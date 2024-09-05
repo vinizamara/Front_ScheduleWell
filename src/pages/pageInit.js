@@ -44,16 +44,32 @@ export default function PageInit() {
   return (
     <View style={styles.container}>
       <View style={styles.containerForm}>
-        <AnimatableText style={styles.titulo} animation="fadeInUp" duration={1000}>
+        <AnimatableText
+          style={styles.titulo}
+          animation="fadeInUp"
+          duration={1000}
+        >
           Seja Bem-Vindo ao{" "}
-          <AnimatableText style={styles.scheduleWell} animation="fadeInUp" duration={1500}>
+          <AnimatableText
+            style={styles.scheduleWell}
+            animation="fadeInUp"
+            duration={1500}
+          >
             ScheduleWell
           </AnimatableText>
         </AnimatableText>
-        <AnimatableText style={styles.subtitulo} animation="fadeInUp" duration={2000}>
+        <AnimatableText
+          style={styles.subtitulo}
+          animation="fadeInLeft"
+          duration={2000}
+        >
           Seu assistente pessoal para organização e controle financeiro.
         </AnimatableText>
-        <AnimatableText style={styles.explicacao} animation="fadeInUp" duration={2500}>
+        <AnimatableText
+          style={styles.explicacao}
+          animation="fadeInLeft"
+          duration={2000}
+        >
           Com o ScheduleWell, você gerencia sua rotina e suas finanças em um só
           lugar. Organize suas tarefas diárias, faça anotações importantes e
           controle suas despesas com facilidade.
@@ -111,7 +127,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: "5%",
     paddingVertical: "10%",
-    marginTop: -50, // Adicionado para subir o título e subtítulo
+    marginTop: -50, 
   },
   titulo: {
     fontFamily: "SuezOne_400Regular",
