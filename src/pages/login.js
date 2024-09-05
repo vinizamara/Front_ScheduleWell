@@ -12,6 +12,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
 import { Ionicons } from "@expo/vector-icons"; // Importando ícones do Ionicons
+import HeaderAnimation from "../components/animatable";
 
 export default function Login() {
   const navigation = useNavigation();
@@ -19,6 +20,7 @@ export default function Login() {
   // Estado para controlar a visibilidade da senha e o conteúdo do campo de senha
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [password, setPassword] = useState(""); // Estado para armazenar o valor da senha
+  const [email, setEmail] = useState("");
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
@@ -32,7 +34,7 @@ export default function Login() {
       }
     }
     prepare();
-  }, [fontsLoaded]);
+  }, []);
 
   if (!fontsLoaded) {
     return (
@@ -47,24 +49,38 @@ export default function Login() {
     setPasswordVisible(!isPasswordVisible);
   };
 
-  // Criando componentes animáveis para TouchableOpacity e Text
+  // Criando componentes animáveis para TouchableOpacity, Text e View
   const AnimatableTouchableOpacity =
     Animatable.createAnimatableComponent(TouchableOpacity);
   const AnimatableText = Animatable.createAnimatableComponent(Text);
   const AnimatableView = Animatable.createAnimatableComponent(View);
 
+  const handleEmailChange = (event) => {
+    const newValue = event.nativeEvent.text; // Captura o valor do evento
+    setEmail(newValue); // Atualiza o estado manualmente
+  };
+
   return (
     <View style={styles.container}>
-      <AnimatableView animation="fadeInLeft" style={styles.containerHeader}>
-        <Text style={styles.message}>Faça seu login!</Text>
-      </AnimatableView>
-
-      <View style={styles.containerForm}>
+      <HeaderAnimation
+        message={"Faça seu login"}
+        animationType={"fadeInLeft"}
+      />
+      <AnimatableView animation="fadeInUp" style={styles.containerForm}>
+        {/* Campo de Email */}
         <Text style={styles.title}>Email</Text>
-        <TextInput placeholder="Insira seu email" style={styles.input} />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.inputWithoutBorder}
+            placeholder="Insira seu email"
+            value={email}
+            onChange={(event) => handleEmailChange(event)} // Passando para a função de manipulação personalizada
+          />
+        </View>
 
+        {/* Campo de Senha */}
         <Text style={styles.title}>Senha</Text>
-        <View style={styles.passwordContainer}>
+        <View style={styles.inputContainer}>
           <TextInput
             placeholder="Insira sua senha"
             style={styles.inputWithoutBorder} // Removendo a barra extra
@@ -72,7 +88,7 @@ export default function Login() {
             value={password} // Vinculando o valor ao estado de senha
             onChangeText={(text) => setPassword(text)} // Atualiza o estado de senha ao digitar
           />
-          {password.length > 0 && (
+          {password.length > 0 ? (
             <TouchableOpacity
               onPress={togglePasswordVisibility}
               style={styles.eyeIcon}
@@ -83,20 +99,30 @@ export default function Login() {
                 color="#555"
               />
             </TouchableOpacity>
+          ) : (
+            <View />
           )}
         </View>
 
-        <AnimatableTouchableOpacity style={styles.button} onPress={() => {console.log("Botão funfando!");
-        }}>
+        <AnimatableTouchableOpacity
+          animation="fadeInLeft"
+          style={styles.button}
+          onPress={() => {
+            console.log("Botão funfando!");
+          }}
+        >
           <Text style={styles.buttonText}>Fazer Login</Text>
         </AnimatableTouchableOpacity>
 
-        <AnimatableTouchableOpacity style={styles.buttonRegister}>
+        <AnimatableTouchableOpacity
+          animation="fadeInLeft"
+          style={styles.buttonRegister}
+        >
           <Text style={styles.buttonRegisterText}>
             Não possui uma conta? Cadastre-se!
           </Text>
         </AnimatableTouchableOpacity>
-      </View>
+      </AnimatableView>
     </View>
   );
 }
@@ -127,13 +153,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 8,
   },
-  input: {
-    fontFamily: "SuezOne_400Regular",
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     borderBottomWidth: 1,
-    height: 40,
     marginBottom: 12,
-    fontSize: 16,
-    paddingHorizontal: 8,
     width: "100%",
   },
   inputWithoutBorder: {
@@ -141,14 +165,7 @@ const styles = StyleSheet.create({
     height: 40,
     fontSize: 16,
     paddingHorizontal: 8,
-    width: "90%", // Ajustando para dar espaço ao ícone
-  },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderBottomWidth: 1, // Mantendo o borderBottom apenas para o container
-    marginBottom: 12,
-    width: "100%",
+    flex: 1,
   },
   eyeIcon: {
     position: "absolute",

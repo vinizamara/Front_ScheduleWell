@@ -81,6 +81,7 @@ export default function PageInit() {
           animation="pulse"
           duration={1500}
           delay={1000}
+          
         >
           <Text style={styles.buttonText}>Comece agora</Text>
         </AnimatableTouchableOpacity>
