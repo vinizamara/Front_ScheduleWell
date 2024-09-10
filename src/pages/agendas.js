@@ -12,7 +12,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
 
-export default function PageInit() {
+export default function Agendas() {
   const navigation = useNavigation();
 
   let [fontsLoaded] = useFonts({

@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Text,
   TextInput,
+  Alert,
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
@@ -13,8 +14,9 @@ import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
 import { Ionicons } from "@expo/vector-icons";
 import HeaderAnimation from "../components/headerAnimation";
+import sheets from "../axios/axios"; // Importa a instância do Axios
 
-export default function Login() {
+export default function Cadastro() {
   const navigation = useNavigation();
 
   // Estado para controlar a visibilidade da senha e outros campos
@@ -23,7 +25,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
-  const [name, setName] = useState(""); // Estado para armazenar o nome
+  const [name, setName] = useState("");
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
@@ -66,6 +68,39 @@ export default function Login() {
     setName(newValue);
   };
 
+  const handleRegister = async () => {
+    if (password !== confirmPassword) {
+      Alert.alert("Erro", "As senhas não coincidem!");
+      return;
+    }
+
+    if (!name || !email || !password) {
+      Alert.alert("Erro", "Todos os campos são obrigatórios!");
+      return;
+    }
+
+    const newUser = {
+      nome: name,
+      email: email,
+      senha: password,
+    };
+
+    try {
+      const response = await sheets.createUser(newUser);
+
+      if (response.status === 201) {
+        Alert.alert("Sucesso", "Usuário cadastrado com sucesso!");
+        navigation.navigate("Agendas");
+      }
+    } catch (error) {
+      if (error.response) {
+        Alert.alert("Erro", error.response.data.error);
+      } else {
+        Alert.alert("Erro", "Erro ao conectar-se ao servidor.");
+      }
+    }
+  };
+
   return (
     <View style={styles.container}>
       <HeaderAnimation
@@ -74,7 +109,6 @@ export default function Login() {
         style={styles.containerHeader}
       />
       <View animation="fadeInUp" style={styles.containerForm}>
-        {/* Campo Nome */}
         <Text style={styles.title}>Nome</Text>
         <View style={styles.inputContainer}>
           <TextInput
@@ -85,7 +119,6 @@ export default function Login() {
           />
         </View>
 
-        {/* Campo Email */}
         <Text style={styles.title}>Email</Text>
         <View style={styles.inputContainer}>
           <TextInput
@@ -96,7 +129,6 @@ export default function Login() {
           />
         </View>
 
-        {/* Campo Senha */}
         <Text style={styles.title}>Senha</Text>
         <View style={styles.inputContainer}>
           <TextInput
@@ -120,7 +152,6 @@ export default function Login() {
           )}
         </View>
 
-        {/* Campo Confirmação de Senha */}
         <Text style={styles.title}>Confirme sua senha</Text>
         <View style={styles.inputContainer}>
           <TextInput
@@ -144,11 +175,10 @@ export default function Login() {
           )}
         </View>
 
-        {/* Botão de Cadastro */}
         <TouchableOpacity
           animation="fadeInLeft"
           style={styles.button}
-          onPress={() => navigation.navigate("Agendas")}
+          onPress={handleRegister} // Chamando a função de cadastro
         >
           <Text style={styles.buttonText}>Cadastrar-se</Text>
         </TouchableOpacity>

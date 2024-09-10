@@ -3,8 +3,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Login from "../pages/login";
 import PageInit from "../pages/pageInit";
 import headerAnimation from "../components/headerAnimation";
-import Cadastro from "../pages/cadastro"
-import Agendas from "../pages/agendas"
+import Cadastro from "../pages/cadastro";
+import Agendas from "../pages/agendas";
 
 const Stack = createStackNavigator();
 
@@ -35,7 +35,7 @@ export default function Rotas() {
         options={{ headerShown: false }}
       />
 
-<Stack.Screen
+      <Stack.Screen
         name="Agendas"
         component={Agendas}
         options={{ headerShown: false }}

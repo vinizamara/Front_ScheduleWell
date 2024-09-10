@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Text,
   TextInput,
+  Alert,
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
@@ -13,14 +14,19 @@ import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
 import { Ionicons } from "@expo/vector-icons"; // Importando ícones do Ionicons
 import HeaderAnimation from "../components/headerAnimation";
+import sheets from "../axios/axios"; // Importa a instância do Axios
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Login() {
   const navigation = useNavigation();
 
   // Estado para controlar a visibilidade da senha e o conteúdo do campo de senha
   const [isPasswordVisible, setPasswordVisible] = useState(false);
-  const [password, setPassword] = useState(""); // Estado para armazenar o valor da senha
-  const [email, setEmail] = useState("");
+  const [error, setError] = useState(null);
+  const [user, setUser] = useState({
+    email: "",
+    senha: "",
+  });
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
@@ -49,16 +55,45 @@ export default function Login() {
     setPasswordVisible(!isPasswordVisible);
   };
 
-  // Criando componentes animáveis para TouchableOpacity, Text e View
-  const AnimatableTouchableOpacity =
-    Animatable.createAnimatableComponent(TouchableOpacity);
-  const AnimatableText = Animatable.createAnimatableComponent(Text);
-  const AnimatableView = Animatable.createAnimatableComponent(View);
-
-  const handleEmailChange = (event) => {
-    const newValue = event.nativeEvent.text; // Captura o valor do evento
-    setEmail(newValue); // Atualiza o estado manualmente
+  // Função para atualizar o valor do email diretamente no objeto user
+  const handleEmailChange = (text) => {
+    setUser({ ...user, email: text });
   };
+
+  // Função para atualizar o valor da senha diretamente no objeto user
+  const handlePasswordChange = (text) => {
+    setUser({ ...user, senha: text });
+  };
+
+  const handleLogin = async () => {
+    if (user.email === "" || user.senha === "") {
+      Alert.alert("Preencha os campos para entrar");
+      return;
+    }
+  
+    try {
+      // Faz a chamada de login usando o método postLogin do objeto sheets
+      const response = await sheets.postLogin(user);
+  
+      if (response.status === 200) {
+        Alert.alert("Sucesso", response.data.message);
+  
+        const userName = response.data.user.Nome;
+        await AsyncStorage.setItem("userLoggedIn", "true");
+        await AsyncStorage.setItem("userName", userName);
+  
+        navigation.navigate("Home");
+      }
+    } catch (error) {
+      if (error.response) {
+        Alert.alert("Erro no login", error.response.data.error);
+        console.log(error);
+      } else {
+        Alert.alert("Erro de Conexão", "Erro ao conectar-se ao servidor.");
+        console.log(error);
+      }
+    }
+  };  
 
   return (
     <View style={styles.container}>
@@ -73,8 +108,8 @@ export default function Login() {
           <TextInput
             style={styles.inputWithoutBorder}
             placeholder="Insira seu email"
-            value={email}
-            onChange={(event) => handleEmailChange(event)} // Passando para a função de manipulação personalizada
+            value={user.email}
+            onChangeText={handleEmailChange} // Usando a função para atualizar o email no estado user
           />
         </View>
 
@@ -82,12 +117,12 @@ export default function Login() {
         <View style={styles.inputContainer}>
           <TextInput
             placeholder="Insira sua senha"
-            style={styles.inputWithoutBorder} // Removendo a barra extra
-            secureTextEntry={!isPasswordVisible} // Define se a senha está visível ou não
-            value={password} // Vinculando o valor ao estado de senha
-            onChangeText={(text) => setPassword(text)} // Atualiza o estado de senha ao digitar
+            style={styles.inputWithoutBorder}
+            secureTextEntry={!isPasswordVisible}
+            value={user.senha}
+            onChangeText={handlePasswordChange} // Usando a função para atualizar a senha no estado user
           />
-          {password.length > 0 ? (
+          {user.senha.length > 0 ? (
             <TouchableOpacity
               onPress={togglePasswordVisibility}
               style={styles.eyeIcon}
@@ -106,15 +141,13 @@ export default function Login() {
         <TouchableOpacity
           animation="fadeInLeft"
           style={styles.button}
-          onPress={() => {
-            console.log("Botão funfando!");
-          }}
+          onPress={handleLogin}
         >
           <Text style={styles.buttonText}>Fazer Login</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-        onPress={() => navigation.navigate("Cadastro")}
+          onPress={() => navigation.navigate("Cadastro")}
           animation="fadeInLeft"
           style={styles.buttonRegister}
         >
@@ -122,6 +155,8 @@ export default function Login() {
             Não possui uma conta? Cadastre-se!
           </Text>
         </TouchableOpacity>
+
+        {error && <Text style={{ color: "red" }}>{error}</Text>}
       </View>
     </View>
   );

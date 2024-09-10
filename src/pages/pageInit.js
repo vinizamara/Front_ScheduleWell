@@ -77,7 +77,18 @@ export default function PageInit() {
 
         <AnimatableTouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("Login")}
+          onPress={() => navigation.navigate("Agendas")}
+          animation="pulse"
+          duration={1500}
+          delay={1000}
+          
+        >
+          <Text style={styles.buttonText}>Comece agora</Text>
+        </AnimatableTouchableOpacity>
+
+        <AnimatableTouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate("escolhaNotas")}
           animation="pulse"
           duration={1500}
           delay={1000}
