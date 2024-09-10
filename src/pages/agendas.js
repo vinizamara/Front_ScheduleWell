@@ -1,19 +1,21 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
-  TouchableOpacity,
-  Image,
   ActivityIndicator,
   Text,
+  FlatList,
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
-import * as Animatable from "react-native-animatable";
+import sheets from "../axios/axios"; // Importando o arquivo axios
 
-export default function Agendas() {
+export default function Agenda() {
   const navigation = useNavigation();
+  const [notas, setNotas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
@@ -29,7 +31,24 @@ export default function Agendas() {
     prepare();
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) {
+  useEffect(() => {
+    // Função para buscar as notas da API usando axios
+    const fetchNotas = async () => {
+      try {
+        const response = await sheets.getNota({ data: "2024-09-10" , }); // Ajuste conforme necessário
+        setNotas(response.data); // Supondo que a resposta contenha um array de notas
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setError("Erro ao buscar as notas");
+        setLoading(false);
+      }
+    };
+
+    fetchNotas();
+  }, []);
+
+  if (!fontsLoaded || loading) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#2196F3" />
@@ -37,13 +56,31 @@ export default function Agendas() {
     );
   }
 
-  // Criando componentes animáveis para TouchableOpacity e Text
-  const AnimatableTouchableOpacity = Animatable.createAnimatableComponent(TouchableOpacity);
-  const AnimatableText = Animatable.createAnimatableComponent(Text);
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
+  // Função para renderizar cada item da lista
+  const renderNota = ({ item }) => (
+    <View style={styles.notaItem}>
+      <Text style={styles.titulo}>{item.titulo}</Text>
+      <Text style={styles.subtitulo}>{item.data}</Text>
+      <Text style={styles.descricao}>{item.descricao}</Text>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-        
+      <FlatList
+        data={notas}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderNota}
+        contentContainerStyle={styles.flatListContent}
+      />
     </View>
   );
 }
@@ -56,75 +93,39 @@ const styles = StyleSheet.create({
     alignItems: "center",
     position: "relative",
   },
-  containerForm: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: "5%",
-    paddingVertical: "10%",
-    marginTop: -50, 
+  flatListContent: {
+    padding: 20,
+  },
+  notaItem: {
+    backgroundColor: "#FFF",
+    padding: 20,
+    marginVertical: 10,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 2,
+    width: "100%",
   },
   titulo: {
     fontFamily: "SuezOne_400Regular",
-    fontSize: 28,
-    textAlign: "center",
-    marginBottom: 0,
+    fontSize: 20,
+    marginBottom: 5,
   },
   subtitulo: {
     fontFamily: "SuezOne_400Regular",
     fontSize: 16,
-    textAlign: "center",
-    marginBottom: 19,
     color: "#555",
   },
-  scheduleWell: {
-    color: "#255573",
-  },
-  explicacao: {
+  descricao: {
     fontFamily: "SuezOne_400Regular",
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 40,
-    marginTop: 40,
-    color: "#555",
+    fontSize: 14,
+    color: "#777",
   },
-  button: {
-    backgroundColor: "#1F74A7",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: "#FFF",
+  errorText: {
     fontSize: 18,
-    fontWeight: "bold",
-    fontFamily: "SuezOne_400Regular",
-  },
-  icon: {
-    width: 50,
-    height: 50,
-    position: "absolute",
-    opacity: 0.5,
-  },
-  icon1: {
-    top: 10,
-    left: 10,
-  },
-  icon2: {
-    top: 10,
-    right: 10,
-  },
-  icon3: {
-    bottom: 10,
-    left: 10,
-  },
-  icon4: {
-    bottom: 10,
-    right: 10,
-  },
-  icon5: {
-    top: 10,
-  },
-  icon6: {
-    bottom: 10,
+    color: "red",
+    textAlign: "center",
   },
 });
