@@ -11,16 +11,19 @@ import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
-import { Ionicons } from "@expo/vector-icons"; // Importando ícones do Ionicons
+import { Ionicons } from "@expo/vector-icons";
 import HeaderAnimation from "../components/headerAnimation";
 
 export default function Login() {
   const navigation = useNavigation();
 
-  // Estado para controlar a visibilidade da senha e o conteúdo do campo de senha
+  // Estado para controlar a visibilidade da senha e outros campos
   const [isPasswordVisible, setPasswordVisible] = useState(false);
-  const [password, setPassword] = useState(""); // Estado para armazenar o valor da senha
+  const [isConfirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [name, setName] = useState(""); // Estado para armazenar o nome
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
@@ -44,50 +47,66 @@ export default function Login() {
     );
   }
 
-  // Função para alternar a visibilidade da senha
+  // Funções para alternar a visibilidade das senhas
   const togglePasswordVisibility = () => {
     setPasswordVisible(!isPasswordVisible);
   };
 
-  // Criando componentes animáveis para TouchableOpacity, Text e View
-  const AnimatableTouchableOpacity =
-    Animatable.createAnimatableComponent(TouchableOpacity);
-  const AnimatableText = Animatable.createAnimatableComponent(Text);
-  const AnimatableView = Animatable.createAnimatableComponent(View);
+  const toggleConfirmPasswordVisibility = () => {
+    setConfirmPasswordVisible(!isConfirmPasswordVisible);
+  };
 
   const handleEmailChange = (event) => {
-    const newValue = event.nativeEvent.text; // Captura o valor do evento
-    setEmail(newValue); // Atualiza o estado manualmente
+    const newValue = event.nativeEvent.text;
+    setEmail(newValue);
+  };
+
+  const handleNameChange = (event) => {
+    const newValue = event.nativeEvent.text;
+    setName(newValue);
   };
 
   return (
     <View style={styles.container}>
       <HeaderAnimation
-        message={"Faça seu login"}
+        message={"Cadastre-se"}
         animationType={"fadeInLeft"}
         style={styles.containerHeader}
       />
       <View animation="fadeInUp" style={styles.containerForm}>
+        {/* Campo Nome */}
+        <Text style={styles.title}>Nome</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.inputWithoutBorder}
+            placeholder="Insira seu nome"
+            value={name}
+            onChange={(event) => handleNameChange(event)}
+          />
+        </View>
+
+        {/* Campo Email */}
         <Text style={styles.title}>Email</Text>
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.inputWithoutBorder}
             placeholder="Insira seu email"
             value={email}
-            onChange={(event) => handleEmailChange(event)} // Passando para a função de manipulação personalizada
+            onChange={(event) => handleEmailChange(event)}
           />
         </View>
 
+        {/* Campo Senha */}
         <Text style={styles.title}>Senha</Text>
         <View style={styles.inputContainer}>
           <TextInput
             placeholder="Insira sua senha"
-            style={styles.inputWithoutBorder} // Removendo a barra extra
-            secureTextEntry={!isPasswordVisible} // Define se a senha está visível ou não
-            value={password} // Vinculando o valor ao estado de senha
-            onChangeText={(text) => setPassword(text)} // Atualiza o estado de senha ao digitar
+            style={styles.inputWithoutBorder}
+            secureTextEntry={!isPasswordVisible}
+            value={password}
+            onChangeText={(text) => setPassword(text)}
           />
-          {password.length > 0 ? (
+          {password.length > 0 && (
             <TouchableOpacity
               onPress={togglePasswordVisibility}
               style={styles.eyeIcon}
@@ -98,29 +117,40 @@ export default function Login() {
                 color="#555"
               />
             </TouchableOpacity>
-          ) : (
-            <View />
           )}
         </View>
 
+        {/* Campo Confirmação de Senha */}
+        <Text style={styles.title}>Confirme sua senha</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Confirme sua senha"
+            style={styles.inputWithoutBorder}
+            secureTextEntry={!isConfirmPasswordVisible}
+            value={confirmPassword}
+            onChangeText={(text) => setConfirmPassword(text)}
+          />
+          {confirmPassword.length > 0 && (
+            <TouchableOpacity
+              onPress={toggleConfirmPasswordVisibility}
+              style={styles.eyeIcon}
+            >
+              <Ionicons
+                name={isConfirmPasswordVisible ? "eye-off" : "eye"}
+                size={24}
+                color="#555"
+              />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Botão de Cadastro */}
         <TouchableOpacity
           animation="fadeInLeft"
           style={styles.button}
-          onPress={() => {
-            console.log("Botão funfando!");
-          }}
+          onPress={() => navigation.navigate("Agendas")}
         >
-          <Text style={styles.buttonText}>Fazer Login</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-        onPress={() => navigation.navigate("Cadastro")}
-          animation="fadeInLeft"
-          style={styles.buttonRegister}
-        >
-          <Text style={styles.buttonRegisterText}>
-            Não possui uma conta? Cadastre-se!
-          </Text>
+          <Text style={styles.buttonText}>Cadastrar-se</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -185,12 +215,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     fontFamily: "SuezOne_400Regular",
-  },
-  buttonRegister: {
-    marginTop: 14,
-    alignSelf: "center",
-  },
-  buttonRegisterText: {
-    color: "#a1a1a1",
   },
 });
