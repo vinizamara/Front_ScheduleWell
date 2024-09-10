@@ -5,10 +5,7 @@ import PageInit from "../pages/pageInit";
 import headerAnimation from "../components/headerAnimation";
 import Cadastro from "../pages/cadastro";
 import Agendas from "../pages/agendas";
-import Cadastro from "../pages/cadastro"
-import Agendas from "../pages/agendas"
 import Escolhanotas from "../pages/escolhanotas";
-
 
 const Stack = createStackNavigator();
 
@@ -45,12 +42,11 @@ export default function Rotas() {
         options={{ headerShown: false }}
       />
 
-<Stack.Screen
+      <Stack.Screen
         name="Escolhanotas"
         component={Escolhanotas}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
-    
   );
 }
