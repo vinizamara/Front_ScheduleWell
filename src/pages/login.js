@@ -12,7 +12,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
 import { Ionicons } from "@expo/vector-icons"; // Importando ícones do Ionicons
-import HeaderAnimation from "../components/animatable";
+import HeaderAnimation from "../components/headerAnimation";
 
 export default function Login() {
   const navigation = useNavigation();
@@ -65,9 +65,9 @@ export default function Login() {
       <HeaderAnimation
         message={"Faça seu login"}
         animationType={"fadeInLeft"}
+        style={styles.containerHeader}
       />
       <AnimatableView animation="fadeInUp" style={styles.containerForm}>
-        {/* Campo de Email */}
         <Text style={styles.title}>Email</Text>
         <View style={styles.inputContainer}>
           <TextInput
@@ -78,7 +78,6 @@ export default function Login() {
           />
         </View>
 
-        {/* Campo de Senha */}
         <Text style={styles.title}>Senha</Text>
         <View style={styles.inputContainer}>
           <TextInput
@@ -135,10 +134,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   containerHeader: {
-    position: "absolute",
-    top: "10%",
-    width: "100%",
     alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: "5%",
+    paddingVertical: "10%",
+    marginTop: -50,
   },
   message: {
     color: "#255573",

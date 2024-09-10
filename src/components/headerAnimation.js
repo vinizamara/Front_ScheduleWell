@@ -2,12 +2,13 @@ import React from 'react';
 import { Text, StyleSheet } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 
-export default function HeaderAnimation({ animationType , message  }) {
+export default function Animation({ animationType , message  }) {
     return (
         <Animatable.View animation={animationType} style={styles.containerHeader}>
           <Text style={styles.message}>{message}</Text>
         </Animatable.View>
       );
+      
 }
 
 

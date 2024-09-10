@@ -2,7 +2,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 
 import Login from "../pages/login";
 import PageInit from "../pages/pageInit";
-import Components from "../components/animatable"
+import headerAnimation from "../components/headerAnimation";
 
 const Stack = createStackNavigator();
 
@@ -17,9 +17,10 @@ export default function Rotas() {
 
       <Stack.Screen
         name="Components"
-        component={Components}
+        component={headerAnimation}
         options={{ headerShown: false }}
       />
+
 
       <Stack.Screen
         name="Login"
