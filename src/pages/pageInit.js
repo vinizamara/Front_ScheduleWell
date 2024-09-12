@@ -94,7 +94,7 @@ export default function PageInit() {
           delay={1000}
           
         >
-          <Text style={styles.buttonText}>Comece agora</Text>
+          <Text style={styles.buttonText}>Escolha notas</Text>
         </AnimatableTouchableOpacity>
       </View>
 

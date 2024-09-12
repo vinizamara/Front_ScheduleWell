@@ -44,26 +44,31 @@ export default function Escolhanotas() {
 
   return (
     <View style={styles.container}>
+
+     <Text style={styles.titulo}>Selecione o tipo de anotação:</Text>
+
       <TouchableOpacity animation="fadeInLeft" style={styles.button}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.buttonAnotação}>
         <Text style={styles.title}>Finanças</Text>
+        <Text style={styles.subtitulo}>Breve Descrição</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.buttonAnotação}>
         <Text style={styles.title}>Anotação</Text>
+        <Text style={styles.subtitulo}>Breve Descrição</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.buttonAnotação}>
         <Text style={styles.title}>Listagem</Text>
-        <Text style={styles.d}>Breve Descrição</Text>
+        <Text style={styles.subtitulo}>Breve Descrição</Text>
       </TouchableOpacity>
+
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -79,7 +84,7 @@ const styles = StyleSheet.create({
     paddingVertical: "10%",
     marginTop: -50,
   },
-
+//botão de Login
   button: {
     backgroundColor: "#1F74A7",
     paddingVertical: 12,
@@ -89,11 +94,11 @@ const styles = StyleSheet.create({
     top: 20,
     right: 20,
   },
-
+  
+//botão de Login
   buttonText: {
     color: "#FFF",
     fontSize: 20,
-    fontWeight: "bold",
     fontFamily: "SuezOne_400Regular",
   },
   container: {
@@ -104,8 +109,8 @@ const styles = StyleSheet.create({
   },
   buttonAnotação: {
     backgroundColor: "#1F74A7",
-    width: 250,
-    height: 250,
+    width: 300,
+    height: 200,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 16,
@@ -122,22 +127,38 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     color: "#fff",
-    fontWeight: "bold",
+    fontFamily: "SuezOne_400Regular",
     marginBottom: 5,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#fff",
   },
   container: {
     flex: 1,
-    justifyContent: 'center', // Centraliza verticalmente
-    alignItems: 'center', // Centraliza horizontalmente
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5', 
+  },
+  subtitulo: {
+    fontSize: 20, 
+    fontWeight: '1000', 
+    color: '#F5F5F5', 
+    textAlign: 'center', 
+    lineHeight: 26, 
+    letterSpacing: 1, 
+    marginBottom: 25, 
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    backgroundColor: '#E2EDF2', 
+    padding: 20, 
   },
   titulo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center', // Centraliza o texto dentro do componente
-    color: '#white', // Cor do texto
+    fontSize: 22,
+    fontWeight: '500', 
+    color: '#255573', 
+    textAlign: 'center',
+    letterSpacing: 0.5, 
+    marginBottom: 20, // Espaço abaixo do título
+    fontFamily: "SuezOne_400Regular",
   },
 });
