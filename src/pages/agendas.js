@@ -2,20 +2,19 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
+  TouchableOpacity,
   ActivityIndicator,
   Text,
-  FlatList,
+  TextInput,
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
-import sheets from "../axios/axios"; // Importando o arquivo axios
+import Icon from "react-native-vector-icons/FontAwesome"; // Ícones do FontAwesome
 
-export default function Agenda() {
+export default function Escolhanotas() {
   const navigation = useNavigation();
-  const [notas, setNotas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
@@ -31,24 +30,7 @@ export default function Agenda() {
     prepare();
   }, [fontsLoaded]);
 
-  useEffect(() => {
-    // Função para buscar as notas da API usando axios
-    const fetchNotas = async () => {
-      try {
-        const response = await sheets.getNota({ data: "2024-09-10" , }); // Ajuste conforme necessário
-        setNotas(response.data); // Supondo que a resposta contenha um array de notas
-        setLoading(false);
-      } catch (err) {
-        console.error(err);
-        setError("Erro ao buscar as notas");
-        setLoading(false);
-      }
-    };
-
-    fetchNotas();
-  }, []);
-
-  if (!fontsLoaded || loading) {
+  if (!fontsLoaded) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#2196F3" />
@@ -56,31 +38,42 @@ export default function Agenda() {
     );
   }
 
-  if (error) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
-  }
-
-  // Função para renderizar cada item da lista
-  const renderNota = ({ item }) => (
-    <View style={styles.notaItem}>
-      <Text style={styles.titulo}>{item.titulo}</Text>
-      <Text style={styles.subtitulo}>{item.data}</Text>
-      <Text style={styles.descricao}>{item.descricao}</Text>
-    </View>
-  );
+  //função de pesquisa
+  const handleSearch = () => {
+    console.log("Pesquisar");
+  };
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={notas}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderNota}
-        contentContainerStyle={styles.flatListContent}
-      />
+      <TouchableOpacity
+        style={styles.plusIconContainer}
+        onPress={() => navigation.navigate("Escolhanotas")}
+      >
+        <Icon name="plus" size={30} color="#1F74A7" />
+      </TouchableOpacity>
+
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBarContainer}>
+          <TextInput
+            style={styles.searchBar}
+            placeholder="Pesquisar..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          <TouchableOpacity style={styles.iconContainer} onPress={handleSearch}>
+            <Icon name="search" size={20} color="#1F74A7" />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity
+          animation="fadeInLeft"
+          style={styles.loginButton}
+          onPress={() => navigation.navigate("Login")}
+        >
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.notesText}>Suas Anotações</Text>
     </View>
   );
 }
@@ -89,43 +82,59 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#E2EDF2",
-    justifyContent: "center",
+    justifyContent: "flex-start",
+    paddingTop: 20,
+    paddingHorizontal: 20,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    alignItems: "center",
+  },
+  searchBarContainer: {
+    flexDirection: "row",
     alignItems: "center",
     position: "relative",
+    width: "70%",
   },
-  flatListContent: {
-    padding: 20,
-  },
-  notaItem: {
-    backgroundColor: "#FFF",
-    padding: 20,
-    marginVertical: 10,
+  searchBar: {
+    height: 40,
     borderRadius: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 2,
+    paddingHorizontal: 40,
     width: "100%",
+    backgroundColor: "#C6DBE4",
+    borderWidth: 0,
   },
-  titulo: {
-    fontFamily: "SuezOne_400Regular",
+  iconContainer: {
+    position: "absolute",
+    left: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loginButton: {
+    height: 40,
+    backgroundColor: "#1F74A7",
+    paddingVertical: 3,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: "#FFF",
     fontSize: 20,
-    marginBottom: 5,
-  },
-  subtitulo: {
     fontFamily: "SuezOne_400Regular",
-    fontSize: 16,
-    color: "#555",
   },
-  descricao: {
+  plusIconContainer: {
+    position: "absolute",
+    top: "15%",
+    right: "5%",
+    zIndex: 1,
+  },
+  notesText: {
+    fontSize: 24,
+    color: "#255573",
     fontFamily: "SuezOne_400Regular",
-    fontSize: 14,
-    color: "#777",
-  },
-  errorText: {
-    fontSize: 18,
-    color: "red",
     textAlign: "center",
+    marginTop: "5%",
   },
 });

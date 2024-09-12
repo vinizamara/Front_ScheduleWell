@@ -86,16 +86,7 @@ export default function PageInit() {
           <Text style={styles.buttonText}>Comece agora</Text>
         </AnimatableTouchableOpacity>
 
-        <AnimatableTouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate("Escolhanotas")}
-          animation="pulse"
-          duration={1500}
-          delay={1000}
-          
-        >
-          <Text style={styles.buttonText}>Comece agora</Text>
-        </AnimatableTouchableOpacity>
+
       </View>
 
       <Image
