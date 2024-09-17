@@ -1,13 +1,47 @@
-import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Text, TextInput, Alert } from "react-native";
-import * as Animatable from "react-native-animatable";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  TextInput,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
+import * as SplashScreen from "expo-splash-screen";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 export default function Anotacoes() {
   const navigation = useNavigation();
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
+
+  let [fontsLoaded] = useFonts({
+    SuezOne_400Regular,
+  });
+
+  useEffect(() => {
+    async function prepare() {
+      await SplashScreen.preventAutoHideAsync();
+      if (fontsLoaded) {
+        await SplashScreen.hideAsync();
+      }
+    }
+    prepare();
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#2196F3" />
+      </View>
+    );
+  }
 
   const handleSave = () => {
     if (title && date && description) {
@@ -26,10 +60,15 @@ export default function Anotacoes() {
   };
 
   return (
-    <View style={styles.container}>
-      <Animatable.View animation="fadeInUp" style={styles.formContainer}>
-        <Animatable.Text animation="fadeInLeft" style={styles.title}>Adicionar Nota</Animatable.Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <View style={styles.header}>
+        <Text style={styles.title}>Anotações</Text>
+      </View>
 
+      <View style={styles.formContainer}>
         <TextInput
           style={styles.input}
           placeholder="Título"
@@ -41,26 +80,25 @@ export default function Anotacoes() {
           placeholder="Data"
           value={date}
           onChangeText={setDate}
-          keyboardType="default"
         />
         <TextInput
-          style={[styles.input, styles.textarea]}
-          placeholder="Descrição"
+          style={styles.input}
+          placeholder="Descrição (opcional)"
           value={description}
           onChangeText={setDescription}
           multiline
         />
+      </View>
 
-        <View style={styles.buttons}>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.buttonText}>Salvar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-            <Text style={styles.buttonText}>Cancelar</Text>
-          </TouchableOpacity>
-        </View>
-      </Animatable.View>
-    </View>
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.footerText}>Salvar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+          <Text style={styles.footerText}>Cancelar</Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -68,56 +106,58 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#E2EDF2",
-    justifyContent: "center",
-    alignItems: "center",
+    paddingHorizontal: 20,
   },
-  formContainer: {
-    width: "90%",
-    backgroundColor: "#C6DBE4",
-    padding: 20,
-    borderRadius: 8,
+  header: {
+    marginTop: 50,
     alignItems: "center",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
-    color: "#333",
+    color: "#1F74A7",
+    fontFamily: "SuezOne_400Regular",
+  },
+  formContainer: {
+    flex: 1,
+    justifyContent: "center",
+    paddingBottom: 550, // Espaço para o footer
   },
   input: {
-    width: "100%",
-    padding: 12,
-    marginBottom: 10,
-    borderRadius: 4,
+    height: 50,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    fontSize: 16,
+    borderColor: "#1F74A7",
     borderWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#C6DBE4",
   },
-  textarea: {
-    height: 100,
-    textAlignVertical: "top",
-  },
-  buttons: {
+  footer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: "100%",
+    paddingHorizontal: 10,
+    marginBottom: 20,
   },
   saveButton: {
     backgroundColor: "#1F74A7",
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
+    flex: 1,
     marginRight: 10,
   },
   cancelButton: {
-    backgroundColor: "#EC4E4E",
-    paddingVertical: 12,
+    backgroundColor: "#FF4B4B",
+    paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
+    flex: 1,
   },
-  buttonText: {
-    color: "#fff",
+  footerText: {
+    color: "#FFF",
     fontSize: 16,
-    fontWeight: "bold",
+    textAlign: "center",
+    fontFamily: "SuezOne_400Regular",
   },
 });
