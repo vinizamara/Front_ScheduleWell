@@ -13,7 +13,6 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
-import Icon from "react-native-vector-icons/MaterialIcons";
 
 export default function Anotacoes() {
   const navigation = useNavigation();
@@ -45,8 +44,8 @@ export default function Anotacoes() {
 
   const handleSave = () => {
     if (title && date && description) {
-      Alert.alert("Nota Salva!", `Título: ${title}\nData: ${date}\nDescrição: ${description}`);
-      navigation.navigate("Escolhanotas"); // Navega de volta para a tela "Escolhanotas"
+      // Navega para a tela "Agendas" diretamente
+      navigation.navigate("Agendas"); 
     } else {
       Alert.alert("Erro", "Por favor, preencha todos os campos.");
     }
@@ -82,8 +81,8 @@ export default function Anotacoes() {
           onChangeText={setDate}
         />
         <TextInput
-          style={styles.input}
-          placeholder="Descrição (opcional)"
+          style={[styles.input, styles.textarea]}
+          placeholder="Descrição"
           value={description}
           onChangeText={setDescription}
           multiline
@@ -109,7 +108,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   header: {
-    marginTop: 50,
+    marginTop: 30, // Aumenta a distância do topo
+    marginBottom: 30, // Aumenta o espaço abaixo do título
     alignItems: "center",
   },
   title: {
@@ -120,11 +120,11 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     flex: 1,
-    justifyContent: "center",
-    paddingBottom: 550, // Espaço para o footer
+    justifyContent: "flex-start", // Garante que os campos fiquem alinhados no topo
+    paddingBottom: 20, // Espaço para o footer
   },
   input: {
-    height: 50,
+    height: 60, // Aumenta a altura dos campos de entrada
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
     paddingHorizontal: 15,
@@ -132,6 +132,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderColor: "#1F74A7",
     borderWidth: 1,
+  },
+  textarea: {
+    flex: 1, // Faz com que a área de texto ocupe o espaço restante
+    textAlignVertical: "top",
+    height: 'auto', // Permite que a altura ajuste automaticamente conforme o conteúdo
   },
   footer: {
     flexDirection: "row",
@@ -141,22 +146,22 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     backgroundColor: "#1F74A7",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 15, // Aumenta o padding vertical
+    paddingHorizontal: 25, // Aumenta o padding horizontal
     borderRadius: 8,
     flex: 1,
     marginRight: 10,
   },
   cancelButton: {
     backgroundColor: "#FF4B4B",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 15, // Aumenta o padding vertical
+    paddingHorizontal: 25, // Aumenta o padding horizontal
     borderRadius: 8,
     flex: 1,
   },
   footerText: {
     color: "#FFF",
-    fontSize: 16,
+    fontSize: 18, // Aumenta o tamanho do texto
     textAlign: "center",
     fontFamily: "SuezOne_400Regular",
   },
