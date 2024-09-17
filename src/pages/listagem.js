@@ -8,12 +8,13 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Alert
+  Alert,
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
+import DateTimePickerModal from 'react-native-modal-datetime-picker'; // Importa a biblioteca do DateTimePickerModal
 import sheets from "../axios/axios"; // Importa a instância do Axios
 
 export default function Listagem() {
@@ -22,6 +23,8 @@ export default function Listagem() {
     data: "",
     descricao: "",
   });
+  const [itens, setItens] = useState([]); // Estado para armazenar os itens
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false); // Estado para mostrar/esconder o picker de data
   const navigation = useNavigation();
 
   let [fontsLoaded] = useFonts({
@@ -47,54 +50,67 @@ export default function Listagem() {
   }
 
   const handleInputChange = (name, value) => {
-    if (name === "data") {
-      value = formatDate(value);
-    }
     setInputValues({ ...inputValues, [name]: value });
   };
 
-  const formatDate = (date) => {
-    // Remove todos os caracteres não numéricos
-    const cleaned = ('' + date).replace(/\D/g, '');
-    // Adiciona a formatação DD/MM/YYYY
-    const match = cleaned.match(/^(\d{2})(\d{2})(\d{4})$/);
-    if (match) {
-      return `${match[1]}/${match[2]}/${match[3]}`;
+  const handleAddItem = () => {
+    if (!inputValues.titulo || !inputValues.data) {
+      Alert.alert("Erro", "Título e data são obrigatórios.");
+      return;
     }
-    // Formata enquanto o usuário digita
-    const parts = cleaned.match(/(\d{0,2})(\d{0,2})(\d{0,4})/);
-    if (parts) {
-      return `${parts[1]}${parts[2] ? '/' + parts[2] : ''}${parts[3] ? '/' + parts[3] : ''}`;
-    }
-    return cleaned;
+    setItens([...itens, { ...inputValues }]);
+    setInputValues({
+      titulo: "",
+      data: "",
+      descricao: "",
+    });
   };
 
-  const handleAdd = async () => {
+  const handleSave = async () => {
     try {
-      // Cria um novo checklist
-      const response = await sheets.postChecklist({
+      // Primeiro, cria o checklist
+      const checklistResponse = await sheets.postChecklist({
         fkIdUsuario: 1, // Substitua com o ID real do usuário
         titulo: inputValues.titulo,
         data: inputValues.data,
-        descricao: inputValues.descricao
+        descricao: inputValues.descricao,
       });
 
-      if (response.status === 201) {
-        Alert.alert("Sucesso", "Checklist adicionado com sucesso!");
+      if (checklistResponse.status === 201) {
+        const checklistId = checklistResponse.data.result.insertId;
+
+        // Adiciona os itens ao checklist
+        for (const item of itens) {
+          await sheets.postItemChecklist({
+            fkIdChecklist: checklistId,
+            texto: item.titulo,
+            concluido: false, // ou o valor padrão que você desejar
+          });
+        }
+
+        Alert.alert("Sucesso", "Checklist e itens adicionados com sucesso!");
         navigation.navigate("Agendas");
       }
     } catch (error) {
-      Alert.alert("Erro", "Erro ao adicionar o checklist.");
+      Alert.alert("Erro", "Erro ao adicionar o checklist e itens.");
     }
-  };
-
-  const handleSave = () => {
-    // Navega para a página Agendas
-    navigation.navigate("Agendas");
   };
 
   const handleCancel = () => {
     navigation.navigate("Escolhanotas");
+  };
+
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date) => {
+    setInputValues({ ...inputValues, data: date.toLocaleDateString('pt-BR') });
+    hideDatePicker();
   };
 
   return (
@@ -113,14 +129,9 @@ export default function Listagem() {
           value={inputValues.titulo}
           onChangeText={(text) => handleInputChange("titulo", text)}
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Data (DD/MM/YYYY)"
-          value={inputValues.data}
-          onChangeText={(text) => handleInputChange("data", text)}
-          keyboardType="numeric" // Aceita apenas números
-          maxLength={10} // Limita a 10 caracteres
-        />
+        <TouchableOpacity onPress={showDatePicker} style={styles.datePicker}>
+          <Text style={styles.dateText}>{inputValues.data || "Selecione a data"}</Text>
+        </TouchableOpacity>
         <TextInput
           style={[styles.input, styles.textarea]}
           placeholder="Descrição (opcional)"
@@ -128,19 +139,36 @@ export default function Listagem() {
           onChangeText={(text) => handleInputChange("descricao", text)}
           multiline
         />
-        <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+        <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
           <Icon name="add" size={24} color="#FFF" />
         </TouchableOpacity>
       </View>
 
       <View style={styles.buttons}>
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.buttonText}>Salvar</Text>
+          <Text style={styles.footerText}>Salvar</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-          <Text style={styles.buttonText}>Cancelar</Text>
+          <Text style={styles.footerText}>Cancelar</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Renderiza a lista de itens */}
+      <View style={styles.itemList}>
+        {itens.map((item, index) => (
+          <View key={index} style={styles.item}>
+            <Text style={styles.itemText}>{item.titulo}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* DateTimePickerModal */}
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -152,31 +180,44 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   header: {
-    marginTop: 50,
+    marginTop: 30, // Aumenta a distância do topo
+    marginBottom: 30, // Aumenta o espaço abaixo do título
     alignItems: "center",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    textAlign: "center",
     color: "#1F74A7",
     fontFamily: "SuezOne_400Regular",
   },
   formContainer: {
     flex: 1,
-    marginTop: 10, // Ajustado para aproximar os campos do título
-    paddingBottom: 70,
-    justifyContent: "center",
+    justifyContent: "flex-start", // Garante que os campos fiquem alinhados no topo
+    paddingBottom: 20, // Espaço para o footer
   },
   input: {
-    height: 50,
+    height: 60, // Aumenta a altura dos campos de entrada
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
     paddingHorizontal: 15,
-    marginBottom: 10, // Ajustado para diminuir o espaçamento
+    marginBottom: 15,
     fontSize: 16,
     borderColor: "#1F74A7",
     borderWidth: 1,
+  },
+  datePicker: {
+    height: 60,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    justifyContent: 'center',
+    borderColor: "#1F74A7",
+    borderWidth: 1,
+  },
+  dateText: {
+    fontSize: 16,
+    color: "#1F74A7",
   },
   textarea: {
     height: 100,
@@ -201,20 +242,38 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     backgroundColor: "#1F74A7",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingVertical: 15, // Aumenta o padding vertical
+    paddingHorizontal: 25, // Aumenta o padding horizontal
     borderRadius: 8,
+    flex: 1,
     marginRight: 10,
   },
   cancelButton: {
-    backgroundColor: "#EC4E4E",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    backgroundColor: "#FF4B4B",
+    paddingVertical: 15, // Aumenta o padding vertical
+    paddingHorizontal: 25, // Aumenta o padding horizontal
     borderRadius: 8,
+    flex: 1,
   },
-  buttonText: {
-    color: "#fff",
+  footerText: {
+    color: "#FFF",
+    fontSize: 18, // Aumenta o tamanho do texto
+    textAlign: "center",
+    fontFamily: "SuezOne_400Regular",
+  },
+  itemList: {
+    marginTop: 20,
+  },
+  item: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 10,
+    borderColor: "#1F74A7",
+    borderWidth: 1,
+  },
+  itemText: {
     fontSize: 16,
-    fontWeight: "bold",
+    color: "#1F74A7",
   },
 });
