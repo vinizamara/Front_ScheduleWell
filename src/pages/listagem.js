@@ -8,10 +8,13 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Alert
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { useNavigation } from "@react-navigation/native";
+import sheets from "../axios/axios"; // Importa a instância do Axios
 
 export default function Listagem() {
   const [inputValues, setInputValues] = useState({
@@ -19,6 +22,7 @@ export default function Listagem() {
     data: "",
     descricao: "",
   });
+  const navigation = useNavigation();
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
@@ -37,13 +41,60 @@ export default function Listagem() {
   if (!fontsLoaded) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#2196F3" />
+        <ActivityIndicator size="large" color="#1F74A7" />
       </View>
     );
   }
 
   const handleInputChange = (name, value) => {
+    if (name === "data") {
+      value = formatDate(value);
+    }
     setInputValues({ ...inputValues, [name]: value });
+  };
+
+  const formatDate = (date) => {
+    // Remove todos os caracteres não numéricos
+    const cleaned = ('' + date).replace(/\D/g, '');
+    // Adiciona a formatação DD/MM/YYYY
+    const match = cleaned.match(/^(\d{2})(\d{2})(\d{4})$/);
+    if (match) {
+      return `${match[1]}/${match[2]}/${match[3]}`;
+    }
+    // Formata enquanto o usuário digita
+    const parts = cleaned.match(/(\d{0,2})(\d{0,2})(\d{0,4})/);
+    if (parts) {
+      return `${parts[1]}${parts[2] ? '/' + parts[2] : ''}${parts[3] ? '/' + parts[3] : ''}`;
+    }
+    return cleaned;
+  };
+
+  const handleAdd = async () => {
+    try {
+      // Cria um novo checklist
+      const response = await sheets.postChecklist({
+        fkIdUsuario: 1, // Substitua com o ID real do usuário
+        titulo: inputValues.titulo,
+        data: inputValues.data,
+        descricao: inputValues.descricao
+      });
+
+      if (response.status === 201) {
+        Alert.alert("Sucesso", "Checklist adicionado com sucesso!");
+        navigation.navigate("Agendas");
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Erro ao adicionar o checklist.");
+    }
+  };
+
+  const handleSave = () => {
+    // Navega para a página Agendas
+    navigation.navigate("Agendas");
+  };
+
+  const handleCancel = () => {
+    navigation.navigate("Escolhanotas");
   };
 
   return (
@@ -64,27 +115,30 @@ export default function Listagem() {
         />
         <TextInput
           style={styles.input}
-          placeholder="Data"
+          placeholder="Data (DD/MM/YYYY)"
           value={inputValues.data}
           onChangeText={(text) => handleInputChange("data", text)}
+          keyboardType="numeric" // Aceita apenas números
+          maxLength={10} // Limita a 10 caracteres
         />
         <TextInput
-          style={styles.input}
+          style={[styles.input, styles.textarea]}
           placeholder="Descrição (opcional)"
           value={inputValues.descricao}
           onChangeText={(text) => handleInputChange("descricao", text)}
+          multiline
         />
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
           <Icon name="add" size={24} color="#FFF" />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.saveButton}>
-          <Text style={styles.footerText}>Salvar</Text>
+      <View style={styles.buttons}>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.buttonText}>Salvar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.cancelButton}>
-          <Text style={styles.footerText}>Cancelar</Text>
+        <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+          <Text style={styles.buttonText}>Cancelar</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -109,24 +163,24 @@ const styles = StyleSheet.create({
     fontFamily: "SuezOne_400Regular",
   },
   formContainer: {
-    flex: 1, // Ocupa o espaço restante acima do footer
-    marginTop: 20,
-    paddingBottom: 70, // Espaço para o botão de adicionar e evitar sobreposição com o footer
-    justifyContent: "center", // Centraliza os campos e o botão de adicionar verticalmente
+    flex: 1,
+    marginTop: 10, // Ajustado para aproximar os campos do título
+    paddingBottom: 70,
+    justifyContent: "center",
   },
   input: {
     height: 50,
     backgroundColor: "#FFFFFF",
     borderRadius: 8,
     paddingHorizontal: 15,
-    marginBottom: 15,
+    marginBottom: 10, // Ajustado para diminuir o espaçamento
     fontSize: 16,
     borderColor: "#1F74A7",
     borderWidth: 1,
   },
-  addButtonContainer: {
-    alignItems: "flex-end",
-    marginTop: 20,
+  textarea: {
+    height: 100,
+    textAlignVertical: "top",
   },
   addButton: {
     backgroundColor: "#1F74A7",
@@ -137,39 +191,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     position: "absolute",
     right: 20,
-    bottom: 20, // Espaço do botão em relação ao fundo
+    bottom: 20,
   },
-  addButtonText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontFamily: "SuezOne_400Regular",
-  },
-  footer: {
+  buttons: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 450,
+    marginTop: 20,
     marginBottom: 30,
-    paddingHorizontal: 10,
   },
   saveButton: {
     backgroundColor: "#1F74A7",
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
-    flex: 1, // Ocupa o espaço disponível
-    marginRight: 10, // Espaçamento entre o botão de salvar e o botão de cancelar
+    marginRight: 10,
   },
   cancelButton: {
-    backgroundColor: "#FF4B4B",
-    paddingVertical: 10,
+    backgroundColor: "#EC4E4E",
+    paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
-    flex: 1, // Ocupa o espaço disponível
   },
-  footerText: {
-    color: "#FFF",
+  buttonText: {
+    color: "#fff",
     fontSize: 16,
-    fontFamily: "SuezOne_400Regular",
-    textAlign: "center", // Centraliza o texto no botão
+    fontWeight: "bold",
   },
 });

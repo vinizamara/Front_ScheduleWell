@@ -1,8 +1,9 @@
+// axios/axios.js
+
 import axios from "axios";
 
-// Configuração da base URL da API
 const api = axios.create({
-  baseURL: "http://10.89.234.134:5000/api/", // Atualize esta URL conforme necessário
+  baseURL: "http://192.168.137.1:5000/api/", // Atualize esta URL conforme necessário
   headers: {
     Accept: "application/json",
   },
@@ -10,17 +11,29 @@ const api = axios.create({
 
 const sheets = {
   // Usuários
-  createUser: (user) => api.post("/createUser", user),// Método para criar um novo usuário
-  postLogin: (data) => api.post("/login", data),// Método de login
-  getUsers: () => api.get("users"),// Método para obter a lista de usuários
-  updateUser: (id, updatedData) => api.put(`/updateUser/${id}`, updatedData),// Método para atualizar informações de um usuário específico pelo ID
-  deleteUser: (id) => api.delete(`/deleteUser/${id}`),// Método para deletar um usuário específico pelo ID
+  createUser: (user) => api.post("/createUser", user),
+  postLogin: (data) => api.post("/login", data),
+  getUsers: () => api.get("users"),
+  updateUser: (id, updatedData) => api.put(`/updateUser/${id}`, updatedData),
+  deleteUser: (id) => api.delete(`/deleteUser/${id}`),
 
   // Notas (Agenda)
-  postNota: (nota) => api.post("/postNota", nota),  // Método para criar uma nova nota
-  getNota: (idUsuario) => api.get(`/getNota/${idUsuario}`), // Método para buscar notas por ID do usuário
-  updateNota: (idNota, nota) => api.put(`/updateNota/${idNota}`, nota), // Método para atualizar uma nota
-  deleteNota: (idNota) => api.delete(`/deleteNota/${idNota}`), // Método para deletar uma nota específica
+  postNota: (nota) => api.post("/postNota", nota),
+  getNota: (idUsuario) => api.get(`/getNota/${idUsuario}`),
+  updateNota: (idNota, nota) => api.put(`/updateNota/${idNota}`, nota),
+  deleteNota: (idNota) => api.delete(`/deleteNota/${idNota}`),
+
+  // Checklists
+  postChecklist: (checklist) => api.post("/checklists", checklist),
+  getChecklists: (idUsuario) => api.get(`/checklists/${idUsuario}`),
+  updateChecklist: (idChecklist, checklist) => api.put(`/checklists/${idChecklist}`, checklist),
+  deleteChecklist: (idChecklist) => api.delete(`/checklists/${idChecklist}`),
+
+  // Itens de Checklist
+  postItemChecklist: (item) => api.post("/itemChecklists", item),
+  getItemChecklists: (idChecklist) => api.get(`/itemChecklists/${idChecklist}`),
+  updateItemChecklist: (idChecklist, item) => api.put(`/itemChecklists/${idChecklist}`, item),
+  deleteItemChecklist: (idChecklist) => api.delete(`/itemChecklists/${idChecklist}`),
 };
 
 export default sheets;

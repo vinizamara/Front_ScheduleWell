@@ -6,7 +6,7 @@ import headerAnimation from "../components/headerAnimation";
 import Cadastro from "../pages/cadastro";
 import Agendas from "../pages/agendas";
 import Escolhanotas from "../pages/escolhanotas";
-import Checklist from "../pages/checklist";
+import Checklist from "../pages/listagem";
 import Anotacoes from "../pages/anotacoes";
 import Financas from "../pages/financas"
 
