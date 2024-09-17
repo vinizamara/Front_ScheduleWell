@@ -14,7 +14,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
 
-export default function Financas() {
+export default function Controlefinanceiro() {
   const navigation = useNavigation();
 
   let [fontsLoaded] = useFonts({
