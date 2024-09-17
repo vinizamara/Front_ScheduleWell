@@ -6,6 +6,9 @@ import headerAnimation from "../components/headerAnimation";
 import Cadastro from "../pages/cadastro";
 import Agendas from "../pages/agendas";
 import Escolhanotas from "../pages/escolhanotas";
+import Checklist from "../pages/checklist";
+import Anotacoes from "../pages/anotacoes";
+import Financas from "../pages/financas"
 
 const Stack = createStackNavigator();
 
@@ -45,6 +48,24 @@ export default function Rotas() {
       <Stack.Screen
         name="Escolhanotas"
         component={Escolhanotas}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="Checklist"
+        component={Checklist}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="Anotacoes"
+        component={Anotacoes}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="Financas"
+        component={Financas}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

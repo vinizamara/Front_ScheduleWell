@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import {
+  ScrollView,
   View,
   StyleSheet,
   TouchableOpacity,
@@ -37,31 +38,36 @@ export default function Escolhanotas() {
     );
   }
 
-  // Criando componentes animáveis para TouchableOpacity e Text
-  const AnimatableTouchableOpacity =
-    Animatable.createAnimatableComponent(TouchableOpacity);
+  const AnimatableTouchableOpacity = Animatable.createAnimatableComponent(TouchableOpacity);
   const AnimatableText = Animatable.createAnimatableComponent(Text);
 
   return (
     <View style={styles.container}>
+      <Text style={styles.titulo}>Selecione o tipo de anotação:</Text>
 
-     <Text style={styles.titulo}>Selecione o tipo de anotação:</Text>
-
-      <TouchableOpacity animation="fadeInLeft" style={styles.button}>
+      <TouchableOpacity animation="fadeInLeft" style={styles.buttonLogin}
+            onPress={() => navigation.navigate("Login")}
+      >
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.buttonAnotação}>
+      <TouchableOpacity style={styles.buttonAnotacao}
+      onPress={() => navigation.navigate("Financas")}
+      >
         <Text style={styles.title}>Finanças</Text>
         <Text style={styles.subtitulo}>Breve Descrição</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.buttonAnotação}>
+      <TouchableOpacity style={styles.buttonAnotacao}
+      onPress={() => navigation.navigate("Anotacoes")}
+      >
         <Text style={styles.title}>Anotação</Text>
         <Text style={styles.subtitulo}>Breve Descrição</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.buttonAnotação}>
+      <TouchableOpacity style={styles.buttonAnotacao}
+             onPress={() => navigation.navigate("Checklist")}
+      >
         <Text style={styles.title}>Listagem</Text>
         <Text style={styles.subtitulo}>Breve Descrição</Text>
       </TouchableOpacity>
@@ -69,6 +75,7 @@ export default function Escolhanotas() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -76,89 +83,60 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
+    padding: 20,
   },
-  containerForm: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: "5%",
-    paddingVertical: "10%",
-    marginTop: -50,
+  titulo: {
+    fontSize: 22,
+    fontWeight: '500',
+    color: '#255573',
+    textAlign: 'center',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+    marginTop: 20,
+    fontFamily: "SuezOne_400Regular",
   },
-//botão de Login
-  button: {
-    backgroundColor: "#1F74A7",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-    position: "absolute",
+  // Estilo do botão de login no canto superior direito
+  buttonLogin: {
+    position: 'absolute',
     top: 20,
     right: 20,
+    height: 40,
+    backgroundColor: "#1F74A7",
+    paddingVertical: 3,
+    paddingHorizontal: 20,
+    borderRadius: 8,
   },
-  
-//botão de Login
   buttonText: {
     color: "#FFF",
     fontSize: 20,
     fontFamily: "SuezOne_400Regular",
   },
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#E2EDF2",
-  },
-  buttonAnotação: {
+  // Botões de Finanças, Anotação e Listagem como quadrados menores
+  buttonAnotacao: {
     backgroundColor: "#1F74A7",
-    width: 300,
-    height: 200,
+    width: 200, // Mudado para quadrado
+    height: 200, // Mudado para quadrado
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 16,
     padding: 10,
-    marginTop: 10,  // Espaçamento superior
-    marginBottom: 10, // Espaçamento inferior
-    marginHorizontal: 20, // Espaçamento lateral 
-  },
-  icon: {
-    width: 100,
-    height: 100,
+    marginTop: 10,
     marginBottom: 10,
+    marginHorizontal: 20,
   },
   title: {
-    fontSize: 26,
+    fontSize: 18, // Ajustado o tamanho da fonte
     color: "#fff",
     fontFamily: "SuezOne_400Regular",
     marginBottom: 5,
   },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F5', 
-  },
   subtitulo: {
-    fontSize: 20, 
-    fontWeight: '1000', 
-    color: '#F5F5F5', 
-    textAlign: 'center', 
-    lineHeight: 26, 
-    letterSpacing: 1, 
-    marginBottom: 25, 
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    backgroundColor: '#E2EDF2', 
-    padding: 20, 
-  },
-  titulo: {
-    fontSize: 22,
-    fontWeight: '500', 
-    color: '#255573', 
+    fontSize: 14, // Ajustado o tamanho da fonte
+    fontWeight: '1000',
+    color: '#F5F5F5',
     textAlign: 'center',
-    letterSpacing: 0.5, 
-    marginBottom: 20, // Espaço abaixo do título
-    fontFamily: "SuezOne_400Regular",
+    lineHeight: 20,
+    letterSpacing: 1,
+    marginBottom: 15,
   },
 });
