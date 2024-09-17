@@ -129,7 +129,6 @@ const styles = StyleSheet.create({
     color: "#255573",
     textAlign: "center",
     marginVertical: 10,
-    fontFamily: "SuezOne_400Regular",
   },
   input: {
     backgroundColor: "#fff",
@@ -140,13 +139,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: "100%",
     backgroundColor: "#C6DBE4",
-
     
   },
   textArea: {
     height: 150,
     textAlignVertical: "top",
     backgroundColor: "#C6DBE4",
-    fontFamily: "SuezOne_400Regular",
   },
 });
