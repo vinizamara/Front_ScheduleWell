@@ -11,7 +11,6 @@ import {
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
-import * as Animatable from "react-native-animatable";
 import { Ionicons } from "@expo/vector-icons";
 import HeaderAnimation from "../components/headerAnimation";
 import sheets from "../axios/axios"; // Importa a instância do Axios
@@ -19,7 +18,6 @@ import sheets from "../axios/axios"; // Importa a instância do Axios
 export default function Cadastro() {
   const navigation = useNavigation();
 
-  // Estado para controlar a visibilidade da senha e outros campos
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [password, setPassword] = useState("");
@@ -49,7 +47,6 @@ export default function Cadastro() {
     );
   }
 
-  // Funções para alternar a visibilidade das senhas
   const togglePasswordVisibility = () => {
     setPasswordVisible(!isPasswordVisible);
   };
@@ -58,14 +55,12 @@ export default function Cadastro() {
     setConfirmPasswordVisible(!isConfirmPasswordVisible);
   };
 
-  const handleEmailChange = (event) => {
-    const newValue = event.nativeEvent.text;
-    setEmail(newValue);
+  const handleEmailChange = (text) => {
+    setEmail(text);
   };
 
-  const handleNameChange = (event) => {
-    const newValue = event.nativeEvent.text;
-    setName(newValue);
+  const handleNameChange = (text) => {
+    setName(text);
   };
 
   const handleRegister = async () => {
@@ -108,14 +103,14 @@ export default function Cadastro() {
         animationType={"fadeInLeft"}
         style={styles.containerHeader}
       />
-      <View animation="fadeInUp" style={styles.containerForm}>
+      <View style={styles.containerForm}>
         <Text style={styles.title}>Nome</Text>
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.inputWithoutBorder}
             placeholder="Insira seu nome"
             value={name}
-            onChange={(event) => handleNameChange(event)}
+            onChangeText={handleNameChange}
           />
         </View>
 
@@ -125,7 +120,7 @@ export default function Cadastro() {
             style={styles.inputWithoutBorder}
             placeholder="Insira seu email"
             value={email}
-            onChange={(event) => handleEmailChange(event)}
+            onChangeText={handleEmailChange}
           />
         </View>
 
@@ -136,7 +131,7 @@ export default function Cadastro() {
             style={styles.inputWithoutBorder}
             secureTextEntry={!isPasswordVisible}
             value={password}
-            onChangeText={(text) => setPassword(text)}
+            onChangeText={setPassword}
           />
           {password.length > 0 && (
             <TouchableOpacity
@@ -159,7 +154,7 @@ export default function Cadastro() {
             style={styles.inputWithoutBorder}
             secureTextEntry={!isConfirmPasswordVisible}
             value={confirmPassword}
-            onChangeText={(text) => setConfirmPassword(text)}
+            onChangeText={setConfirmPassword}
           />
           {confirmPassword.length > 0 && (
             <TouchableOpacity
@@ -176,9 +171,8 @@ export default function Cadastro() {
         </View>
 
         <TouchableOpacity
-          animation="fadeInLeft"
           style={styles.button}
-          onPress={handleRegister} // Chamando a função de cadastro
+          onPress={handleRegister}
         >
           <Text style={styles.buttonText}>Cadastrar-se</Text>
         </TouchableOpacity>

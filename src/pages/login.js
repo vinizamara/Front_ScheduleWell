@@ -12,7 +12,7 @@ import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
-import { Ionicons } from "@expo/vector-icons"; // Importando ícones do Ionicons
+import { Ionicons } from "@expo/vector-icons";
 import HeaderAnimation from "../components/headerAnimation";
 import sheets from "../axios/axios"; // Importa a instância do Axios
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -20,7 +20,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function Login() {
   const navigation = useNavigation();
 
-  // Estado para controlar a visibilidade da senha e o conteúdo do campo de senha
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState(null);
   const [user, setUser] = useState({
@@ -50,17 +49,14 @@ export default function Login() {
     );
   }
 
-  // Função para alternar a visibilidade da senha
   const togglePasswordVisibility = () => {
     setPasswordVisible(!isPasswordVisible);
   };
 
-  // Função para atualizar o valor do email diretamente no objeto user
   const handleEmailChange = (text) => {
     setUser({ ...user, email: text });
   };
 
-  // Função para atualizar o valor da senha diretamente no objeto user
   const handlePasswordChange = (text) => {
     setUser({ ...user, senha: text });
   };
@@ -70,18 +66,17 @@ export default function Login() {
       Alert.alert("Preencha os campos para entrar");
       return;
     }
-  
+
     try {
-      // Faz a chamada de login usando o método postLogin do objeto sheets
       const response = await sheets.postLogin(user);
-  
+
       if (response.status === 200) {
         Alert.alert("Sucesso", response.data.message);
-  
+
         const userName = response.data.user.Nome;
         await AsyncStorage.setItem("userLoggedIn", "true");
         await AsyncStorage.setItem("userName", userName);
-  
+
         navigation.navigate("Home");
       }
     } catch (error) {
@@ -93,7 +88,7 @@ export default function Login() {
         console.log(error);
       }
     }
-  };  
+  };
 
   return (
     <View style={styles.container}>
@@ -109,7 +104,7 @@ export default function Login() {
             style={styles.inputWithoutBorder}
             placeholder="Insira seu email"
             value={user.email}
-            onChangeText={handleEmailChange} // Usando a função para atualizar o email no estado user
+            onChangeText={handleEmailChange}
           />
         </View>
 
@@ -120,7 +115,7 @@ export default function Login() {
             style={styles.inputWithoutBorder}
             secureTextEntry={!isPasswordVisible}
             value={user.senha}
-            onChangeText={handlePasswordChange} // Usando a função para atualizar a senha no estado user
+            onChangeText={handlePasswordChange}
           />
           {user.senha.length > 0 ? (
             <TouchableOpacity
