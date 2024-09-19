@@ -10,6 +10,7 @@ import Checklist from "../pages/listagem";
 import Anotacoes from "../pages/anotacoes";
 import Controlefinanceiro from "../pages/controlefinanceiro";
 import Financas from "../pages/financas";
+import Paginadeperfil from "../pages/paginadeperfil";
 
 const Stack = createStackNavigator();
 
@@ -75,6 +76,13 @@ export default function Rotas() {
         component={Financas}
         options={{ headerShown: false }}
       />
+
+<Stack.Screen
+        name="Paginadeperfil"
+        component={Paginadeperfil}
+        options={{ headerShown: false }}
+      />
+
     </Stack.Navigator>
   );
 }
