@@ -60,7 +60,7 @@ export default function Controlefinanceiro() {
         <Text style={styles.label}>Renda Atual:</Text>
         <TextInput style={styles.input} placeholder="Insira sua renda atual" />
 
-        <Text style={styles.subtitle}>Gasto e Ganho Mensal</Text>
+        <Text style={styles.title}>Gasto e Ganho Mensal</Text>
 
         <Text style={styles.label}>Gasto:</Text>
         <TextInput style={styles.input} placeholder="Insira o gasto mensal" />
@@ -109,26 +109,21 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: "SuezOne_400Regular",
     color: "#255573",
+    textAlign: "center",
   },
   containerForm: {
     width: "100%",
   },
   label: {
-    fontSize: 16,
+    fontSize: 20,
     color: "#255573",
     marginBottom: 5,
     marginTop: 15,
     fontFamily: "SuezOne_400Regular",
     
-  },
-  subtitle: {
-    fontSize: 18,
-    color: "#255573",
-    textAlign: "center",
-    marginVertical: 10,
   },
   input: {
     backgroundColor: "#fff",
@@ -139,10 +134,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: "100%",
     backgroundColor: "#C6DBE4",
-    
   },
   textArea: {
-    height: 150,
+    height: 180,
     textAlignVertical: "top",
     backgroundColor: "#C6DBE4",
   },

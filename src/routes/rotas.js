@@ -9,6 +9,8 @@ import Escolhanotas from "../pages/escolhanotas";
 import Checklist from "../pages/listagem";
 import Anotacoes from "../pages/anotacoes";
 import Controlefinanceiro from "../pages/controlefinanceiro";
+import Financas from "../pages/financas";
+import Paginadeperfil from "../pages/paginadeperfil";
 
 const Stack = createStackNavigator();
 
@@ -68,6 +70,19 @@ export default function Rotas() {
         component={Controlefinanceiro}
         options={{ headerShown: false }}
       />
+
+      <Stack.Screen
+        name="Financas"
+        component={Financas}
+        options={{ headerShown: false }}
+      />
+
+<Stack.Screen
+        name="Paginadeperfil"
+        component={Paginadeperfil}
+        options={{ headerShown: false }}
+      />
+
     </Stack.Navigator>
   );
 }

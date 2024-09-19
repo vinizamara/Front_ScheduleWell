@@ -5,20 +5,18 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Text,
-  TextInput,
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios"; // Usando axios para requisições HTTP
+import axios from "axios";
 
 export default function Escolhanotas() {
   const navigation = useNavigation();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Estado para verificar se o usuário está logado
-  const [loading, setLoading] = useState(true); // Estado de carregamento
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
@@ -38,7 +36,6 @@ export default function Escolhanotas() {
   const checkLoginStatus = async () => {
     try {
       setLoading(true);
-      // Obter o token de autenticação do armazenamento local
       const token = await AsyncStorage.getItem("authToken");
 
       if (!token) {
@@ -47,14 +44,12 @@ export default function Escolhanotas() {
         return;
       }
 
-      // Fazer a requisição à API para verificar o token
       const response = await axios.get("https://sua-api.com/verificar-login", {
         headers: {
-          Authorization: `Bearer ${token}`, // Passar o token no cabeçalho da requisição
+          Authorization: `Bearer ${token}`,
         },
       });
 
-      // Se a resposta for válida, o usuário está logado
       if (response.status === 200 && response.data.loggedIn) {
         setIsLoggedIn(true);
       } else {
@@ -69,7 +64,7 @@ export default function Escolhanotas() {
   };
 
   useEffect(() => {
-    checkLoginStatus(); // Verificar o status de login ao carregar o componente
+    checkLoginStatus();
   }, []);
 
   if (loading || !fontsLoaded) {
@@ -80,18 +75,21 @@ export default function Escolhanotas() {
     );
   }
 
-  // Função de pesquisa
-  const handleSearch = () => {
-    console.log("Pesquisar");
-  };
-
-  // Função para login/logout ou navegação para o perfil
   const handleLoginLogout = () => {
     if (isLoggedIn) {
-      navigation.navigate("Perfil"); // Navegar para a tela de perfil
+      navigation.navigate("Perfil");
     } else {
-      navigation.navigate("Login"); // Navegar para a tela de login
+      navigation.navigate("Login");
     }
+  };
+
+  const handleNewButton = () => {
+    console.log("botão pressionado!");
+    navigation.navigate("Controlefinanceiro");
+  };
+
+  const handleProfilePage = () => {
+    navigation.navigate("Paginadeperfil"); // Ajuste o nome da rota se necessário
   };
 
   return (
@@ -103,30 +101,29 @@ export default function Escolhanotas() {
         <Icon name="plus" size={30} color="#1F74A7" />
       </TouchableOpacity>
 
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBarContainer}>
-          <TextInput
-            style={styles.searchBar}
-            placeholder="Pesquisar..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          <TouchableOpacity style={styles.iconContainer} onPress={handleSearch}>
-            <Icon name="search" size={20} color="#1F74A7" />
-          </TouchableOpacity>
-        </View>
+      <TouchableOpacity
+        style={styles.newButton}
+        onPress={handleNewButton}
+      >
+        <Text style={styles.buttonText}>Controle Financeiro</Text>
+      </TouchableOpacity>
 
-        {/* Botão de Login ou Perfil */}
-        <TouchableOpacity
-          animation="fadeInLeft"
-          style={styles.loginButton}
-          onPress={handleLoginLogout}
-        >
-          <Text style={styles.buttonText}>
-            {isLoggedIn ? "Perfil" : "Login"}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={styles.loginButton}
+        onPress={handleLoginLogout}
+      >
+        <Text style={styles.buttonText}>
+          {isLoggedIn ? "Perfil" : "Login"}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.profileButton}
+        onPress={handleProfilePage}
+      >
+        <Text style={styles.buttonText}>Página de Perfil</Text>
+      </TouchableOpacity>
+
       <Text style={styles.notesText}>Suas Anotações</Text>
     </View>
   );
@@ -140,47 +137,44 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingHorizontal: 20,
   },
-  searchContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    alignItems: "center",
-  },
-  searchBarContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    position: "relative",
-    width: "70%",
-  },
-  searchBar: {
-    height: 40,
-    borderRadius: 8,
-    paddingHorizontal: 40,
-    width: "100%",
-    backgroundColor: "#C6DBE4",
-    borderWidth: 0,
-  },
-  iconContainer: {
+  newButton: {
     position: "absolute",
-    left: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loginButton: {
+    top: 50,
+    left: 20,
     height: 40,
     backgroundColor: "#1F74A7",
-    paddingVertical: 3,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 25,
+    borderRadius: 10,
+  },
+  loginButton: {
+    position: "absolute",
+    top: 100, 
+    right: 20,
+    height: 40,
+    backgroundColor: "#1F74A7",
+    paddingVertical: 8,
+    paddingHorizontal: 25,
+    borderRadius: 10,
+  },
+  profileButton: {
+    position: "absolute",
+    top: 150, 
+    right: 20,
+    height: 40,
+    backgroundColor: "#1F74A7",
+    paddingVertical: 8,
+    paddingHorizontal: 25,
+    borderRadius: 10,
   },
   buttonText: {
     color: "#FFF",
-    fontSize: 20,
+    fontSize: 16,
     fontFamily: "SuezOne_400Regular",
   },
   plusIconContainer: {
     position: "absolute",
-    top: "15%",
+    top: "20%",
     right: "5%",
     zIndex: 1,
   },
@@ -188,7 +182,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: "#255573",
     fontFamily: "SuezOne_400Regular",
-    textAlign: "center",
-    marginTop: "5%",
+    alignSelf: "flex-start", 
+    marginTop: 80, 
   },
 });
