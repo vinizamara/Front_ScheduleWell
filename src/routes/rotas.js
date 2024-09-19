@@ -9,6 +9,7 @@ import Escolhanotas from "../pages/escolhanotas";
 import Checklist from "../pages/listagem";
 import Anotacoes from "../pages/anotacoes";
 import Controlefinanceiro from "../pages/controlefinanceiro";
+import Financas from "../pages/financas";
 
 const Stack = createStackNavigator();
 
@@ -66,6 +67,12 @@ export default function Rotas() {
       <Stack.Screen
         name="Controlefinanceiro"
         component={Controlefinanceiro}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="Financas"
+        component={Financas}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
