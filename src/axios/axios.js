@@ -34,6 +34,9 @@ const sheets = {
   getItemChecklists: (idChecklist) => api.get(`/itemChecklists/${idChecklist}`),
   updateItemChecklist: (idChecklist, item) => api.put(`/itemChecklists/${idChecklist}`, item),
   deleteItemChecklist: (idChecklist) => api.delete(`/itemChecklists/${idChecklist}`),
+
+  //Finanças
+  criarFinanca: (financa) => api.post("/criarFinanca/", financa),
 };
 
 export default sheets;
