@@ -3,7 +3,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://10.89.240.72:5000/api/", // Remover espaço extra
+  baseURL: "http://10.89.240.99:5000/api/", // Remover espaço extra
   headers: {
     Accept: "application/json",
   },

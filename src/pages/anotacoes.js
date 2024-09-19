@@ -14,6 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import sheets from "../axios/axios";
 
 export default function Anotacoes() {
   const navigation = useNavigation();
@@ -45,9 +46,8 @@ export default function Anotacoes() {
   }
 
   const handleConfirm = (date) => {
-    // Formata a data para DD/MM/YYYY para exibição
     const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Mês começa em 0
+    const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     const formattedDate = `${day}/${month}/${year}`;
     
@@ -58,30 +58,21 @@ export default function Anotacoes() {
   const handleSave = async () => {
     if (title && date && description) {
       try {
-        // Converte a data de DD/MM/YYYY para YYYY-MM-DD
         const [day, month, year] = date.split("/");
-        const dbFormattedDate = `${year}-${month}-${day}`; // Formato para o banco de dados
+        const dbFormattedDate = `${year}-${month}-${day}`;
 
-        const response = await fetch("http://10.89.240.72:5000/api/postNota", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            fk_id_usuario: 1, // Substitua pelo ID do usuário atual
-            data: dbFormattedDate,
-            titulo: title,
-            descricao: description,
-          }),
+        const response = await sheets.postNota({
+          fk_id_usuario: 1, // Substitua pelo ID do usuário atual
+          data: dbFormattedDate,
+          titulo: title,
+          descricao: description,
         });
 
-        const data = await response.json();
-
-        if (response.ok) {
-          Alert.alert("Sucesso", data.message);
+        if (response.status === 201) {
+          Alert.alert("Sucesso", response.data.message);
           navigation.navigate("Agendas");
         } else {
-          Alert.alert("Erro", data.message);
+          Alert.alert("Erro", response.data.message);
         }
       } catch (error) {
         console.error('Error details:', error);
@@ -144,7 +135,6 @@ export default function Anotacoes() {
         </TouchableOpacity>
       </View>
 
-      {/* DateTimePickerModal */}
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"

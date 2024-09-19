@@ -52,7 +52,7 @@ export default function Escolhanotas() {
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.buttonAnotacao}
-      onPress={() => navigation.navigate("Controlefinanceiro")}
+      onPress={() => navigation.navigate("Financas")}
       >
         <Text style={styles.title}>Finanças</Text>
         <Text style={styles.subtitulo}>Breve Descrição</Text>
