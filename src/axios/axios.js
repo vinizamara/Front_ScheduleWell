@@ -3,7 +3,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://192.168.137.1:5000/api/", // Atualize esta URL conforme necessário
+  baseURL: "http://192.168.56.1:5000/api/", // Atualize esta URL conforme necessário
   headers: {
     Accept: "application/json",
   },

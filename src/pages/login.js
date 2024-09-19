@@ -14,7 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
 import { Ionicons } from "@expo/vector-icons";
 import HeaderAnimation from "../components/headerAnimation";
-import sheets from "../axios/axios"; // Importa a instância do Axios
+import sheets from "../axios/axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Login() {
@@ -39,7 +39,7 @@ export default function Login() {
       }
     }
     prepare();
-  }, []);
+  }, [fontsLoaded]);
 
   if (!fontsLoaded) {
     return (
@@ -54,15 +54,15 @@ export default function Login() {
   };
 
   const handleEmailChange = (text) => {
-    setUser({ ...user, email: text });
+    setUser((prevState) => ({ ...prevState, email: text }));
   };
 
   const handlePasswordChange = (text) => {
-    setUser({ ...user, senha: text });
+    setUser((prevState) => ({ ...prevState, senha: text }));
   };
 
   const handleLogin = async () => {
-    if (user.email === "" || user.senha === "") {
+    if (user.email.trim() === "" || user.senha.trim() === "") {
       Alert.alert("Preencha os campos para entrar");
       return;
     }
@@ -74,18 +74,20 @@ export default function Login() {
         Alert.alert("Sucesso", response.data.message);
 
         const userName = response.data.user.Nome;
-        await AsyncStorage.setItem("userLoggedIn", "true");
-        await AsyncStorage.setItem("userName", userName);
+        if (userName) {
+          await AsyncStorage.setItem("userLoggedIn", "true");
+          await AsyncStorage.setItem("userName", userName);
+        } 
 
-        navigation.navigate("Home");
+        navigation.navigate("Agendas");
       }
     } catch (error) {
       if (error.response) {
         Alert.alert("Erro no login", error.response.data.error);
-        console.log(error);
+        console.error(error);
       } else {
         Alert.alert("Erro de Conexão", "Erro ao conectar-se ao servidor.");
-        console.log(error);
+        console.error(error);
       }
     }
   };
@@ -117,7 +119,7 @@ export default function Login() {
             value={user.senha}
             onChangeText={handlePasswordChange}
           />
-          {user.senha.length > 0 ? (
+          {user.senha.length > 0 && (
             <TouchableOpacity
               onPress={togglePasswordVisibility}
               style={styles.eyeIcon}
@@ -128,8 +130,6 @@ export default function Login() {
                 color="#555"
               />
             </TouchableOpacity>
-          ) : (
-            <View />
           )}
         </View>
 
