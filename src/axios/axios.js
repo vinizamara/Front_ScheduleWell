@@ -3,7 +3,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://10.89.240.99:5000/api/", // Atualize esta URL conforme necessário
+  baseURL: "http://10.89.240.72:5000/api/", // Remover espaço extra
   headers: {
     Accept: "application/json",
   },
@@ -13,7 +13,7 @@ const sheets = {
   // Usuários
   createUser: (user) => api.post("/createUser", user),
   postLogin: (data) => api.post("/login", data),
-  getUsers: () => api.get("users"),
+  getUsers: () => api.get("/users"),
   updateUser: (id, updatedData) => api.put(`/updateUser/${id}`, updatedData),
   deleteUser: (id) => api.delete(`/deleteUser/${id}`),
 
