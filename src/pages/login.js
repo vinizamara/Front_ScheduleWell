@@ -62,12 +62,14 @@ export default function Login() {
         Alert.alert("Sucesso", response.data.message);
   
         const userName = response.data.user.nome;
+        const userEmail = response.data.user.email;
         const userId = response.data.user.id_usuario;
   
         if (userName) {
           try {
             await AsyncStorage.setItem("userLoggedIn", "true");
             await AsyncStorage.setItem("userName", userName);
+            await AsyncStorage.setItem("userEmail", userEmail);
             await AsyncStorage.setItem("userId", userId.toString());
             console.log("Dados salvos com sucesso!");
           } catch (e) {
