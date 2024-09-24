@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -13,13 +13,54 @@ import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
+import sheets from "../axios/axios"; 
 
 export default function Controlefinanceiro() {
   const navigation = useNavigation();
 
+  const [rendaAtual, setRendaAtual] = useState("");
+  const [gastoMensal, setGastoMensal] = useState("");
+  const [ganhoMensal, setGanhoMensal] = useState("");
+  const [saldo, setSaldo] = useState("");
+  const [transacoesFeitas, setTransacoesFeitas] = useState("");
+  const [transacoesPlanejadas, setTransacoesPlanejadas] = useState("");
+  const [loading, setLoading] = useState(true);
+
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
   });
+
+  // Função para buscar os dados da API
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await sheets.gastoseganhosporMes; 
+        const data = response.data;
+        
+        // Atualiza os estados com os dados da API
+        setRendaAtual(data.rendaAtual);
+        setGastoMensal(data.gastoMensal);
+        setGanhoMensal(data.ganhoMensal);
+        setSaldo(data.saldo);
+      } catch (error) {
+        console.error("Erro ao buscar os dados:", error);
+      } 
+      try{
+        const response = await sheets.listarTransacoes; 
+        const data = response.data;
+
+        setTransacoesFeitas(data.transacoesFeitas);
+        setTransacoesPlanejadas(data.transacoesPlanejadas);
+      } catch (error) {
+        console.error("Erro ao buscar os dados:", error);
+      }
+      finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     async function prepare() {
@@ -31,7 +72,7 @@ export default function Controlefinanceiro() {
     prepare();
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || loading) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#2196F3" />
@@ -58,31 +99,55 @@ export default function Controlefinanceiro() {
 
       <View style={styles.containerForm}>
         <Text style={styles.label}>Renda Atual:</Text>
-        <TextInput style={styles.input} placeholder="Insira sua renda atual" />
+        <TextInput
+          style={styles.input}
+          value={rendaAtual}
+          placeholder="Insira sua renda atual"
+          editable={false}
+        />
 
         <Text style={styles.title}>Gasto e Ganho Mensal</Text>
 
         <Text style={styles.label}>Gasto:</Text>
-        <TextInput style={styles.input} placeholder="Insira o gasto mensal" />
+        <TextInput
+          style={styles.input}
+          value={gastoMensal}
+          placeholder="Insira o gasto mensal"
+          editable={false}
+        />
 
         <Text style={styles.label}>Ganho:</Text>
-        <TextInput style={styles.input} placeholder="Insira o ganho mensal" />
+        <TextInput
+          style={styles.input}
+          value={ganhoMensal}
+          placeholder="Insira o ganho mensal"
+          editable={false}
+        />
 
         <Text style={styles.label}>Saldo:</Text>
-        <TextInput style={styles.input} placeholder="Saldo total" />
+        <TextInput
+          style={styles.input}
+          value={saldo}
+          placeholder="Saldo total"
+          editable={false}
+        />
 
         <Text style={styles.label}>Transações Feitas:</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
           multiline
+          value={transacoesFeitas}
           placeholder="Detalhe suas transações feitas"
+          editable={false}
         />
 
         <Text style={styles.label}>Transações Planejadas:</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
           multiline
+          value={transacoesPlanejadas}
           placeholder="Detalhe suas transações planejadas"
+          editable={false}
         />
       </View>
     </ScrollView>
@@ -103,11 +168,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
-  backIcon: {
-    width: 30,
-    height: 30,
-    marginRight: 10,
-  },
   title: {
     fontSize: 22,
     fontFamily: "SuezOne_400Regular",
@@ -123,7 +183,6 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     marginTop: 15,
     fontFamily: "SuezOne_400Regular",
-    
   },
   input: {
     backgroundColor: "#fff",
