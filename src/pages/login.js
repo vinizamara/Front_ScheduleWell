@@ -31,27 +31,6 @@ export default function Login() {
     SuezOne_400Regular,
   });
 
-  useEffect(() => {
-    async function prepare() {
-      await SplashScreen.preventAutoHideAsync();
-      if (fontsLoaded) {
-        await SplashScreen.hideAsync();
-      }
-    }
-    prepare();
-  }, [fontsLoaded]);
-
-  useEffect(() => {
-    const checkUserLoggedIn = async () => {
-      const userLoggedIn = await AsyncStorage.getItem("userLoggedIn");
-      if (userLoggedIn === "true") {
-        navigation.navigate("Agendas");
-      }
-    };
-
-    checkUserLoggedIn();
-  }, []);
-
   if (!fontsLoaded) {
     return (
       <View style={styles.container}>
