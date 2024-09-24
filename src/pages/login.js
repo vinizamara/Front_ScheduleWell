@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -9,9 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
-import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
-import * as Animatable from "react-native-animatable";
 import { Ionicons } from "@expo/vector-icons";
 import HeaderAnimation from "../components/headerAnimation";
 import sheets from "../axios/axios";
@@ -21,7 +19,6 @@ export default function Login() {
   const navigation = useNavigation();
 
   const [isPasswordVisible, setPasswordVisible] = useState(false);
-  const [error, setError] = useState(null);
   const [user, setUser] = useState({
     email: "",
     senha: "",
@@ -56,20 +53,28 @@ export default function Login() {
       Alert.alert("Preencha os campos para entrar");
       return;
     }
-
+  
     try {
       const response = await sheets.postLogin(user);
-
+      console.log(response.data); // Adicione este log
+  
       if (response.status === 200) {
         Alert.alert("Sucesso", response.data.message);
-
-        const userName = response.data.user.Nome;
+  
+        const userName = response.data.user.nome;
+        const userId = response.data.user.id_usuario;
+  
         if (userName) {
-          await AsyncStorage.setItem("userLoggedIn", "true");
-          await AsyncStorage.setItem("userName", userName);
-          console.log("Feito")
+          try {
+            await AsyncStorage.setItem("userLoggedIn", "true");
+            await AsyncStorage.setItem("userName", userName);
+            await AsyncStorage.setItem("userId", userId.toString());
+            console.log("Dados salvos com sucesso!");
+          } catch (e) {
+            console.error("Erro ao armazenar dados no AsyncStorage:", e);
+          }
         }
-
+  
         navigation.navigate("Agendas");
       }
     } catch (error) {
@@ -82,6 +87,7 @@ export default function Login() {
       }
     }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -141,8 +147,6 @@ export default function Login() {
             Não possui uma conta? Cadastre-se!
           </Text>
         </TouchableOpacity>
-
-        {error && <Text style={{ color: "red" }}>{error}</Text>}
       </View>
     </View>
   );
