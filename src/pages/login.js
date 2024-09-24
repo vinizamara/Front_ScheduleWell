@@ -41,6 +41,17 @@ export default function Login() {
     prepare();
   }, [fontsLoaded]);
 
+  useEffect(() => {
+    const checkUserLoggedIn = async () => {
+      const userLoggedIn = await AsyncStorage.getItem("userLoggedIn");
+      if (userLoggedIn === "true") {
+        navigation.navigate("Agendas");
+      }
+    };
+
+    checkUserLoggedIn();
+  }, []);
+
   if (!fontsLoaded) {
     return (
       <View style={styles.container}>
@@ -77,7 +88,8 @@ export default function Login() {
         if (userName) {
           await AsyncStorage.setItem("userLoggedIn", "true");
           await AsyncStorage.setItem("userName", userName);
-        } 
+          console.log("Feito")
+        }
 
         navigation.navigate("Agendas");
       }
