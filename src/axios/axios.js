@@ -3,7 +3,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://10.89.240.99:5000/api/", // Remover espaço extra
+  baseURL: "http://10.89.234.250:5000/api/", // Remover espaço extra
   headers: {
     Accept: "application/json",
   },
@@ -24,16 +24,16 @@ const sheets = {
   deleteNota: (idNota) => api.delete(`/deleteNota/${idNota}`),
 
   // Checklists
-  postChecklist: (checklist) => api.post("/checklists", checklist),
-  getChecklists: (idUsuario) => api.get(`/checklists/${idUsuario}`),
-  updateChecklist: (idChecklist, checklist) => api.put(`/checklists/${idChecklist}`, checklist),
-  deleteChecklist: (idChecklist) => api.delete(`/checklists/${idChecklist}`),
+  postChecklist: (checklist) => api.post("/postChecklist/", checklist),
+  getChecklists: (idUsuario) => api.get(`/getChecklist/${idUsuario}`),
+  updateChecklist: (idChecklist, checklist) => api.put(`/updateChecklist/${idChecklist}`, checklist),
+  deleteChecklist: (idChecklist) => api.delete(`/deleteChecklist/${idChecklist}`),
 
   // Itens de Checklist
-  postItemChecklist: (item) => api.post("/itemChecklists", item),
-  getItemChecklists: (idChecklist) => api.get(`/itemChecklists/${idChecklist}`),
-  updateItemChecklist: (idChecklist, item) => api.put(`/itemChecklists/${idChecklist}`, item),
-  deleteItemChecklist: (idChecklist) => api.delete(`/itemChecklists/${idChecklist}`),
+  postItemChecklist: (item) => api.post("/postItemChecklist/", item),
+  getItemChecklists: (idChecklist) => api.get(`/getItemChecklist/${idChecklist}`),
+  updateItemChecklist: (idChecklist, item) => api.put(`/updateItemChecklist/${idChecklist}`, item),
+  deleteItemChecklist: (fkIdChecklist) => api.delete(`/deleteItemChecklist/${fkIdChecklist}`),
 
   //Finanças
   criarFinanca: (financa) => api.post("/criarFinanca/", financa),
