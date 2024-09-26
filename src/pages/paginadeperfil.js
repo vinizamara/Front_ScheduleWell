@@ -12,6 +12,7 @@ import {
   Alert,
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
+import { Ionicons } from "@expo/vector-icons";
 import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
@@ -23,6 +24,10 @@ export default function PerfilUsuario() {
   const [modalVisible, setModalVisible] = useState(false);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
+  const [novaSenha, setNovaSenha] = useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [isPasswordVisible, setPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
@@ -50,12 +55,36 @@ export default function PerfilUsuario() {
     );
   }
 
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!isPasswordVisible);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setConfirmPasswordVisible(!isConfirmPasswordVisible);
+  };
+
   const handleSave = async () => {
+    if (!nome || !email || !novaSenha || !confirmarSenha) {
+      Alert.alert("Erro", "Por favor, preencha todos os campos.");
+      return;
+    }
+
+    if (novaSenha && novaSenha !== confirmarSenha) {
+      Alert.alert("Erro", "As senhas não coincidem.");
+      return;
+    }
+
     const userId = await AsyncStorage.getItem("userId");
     if (userId) {
-      await sheets.updateUser(userId, { nome, email });
+      const updateData = { nome, email };
+      if (novaSenha) {
+        updateData.senha = novaSenha;
+      }
+      await sheets.updateUser(userId, updateData);
       Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
       setModalVisible(false);
+      setNovaSenha("");
+      setConfirmarSenha("");
     } else {
       Alert.alert("Erro", "ID do usuário não encontrado.");
     }
@@ -139,38 +168,86 @@ export default function PerfilUsuario() {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Editar Perfil</Text>
+            <ScrollView>
+              <Text style={styles.modalTitle}>Editar Perfil</Text>
 
-            <TextInput
-              style={styles.input}
-              value={nome}
-              onChangeText={setNome}
-              placeholder="Nome"
-            />
+              <Text style={styles.title}>Nome</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.inputWithoutBorder}
+                  value={nome}
+                  onChangeText={setNome}
+                  placeholder="Insira seu nome"
+                />
+              </View>
 
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="E-mail"
-              keyboardType="email-address"
-            />
+              <Text style={styles.title}>E-mail</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.inputWithoutBorder}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Insira seu e-mail"
+                  keyboardType="email-address"
+                />
+              </View>
 
-            <View style={styles.modalButtonsContainer}>
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={handleSave}
-              >
-                <Text style={styles.modalButtonText}>Salvar</Text>
-              </TouchableOpacity>
+              <Text style={styles.title}>Nova Senha</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  placeholder="Insira sua nova senha"
+                  style={styles.inputWithoutBorder}
+                  secureTextEntry={!isPasswordVisible}
+                  value={novaSenha}
+                  onChangeText={setNovaSenha}
+                />
+                {novaSenha.length > 0 && (
+                  <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
+                    <Ionicons
+                      name={isPasswordVisible ? "eye-off" : "eye"}
+                      size={24}
+                      color="#555"
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
 
-              <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: "#f44336" }]}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.modalButtonText}>Cancelar</Text>
-              </TouchableOpacity>
-            </View>
+              <Text style={styles.title}>Confirmar Senha</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  placeholder="Confirme sua nova senha"
+                  style={styles.inputWithoutBorder}
+                  secureTextEntry={!isConfirmPasswordVisible}
+                  value={confirmarSenha}
+                  onChangeText={setConfirmarSenha}
+                />
+                {confirmarSenha.length > 0 && (
+                  <TouchableOpacity onPress={toggleConfirmPasswordVisibility} style={styles.eyeIcon}>
+                    <Ionicons
+                      name={isConfirmPasswordVisible ? "eye-off" : "eye"}
+                      size={24}
+                      color="#555"
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              <View style={styles.modalButtonsContainer}>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={handleSave}
+                >
+                  <Text style={styles.modalButtonText}>Salvar</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.modalButton, { backgroundColor: "#f44336" }]}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Text style={styles.modalButtonText}>Cancelar</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -180,111 +257,117 @@ export default function PerfilUsuario() {
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    flex: 1,
     backgroundColor: "#E2EDF2",
-    paddingHorizontal: 20,
-    paddingVertical: 40,
-    justifyContent: "top",
+    justifyContent: "center",
     alignItems: "center",
+  },
+  profileContainer: {
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 20,
+  },
+  title: {
+    fontFamily: "SuezOne_400Regular",
+    fontSize: 20,
+    color: "#255573",
+    textAlign: "center",
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    marginVertical: 10,
+  },
+  button: {
+    backgroundColor: "#1F74A7",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    margin: 5,
+    width: "40%",
+  },
+  buttonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "bold",
+    fontFamily: "SuezOne_400Regular",
+    textAlign: "center",
+  },
+  deleteButton: {
+    marginTop: 20,
+    backgroundColor: "#f44336",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  profileContainer: {
-    width: "100%",
-    alignItems: "center",
-  },
-  profileImage: {
-    width: 120,  // Aumentando o tamanho da imagem
-    height: 120,
-    borderRadius: 60,  // Mantendo a imagem circular
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontFamily: "SuezOne_400Regular",
-    color: "#255573",
-    marginBottom: 50,
-  },
-  buttonsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: "#1F74A7",
-    paddingVertical: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    flex: 1,
-    marginHorizontal: 10,
-    elevation: 3, // Efeito de sombra
-  },
-  buttonText: {
-    color: "#fff",
-    fontFamily: "SuezOne_400Regular",
-    fontSize: 20,
-  },
-  deleteButton: {
-    backgroundColor: "#FF4B4B",
-    paddingVertical: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    width: "96%",
-    elevation: 3, // Efeito de sombra
+    backgroundColor: "#E2EDF2",
   },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalView: {
-    width: "90%",
-    backgroundColor: "#fff",
+    width: "80%",
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 20,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
   },
   modalTitle: {
-    fontSize: 20,
     fontFamily: "SuezOne_400Regular",
+    fontSize: 24,
+    color: "#255573",
     marginBottom: 20,
   },
-  input: {
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    marginBottom: 12,
     width: "100%",
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 20,
+  },
+  inputWithoutBorder: {
+    fontFamily: "SuezOne_400Regular",
+    height: 40,
+    fontSize: 16,
+    paddingHorizontal: 8,
+    flex: 1,
+  },
+  eyeIcon: {
+    position: "absolute",
+    right: 10,
   },
   modalButtonsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
+    marginTop: 20,
   },
   modalButton: {
-    flex: 1,
     backgroundColor: "#1F74A7",
-    paddingVertical: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 8,
     marginHorizontal: 5,
-    alignItems: "center",
+    flex: 1,
   },
   modalButtonText: {
-    color: "#fff",
-    fontFamily: "SuezOne_400Regular",
+    color: "#FFF",
     fontSize: 16,
+    fontWeight: "bold",
+    fontFamily: "SuezOne_400Regular",
+    textAlign: "center",
   },
 });
