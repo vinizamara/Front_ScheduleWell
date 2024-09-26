@@ -50,9 +50,15 @@ export default function PerfilUsuario() {
     );
   }
 
-  const handleSave = () => {
-    setModalVisible(false);
-    alert("Perfil atualizado com sucesso!");
+  const handleSave = async () => {
+    const userId = await AsyncStorage.getItem("userId");
+    if (userId) {
+      await sheets.updateUser(userId, { nome, email });
+      Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
+      setModalVisible(false);
+    } else {
+      Alert.alert("Erro", "ID do usuário não encontrado.");
+    }
   };
 
   const handleLogout = async () => {
@@ -74,14 +80,14 @@ export default function PerfilUsuario() {
     });
 
     if (confirm) {
-      const userId = await AsyncStorage.getItem("userId"); // Obter o ID do usuário
+      const userId = await AsyncStorage.getItem("userId");
       if (userId) {
         await sheets.deleteUser(userId);
         await AsyncStorage.clear();
         navigation.navigate("PageInit");
-        alert("Conta deletada com sucesso!");
+        Alert.alert("Sucesso", "Conta deletada com sucesso!");
       } else {
-        alert("Erro: ID do usuário não encontrado.");
+        Alert.alert("Erro", "ID do usuário não encontrado.");
       }
     }
   };
@@ -91,37 +97,37 @@ export default function PerfilUsuario() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.profileContainer}>
-        <Image source={require("../../assets/icons/perfil.png")} />
+        <Image source={require("../../assets/icons/perfil.png")} style={styles.profileImage} />
 
         <Animatable.Text animation="fadeInDown" style={styles.title}>
           Olá, {nome || "Nome do Usuário"}
         </Animatable.Text>
 
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity
+          <AnimatableTouchableOpacity
             animation="bounceIn"
             style={styles.button}
             onPress={() => setModalVisible(true)}
           >
             <Text style={styles.buttonText}>Editar Perfil</Text>
-          </TouchableOpacity>
+          </AnimatableTouchableOpacity>
 
-          <TouchableOpacity
+          <AnimatableTouchableOpacity
             animation="bounceIn"
             style={styles.button}
             onPress={handleLogout}
           >
             <Text style={styles.buttonText}>Sair</Text>
-          </TouchableOpacity>
+          </AnimatableTouchableOpacity>
         </View>
 
-        <TouchableOpacity
+        <AnimatableTouchableOpacity
           animation="fadeInUp"
           style={styles.deleteButton}
           onPress={handleDeleteAccount}
         >
           <Text style={styles.buttonText}>Deletar Conta</Text>
-        </TouchableOpacity>
+        </AnimatableTouchableOpacity>
       </View>
 
       {/* Modal de edição de perfil */}
@@ -190,6 +196,12 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
+  profileImage: {
+    width: 120,  // Aumentando o tamanho da imagem
+    height: 120,
+    borderRadius: 60,  // Mantendo a imagem circular
+    marginBottom: 20,
+  },
   title: {
     fontSize: 24,
     fontFamily: "SuezOne_400Regular",
@@ -210,6 +222,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flex: 1,
     marginHorizontal: 10,
+    elevation: 3, // Efeito de sombra
   },
   buttonText: {
     color: "#fff",
@@ -223,6 +236,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     width: "96%",
+    elevation: 3, // Efeito de sombra
   },
   modalContainer: {
     flex: 1,
@@ -271,6 +285,6 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: "#fff",
     fontFamily: "SuezOne_400Regular",
-    fontSize: 20,
+    fontSize: 16,
   },
 });
