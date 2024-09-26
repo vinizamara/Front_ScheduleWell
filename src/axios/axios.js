@@ -3,7 +3,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://10.89.240.98:5000/api/", // Remover espaço extra
+  baseURL: "http://10.89.240.73:5000/api/", // Remover espaço extra
   headers: {
     Accept: "application/json",
   },
@@ -37,6 +37,10 @@ const sheets = {
 
   //Finanças
   criarFinanca: (financa) => api.post("/criarFinanca/", financa),
+
+  // Consulta de Finanças
+  gastoseganhosporMes: (fk_id_usuario) => api.get(`/gastoseganhosporMes/${fk_id_usuario}`),
+  listarTransacoes: (fk_id_usuario) => api.get(`/listarTransacoes/${fk_id_usuario}`),
 };
 
 export default sheets;
