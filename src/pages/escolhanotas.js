@@ -32,90 +32,92 @@ export default function Escolhanotas() {
 
   if (!fontsLoaded) {
     return (
-      <View style={styles.container}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#2196F3" />
       </View>
     );
   }
 
-  const AnimatableTouchableOpacity = Animatable.createAnimatableComponent(TouchableOpacity);
-  const AnimatableText = Animatable.createAnimatableComponent(Text);
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.titulo}>Selecione o tipo de anotação:</Text>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Text style={styles.titulo}>Selecione o tipo de anotação:</Text>
 
-      <TouchableOpacity animation="fadeInLeft" style={styles.buttonLogin}
-            onPress={() => navigation.navigate("Login")}
-      >
-        <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.buttonAnotacao}
+          onPress={() => navigation.navigate("Financas")}
+        >
+          <Image source={require("../../assets/icons/porco.png")} />
+          <Text style={styles.title}>Finanças</Text>
+          <Text style={styles.subtitulo}>
+            Gerencie suas finanças pessoais, acompanhando suas despesas e
+            receitas de forma eficiente.
+          </Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.buttonAnotacao}
-      onPress={() => navigation.navigate("Financas")}
-      >
-        <Text style={styles.title}>Finanças</Text>
-        <Text style={styles.subtitulo}>Breve Descrição</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.buttonAnotacao}
+          onPress={() => navigation.navigate("Anotacoes")}
+        >
+          <Image source={require("../../assets/icons/checklist.png")} />
+          <Text style={styles.title}>Anotação</Text>
+          <Text style={styles.subtitulo}>
+            Crie e edite anotações para se organizar em suas atividades diárias.
+          </Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity style={styles.buttonAnotacao}
-      onPress={() => navigation.navigate("Anotacoes")}
-      >
-        <Text style={styles.title}>Anotação</Text>
-        <Text style={styles.subtitulo}>Breve Descrição</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.buttonAnotacao}
-             onPress={() => navigation.navigate("Checklist")}
-      >
-        <Text style={styles.title}>Listagem</Text>
-        <Text style={styles.subtitulo}>Breve Descrição</Text>
-      </TouchableOpacity>
-
-    </View>
+        <TouchableOpacity
+          style={styles.buttonAnotacao}
+          onPress={() => navigation.navigate("Checklist")}
+        >
+          <Image source={require("../../assets/icons/anotacoes.png")} />
+          <Text style={styles.title}>Listagem</Text>
+          <Text style={styles.subtitulo}>
+            Organize suas tarefas ou compras com uma lista de verificação
+            personalizada.
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+  },
   container: {
     flex: 1,
     backgroundColor: "#E2EDF2",
     justifyContent: "center",
     alignItems: "center",
-    position: "relative",
     padding: 20,
   },
   titulo: {
     fontSize: 22,
-    fontWeight: '500',
-    color: '#255573',
-    textAlign: 'center',
+    fontWeight: "500",
+    color: "#255573",
+    textAlign: "center",
     letterSpacing: 0.5,
-    marginBottom: 10,
+    marginBottom: 20, // Ajustado para mais espaço entre o título e o botão
     marginTop: 20,
     fontFamily: "SuezOne_400Regular",
-  },
-  // Estilo do botão de login no canto superior direito
-  buttonLogin: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    height: 40,
-    backgroundColor: "#1F74A7",
-    paddingVertical: 3,
-    paddingHorizontal: 20,
-    borderRadius: 8,
   },
   buttonText: {
     color: "#FFF",
     fontSize: 20,
     fontFamily: "SuezOne_400Regular",
   },
-  // Botões de Finanças, Anotação e Listagem como quadrados menores
   buttonAnotacao: {
     backgroundColor: "#1F74A7",
-    width: 200, // Mudado para quadrado
-    height: 200, // Mudado para quadrado
+    width: 230,
+    height: 230,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 16,
@@ -125,16 +127,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   title: {
-    fontSize: 18, // Ajustado o tamanho da fonte
+    fontSize: 18,
     color: "#fff",
     fontFamily: "SuezOne_400Regular",
     marginBottom: 5,
   },
   subtitulo: {
-    fontSize: 14, // Ajustado o tamanho da fonte
-    fontWeight: '1000',
-    color: '#F5F5F5',
-    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: "1000",
+    color: "#F5F5F5",
+    textAlign: "center",
     lineHeight: 20,
     letterSpacing: 1,
     marginBottom: 15,
