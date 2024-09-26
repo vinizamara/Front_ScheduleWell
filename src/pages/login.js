@@ -56,7 +56,7 @@ export default function Login() {
   
     try {
       const response = await sheets.postLogin(user);
-      console.log(response.data); // Adicione este log
+      console.log(response.data);
   
       if (response.status === 200) {
         Alert.alert("Sucesso", response.data.message);
@@ -65,16 +65,14 @@ export default function Login() {
         const userEmail = response.data.user.email;
         const userId = response.data.user.id_usuario;
   
-        if (userName) {
-          try {
-            await AsyncStorage.setItem("userLoggedIn", "true");
-            await AsyncStorage.setItem("userName", userName);
-            await AsyncStorage.setItem("userEmail", userEmail);
-            await AsyncStorage.setItem("userId", userId.toString());
-            console.log("Dados salvos com sucesso!");
-          } catch (e) {
-            console.error("Erro ao armazenar dados no AsyncStorage:", e);
-          }
+        try {
+          await AsyncStorage.setItem("userLoggedIn", "true");
+          await AsyncStorage.setItem("userName", userName);
+          await AsyncStorage.setItem("userEmail", userEmail);
+          await AsyncStorage.setItem("userId", userId.toString());
+          console.log("Dados salvos com sucesso!");
+        } catch (e) {
+          console.error("Erro ao armazenar dados no AsyncStorage:", e);
         }
   
         navigation.navigate("Agendas");
@@ -82,14 +80,12 @@ export default function Login() {
     } catch (error) {
       if (error.response) {
         Alert.alert("Erro no login", error.response.data.error);
-        console.error(error);
       } else {
         Alert.alert("Erro de Conexão", "Erro ao conectar-se ao servidor.");
-        console.error(error);
       }
+      console.error(error);
     }
-  };
-  
+  };  
 
   return (
     <View style={styles.container}>
