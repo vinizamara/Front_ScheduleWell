@@ -5,16 +5,18 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Text,
+  Alert,
+  Image,
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
 
 export default function Escolhanotas() {
   const navigation = useNavigation();
+  const isFocused = useIsFocused(); // Hook para verificar o foco na tela
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -36,21 +38,9 @@ export default function Escolhanotas() {
   const checkLoginStatus = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem("authToken");
-
-      if (!token) {
-        setIsLoggedIn(false);
-        setLoading(false);
-        return;
-      }
-
-      const response = await axios.get("https://sua-api.com/verificar-login", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.status === 200 && response.data.loggedIn) {
+      const userLoggedIn = await AsyncStorage.getItem("userLoggedIn");
+  
+      if (userLoggedIn === "true") {
         setIsLoggedIn(true);
       } else {
         setIsLoggedIn(false);
@@ -63,9 +53,12 @@ export default function Escolhanotas() {
     }
   };
 
+  // Verifica o status de login sempre que a tela ganhar foco
   useEffect(() => {
-    checkLoginStatus();
-  }, []);
+    if (isFocused) {
+      checkLoginStatus();
+    }
+  }, [isFocused]);
 
   if (loading || !fontsLoaded) {
     return (
@@ -75,16 +68,30 @@ export default function Escolhanotas() {
     );
   }
 
-  const handleLoginLogout = () => {
-    if (isLoggedIn) {
-      navigation.navigate("Perfil");
+  // Função chamada ao apertar o botão plus
+  const handlePlusPress = () => {
+    if (!isLoggedIn) {
+      // Exibir alerta se o usuário não estiver logado
+      Alert.alert(
+        "Faça Login",
+        "Você precisa fazer login para criar uma nova nota. Deseja fazer login agora?",
+        [
+          {
+            text: "Cancelar",
+            style: "cancel",
+          },
+          {
+            text: "Login",
+            onPress: () => navigation.navigate("Login"),
+          },
+        ]
+      );
     } else {
-      navigation.navigate("Login");
+      navigation.navigate("Escolhanotas");
     }
   };
 
   const handleNewButton = () => {
-    console.log("botão pressionado!");
     navigation.navigate("Controlefinanceiro");
   };
 
@@ -94,35 +101,30 @@ export default function Escolhanotas() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.plusIconContainer}
-        onPress={() => navigation.navigate("Escolhanotas")}
-      >
+      <TouchableOpacity style={styles.plusIconContainer} onPress={handlePlusPress}>
         <Icon name="plus" size={30} color="#1F74A7" />
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.newButton}
-        onPress={handleNewButton}
-      >
-        <Text style={styles.buttonText}>Controle Financeiro</Text>
-      </TouchableOpacity>
+      {/* Botão de Controle Financeiro só aparece se o usuário estiver logado */}
+      {isLoggedIn && (
+        <TouchableOpacity style={styles.newButton} onPress={handleNewButton}>
+          <Text style={styles.buttonText}>Controle Financeiro</Text>
+        </TouchableOpacity>
+      )}
 
-      <TouchableOpacity
-        style={styles.loginButton}
-        onPress={handleLoginLogout}
-      >
-        <Text style={styles.buttonText}>
-          {isLoggedIn ? "Perfil" : "Login"}
-        </Text>
-      </TouchableOpacity>
+      {/* Botão de Login só aparece se o usuário NÃO estiver logado */}
+      {!isLoggedIn && (
+        <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate("Login")}>
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+      )}
 
-      <TouchableOpacity
-        style={styles.profileButton}
-        onPress={handleProfilePage}
-      >
-        <Text style={styles.buttonText}>Página de Perfil</Text>
-      </TouchableOpacity>
+      {/* Botão de Página de Perfil só aparece se o usuário estiver logado */}
+      {isLoggedIn && (
+        <TouchableOpacity style={styles.profileButton} onPress={handleProfilePage}>
+          <Image source={require("../../assets/icons/perfil.png")} style={styles.perfilImage} />
+        </TouchableOpacity>
+      )}
 
       <Text style={styles.notesText}>Suas Anotações</Text>
     </View>
@@ -139,9 +141,9 @@ const styles = StyleSheet.create({
   },
   newButton: {
     position: "absolute",
-    top: 50,
+    top: 10,
     left: 20,
-    height: 40,
+    height: 45,
     backgroundColor: "#1F74A7",
     paddingVertical: 8,
     paddingHorizontal: 25,
@@ -149,32 +151,34 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     position: "absolute",
-    top: 100, 
+    top: 10,
     right: 20,
-    height: 40,
+    height: 45,
     backgroundColor: "#1F74A7",
     paddingVertical: 8,
     paddingHorizontal: 25,
     borderRadius: 10,
+    alignItems: "center",
   },
   profileButton: {
     position: "absolute",
-    top: 150, 
+    top: 0,
     right: 20,
-    height: 40,
-    backgroundColor: "#1F74A7",
+    backgroundColor: "#E2EDF2",
     paddingVertical: 8,
-    paddingHorizontal: 25,
+    paddingHorizontal: 10,
     borderRadius: 10,
+    alignItems: "center",  // Centraliza horizontalmente
+    justifyContent: "center", // Centraliza verticalmente
   },
   buttonText: {
     color: "#FFF",
-    fontSize: 16,
+    fontSize: 22,
     fontFamily: "SuezOne_400Regular",
   },
   plusIconContainer: {
     position: "absolute",
-    top: "20%",
+    top: "12%",
     right: "5%",
     zIndex: 1,
   },
@@ -182,7 +186,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: "#255573",
     fontFamily: "SuezOne_400Regular",
-    alignSelf: "flex-start", 
-    marginTop: 80, 
+    alignSelf: "center",
+    marginTop: 50,
+  },
+  perfilImage: {
+    width: 60,
+    height: 60,
   },
 });

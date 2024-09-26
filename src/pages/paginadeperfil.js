@@ -54,10 +54,21 @@ export default function PerfilUsuario() {
   };
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("userName");
-    await AsyncStorage.removeItem("userEmail");
-    navigation.navigate("PageInit"); // Substitua "Login" pelo nome da sua tela de login
-  };
+    try {
+      // Remova todos os itens relacionados ao login do AsyncStorage
+      await AsyncStorage.removeItem("authToken");
+      await AsyncStorage.removeItem("userLoggedIn");
+      await AsyncStorage.removeItem("userName");
+      await AsyncStorage.removeItem("userEmail");
+      await AsyncStorage.removeItem("userId");
+      console.log("Saiu do login")
+  
+      // Navegue para a página inicial ou de login
+      navigation.navigate("PageInit"); // Substitua "PageInit" pelo nome da sua tela de login ou inicial
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+    }
+  };  
 
   const AnimatableTouchableOpacity = Animatable.createAnimatableComponent(TouchableOpacity);
 

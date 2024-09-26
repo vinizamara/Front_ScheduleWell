@@ -15,11 +15,13 @@ import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/MaterialIcons"; // Importando o ícone
 
 import sheets from "../axios/axios"; // Certifique-se de que o axios está corretamente configurado.
 
 export default function Listagem() {
+  const [userId, setUserId] = useState(null);
   const [inputValues, setInputValues] = useState({
     titulo: "",
     data: "",
@@ -41,6 +43,18 @@ export default function Listagem() {
         await SplashScreen.hideAsync();
       }
     }
+
+    const fetchUserId = async () => {
+      try {
+        const storedUserId = await AsyncStorage.getItem("userId");
+        console.log("User ID recuperado:", storedUserId); // Log do userId
+        setUserId(storedUserId ? parseInt(storedUserId) : null); // Converte para número se não for null
+      } catch (error) {
+        console.error("Erro ao obter o ID do usuário:", error);
+      }
+    };
+
+    fetchUserId();
     prepare();
   }, [fontsLoaded]);
 
@@ -95,7 +109,7 @@ export default function Listagem() {
   const handleSave = async () => {
     try {
       const response = await sheets.postChecklist({
-        fkIdUsuario: 1,
+        fkIdUsuario: userId,
         titulo: inputValues.titulo,
         data: inputValues.data,
         descricao: inputValues.descricao,
