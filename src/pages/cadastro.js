@@ -89,7 +89,7 @@ export default function Cadastro() {
       }
     } catch (error) {
       const errorMessage = error.response
-        ? `Código: ${error.response.status}\nMensagem: ${error.response.data.error}`
+        ? `${error.response.data.error}`
         : "Erro ao conectar-se ao servidor.";
       Alert.alert("Erro", errorMessage);
     }

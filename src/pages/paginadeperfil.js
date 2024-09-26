@@ -22,6 +22,11 @@ import sheets from "../axios/axios"; // Ajuste o caminho conforme necessário
 export default function PerfilUsuario() {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+  const [userDefault, setUserDefault] = useState({
+    nome:'',
+    email:''
+  });
+  const [user, setUser] = useState(userDefault);
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
@@ -38,8 +43,7 @@ export default function PerfilUsuario() {
       await SplashScreen.preventAutoHideAsync();
       const userName = await AsyncStorage.getItem("userName");
       const userEmail = await AsyncStorage.getItem("userEmail");
-      if (userName) setNome(userName);
-      if (userEmail) setEmail(userEmail);
+      if (userName && userEmail) setUser({nome:userName,email:userEmail});
       if (fontsLoaded) {
         await SplashScreen.hideAsync();
       }
@@ -101,6 +105,11 @@ export default function PerfilUsuario() {
       console.log("Saiu do login")
   };
 
+  function onChange(event) {
+    const { name, value } = event.target;
+    setUser({ ...user, [name]: value });
+  }
+
   const handleDeleteAccount = async () => {
     const confirm = await new Promise((resolve) => {
       Alert.alert(
@@ -134,7 +143,7 @@ export default function PerfilUsuario() {
         <Image source={require("../../assets/icons/perfil.png")} style={styles.profileImage} />
 
         <Animatable.Text animation="fadeInDown" style={styles.title}>
-          Olá, {nome || "Nome do Usuário"}
+          Olá, {user.nome || "Nome do Usuário"}
         </Animatable.Text>
 
         <View style={styles.buttonsContainer}>
@@ -179,7 +188,7 @@ export default function PerfilUsuario() {
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.inputWithoutBorder}
-                  value={nome}
+                  value={user.nome}
                   onChangeText={setNome}
                   placeholder="Insira seu nome"
                 />
@@ -189,7 +198,9 @@ export default function PerfilUsuario() {
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.inputWithoutBorder}
-                  value={email}
+                  name="email"
+                  value={user.email}
+                  onChange={onChange}
                   onChangeText={setEmail}
                   placeholder="Insira seu e-mail"
                   keyboardType="email-address"
@@ -246,7 +257,7 @@ export default function PerfilUsuario() {
 
                 <TouchableOpacity
                   style={[styles.modalButton, { backgroundColor: "#f44336" }]}
-                  onPress={() => setModalVisible(false)}
+                  onPress={() => {setModalVisible(false), setUser(userDefault)}}
                 >
                   <Text style={styles.modalButtonText}>Cancelar</Text>
                 </TouchableOpacity>
