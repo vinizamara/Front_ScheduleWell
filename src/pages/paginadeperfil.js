@@ -9,12 +9,14 @@ import {
   Image,
   Modal,
   TextInput,
+  Alert,
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import sheets from "../axios/axios"; // Ajuste o caminho conforme necessário
 
 export default function PerfilUsuario() {
   const navigation = useNavigation();
@@ -56,7 +58,32 @@ export default function PerfilUsuario() {
   const handleLogout = async () => {
     await AsyncStorage.removeItem("userName");
     await AsyncStorage.removeItem("userEmail");
-    navigation.navigate("PageInit"); // Substitua "Login" pelo nome da sua tela de login
+    navigation.navigate("PageInit");
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirm = await new Promise((resolve) => {
+      Alert.alert(
+        "Confirmar Exclusão",
+        "Tem certeza de que deseja deletar sua conta?",
+        [
+          { text: "Cancelar", onPress: () => resolve(false), style: "cancel" },
+          { text: "Deletar", onPress: () => resolve(true) },
+        ]
+      );
+    });
+
+    if (confirm) {
+      const userId = await AsyncStorage.getItem("userId"); // Obter o ID do usuário
+      if (userId) {
+        await sheets.deleteUser(userId);
+        await AsyncStorage.clear();
+        navigation.navigate("PageInit");
+        alert("Conta deletada com sucesso!");
+      } else {
+        alert("Erro: ID do usuário não encontrado.");
+      }
+    }
   };
 
   const AnimatableTouchableOpacity = Animatable.createAnimatableComponent(TouchableOpacity);
@@ -82,7 +109,7 @@ export default function PerfilUsuario() {
           <TouchableOpacity
             animation="bounceIn"
             style={styles.button}
-            onPress={handleLogout} // Chamando a função de logout
+            onPress={handleLogout}
           >
             <Text style={styles.buttonText}>Sair</Text>
           </TouchableOpacity>
@@ -91,7 +118,7 @@ export default function PerfilUsuario() {
         <TouchableOpacity
           animation="fadeInUp"
           style={styles.deleteButton}
-          onPress={() => alert("Deletar Conta")}
+          onPress={handleDeleteAccount}
         >
           <Text style={styles.buttonText}>Deletar Conta</Text>
         </TouchableOpacity>
@@ -187,7 +214,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontFamily: "SuezOne_400Regular",
-    fontSize: 20, // Aumenta o tamanho da fonte
+    fontSize: 20,
   },
   deleteButton: {
     backgroundColor: "#FF4B4B",
@@ -197,12 +224,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "96%",
   },
-  // Estilos do Modal
   modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)", // Fundo transparente
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalView: {
     width: "90%",
