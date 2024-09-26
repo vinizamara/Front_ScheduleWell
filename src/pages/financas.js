@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -12,6 +12,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from "@react-navigation/native";
 import sheets from "../axios/axios"; // Importa o Axios configurado
 import Icon from 'react-native-vector-icons/FontAwesome';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Financas() {
   const navigation = useNavigation();
@@ -25,7 +26,22 @@ export default function Financas() {
     frequencia: ""
   });
   
+  const [userId, setUserId] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const storedUserId = await AsyncStorage.getItem("userId");
+        console.log("User ID recuperado:", storedUserId); // Log do userId
+        setUserId(storedUserId ? parseInt(storedUserId) : null); // Converte para número se não for null
+      } catch (error) {
+        console.error("Erro ao obter o ID do usuário:", error);
+      }
+    };
+
+    fetchUserId();
+  }, []);
 
   const showDatePickerHandler = () => {
     setShowDatePicker(true);
@@ -50,9 +66,14 @@ export default function Financas() {
   };
 
   const handleSave = async () => {
+    if (!userId) {
+      Alert.alert("Erro", "ID do usuário não encontrado.");
+      return;
+    }
+
     try {
       const response = await sheets.criarFinanca({
-        fk_id_usuario: 1,
+        fk_id_usuario: userId, // Usa o ID do usuário do AsyncStorage
         titulo: financa.tituloNota,
         descricao: financa.descricaoNota,
         data: formatDate(financa.dataNota),
@@ -119,23 +140,17 @@ export default function Financas() {
         <Text style={styles.transactionTypeLabel}>Tipo de Transação:</Text>
         <View style={styles.transactionTypeContainer}>
           <TouchableOpacity
-            style={[
-              styles.ganhoButton,
-              financa.tipoTransacao === "Ganho" && styles.selectedButton
-            ]}
+            style={[styles.ganhoButton, financa.tipoTransacao === "Ganho" && styles.selectedButton]}
             onPress={() => handleInputChange("tipoTransacao", "Ganho")}
           >
-            <Text style={styles.transactionButtonText}>Ganho  <Icon name="plus" size={20} color="#FFF" /></Text>
+            <Text style={styles.transactionButtonText}>Ganho <Icon name="plus" size={20} color="#FFF" /></Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.gastoButton,
-              financa.tipoTransacao === "Gasto" && styles.selectedButton
-            ]}
+            style={[styles.gastoButton, financa.tipoTransacao === "Gasto" && styles.selectedButton]}
             onPress={() => handleInputChange("tipoTransacao", "Gasto")}
           >
-            <Text style={styles.transactionButtonText}>Gasto  <Icon name="minus" size={20} color="#FFF" /></Text>
+            <Text style={styles.transactionButtonText}>Gasto <Icon name="minus" size={20} color="#FFF" /></Text>
           </TouchableOpacity>
         </View>
 
@@ -147,66 +162,46 @@ export default function Financas() {
           keyboardType="numeric"
         />
 
-        {/* Texto "Frequência" */}
         <Text style={styles.transactionTypeLabel}>Frequência:</Text>
-
-        {/* Seção Frequência */}
         <View style={styles.frequencyContainer}>
-        <TouchableOpacity
-            style={[
-            styles.frequencyButton,
-            financa.frequencia === "Diária" && styles.selectedButton
-            ]}
+          <TouchableOpacity
+            style={[styles.frequencyButton, financa.frequencia === "Diária" && styles.selectedButton]}
             onPress={() => handleInputChange("frequencia", "Diária")}
-        >
+          >
             <Text style={styles.frequencyButtonText}>Diária</Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-            style={[
-            styles.frequencyButton,
-            financa.frequencia === "Semanal" && styles.selectedButton
-            ]}
+          <TouchableOpacity
+            style={[styles.frequencyButton, financa.frequencia === "Semanal" && styles.selectedButton]}
             onPress={() => handleInputChange("frequencia", "Semanal")}
-        >
+          >
             <Text style={styles.frequencyButtonText}>Semanal</Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
         </View>
 
-        {/* Seção Frequência */}
         <View style={styles.frequencyContainer}>
-        <TouchableOpacity
-            style={[
-            styles.frequencyButton,
-            financa.frequencia === "Mensal" && styles.selectedButton
-            ]}
+          <TouchableOpacity
+            style={[styles.frequencyButton, financa.frequencia === "Mensal" && styles.selectedButton]}
             onPress={() => handleInputChange("frequencia", "Mensal")}
-        >
+          >
             <Text style={styles.frequencyButtonText}>Mensal</Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-            style={[
-            styles.frequencyButton,
-            financa.frequencia === "Anual" && styles.selectedButton
-            ]}
+          <TouchableOpacity
+            style={[styles.frequencyButton, financa.frequencia === "Anual" && styles.selectedButton]}
             onPress={() => handleInputChange("frequencia", "Anual")}
-        >
+          >
             <Text style={styles.frequencyButtonText}>Anual</Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
         </View>
 
-        {/* Seção Frequência */}
         <View style={styles.frequencyContainer}>
-        <TouchableOpacity
-            style={[
-            styles.frequencyButton,
-            financa.frequencia === "Única" && styles.selectedButton
-            ]}
+          <TouchableOpacity
+            style={[styles.frequencyButton, financa.frequencia === "Única" && styles.selectedButton]}
             onPress={() => handleInputChange("frequencia", "Única")}
-        >
+          >
             <Text style={styles.frequencyButtonText}>Única</Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -259,7 +254,7 @@ const styles = StyleSheet.create({
   },
   frequencyContainer: {
     flexDirection: "row",
-    flexWrap: "wrap", // Permite os botões quebrarem linha, se necessário
+    flexWrap: "wrap",
     justifyContent: "space-between",
   },
   ganhoButton: {
@@ -302,7 +297,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 8,
     marginHorizontal: 5,
-    marginBottom: 10, // Espaçamento entre os botões
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: "#7A7A7A",
   },
@@ -318,23 +313,22 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     backgroundColor: "#1F74A7",
-    paddingVertical: 15, // Aumenta o padding vertical
-    paddingHorizontal: 25, // Aumenta o padding horizontal
+    paddingVertical: 15,
+    paddingHorizontal: 25,
     borderRadius: 8,
     flex: 1,
     marginRight: 10,
   },
   cancelButton: {
     backgroundColor: "#FF4B4B",
-    paddingVertical: 15, // Aumenta o padding vertical
-    paddingHorizontal: 25, // Aumenta o padding horizontal
+    paddingVertical: 15,
+    paddingHorizontal: 25,
     borderRadius: 8,
     flex: 1,
   },
   footerText: {
     color: "#FFF",
-    fontSize: 18, // Aumenta o tamanho do texto
+    fontSize: 18,
     textAlign: "center",
-    fontFamily: "SuezOne_400Regular",
   },
 });

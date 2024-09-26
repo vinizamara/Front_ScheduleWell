@@ -14,6 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import HeaderAnimation from "../components/headerAnimation";
 import sheets from "../axios/axios"; // Importa a instância do Axios
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Cadastro() {
   const navigation = useNavigation();
@@ -79,6 +80,11 @@ export default function Cadastro() {
       const response = await sheets.createUser(newUser);
       if (response.status === 201) {
         Alert.alert("Sucesso", "Usuário cadastrado com sucesso!");
+
+        // Armazenar informações no AsyncStorage
+        await AsyncStorage.setItem("userLoggedIn", "true");
+        await AsyncStorage.setItem("userName", name);
+
         navigation.navigate("Login");
       }
     } catch (error) {

@@ -15,6 +15,7 @@ import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import sheets from "../axios/axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Anotacoes() {
   const navigation = useNavigation();
@@ -22,6 +23,7 @@ export default function Anotacoes() {
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
@@ -30,6 +32,8 @@ export default function Anotacoes() {
   useEffect(() => {
     async function prepare() {
       await SplashScreen.preventAutoHideAsync();
+      const id = await AsyncStorage.getItem("userId"); // Recupera o ID do usuário
+      setUserId(id);
       if (fontsLoaded) {
         await SplashScreen.hideAsync();
       }
@@ -50,19 +54,19 @@ export default function Anotacoes() {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     const formattedDate = `${day}/${month}/${year}`;
-    
+
     setDate(formattedDate);
     hideDatePicker();
   };
 
   const handleSave = async () => {
-    if (title && date && description) {
+    if (title && date && description && userId) {
       try {
         const [day, month, year] = date.split("/");
         const dbFormattedDate = `${year}-${month}-${day}`;
 
         const response = await sheets.postNota({
-          fk_id_usuario: 1, // Substitua pelo ID do usuário atual
+          fk_id_usuario: userId, // Usa o ID do usuário recuperado
           data: dbFormattedDate,
           titulo: title,
           descricao: description,

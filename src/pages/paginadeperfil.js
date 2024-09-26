@@ -14,25 +14,30 @@ import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function PerfilUsuario() {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
-  const [nome, setNome] = useState("Nome do Usuário");
-  const [email, setEmail] = useState("email@example.com");
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
   });
 
   useEffect(() => {
-    async function prepare() {
+    async function loadUserData() {
       await SplashScreen.preventAutoHideAsync();
+      const userName = await AsyncStorage.getItem("userName");
+      const userEmail = await AsyncStorage.getItem("userEmail");
+      if (userName) setNome(userName);
+      if (userEmail) setEmail(userEmail);
       if (fontsLoaded) {
         await SplashScreen.hideAsync();
       }
     }
-    prepare();
+    loadUserData();
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
@@ -44,9 +49,14 @@ export default function PerfilUsuario() {
   }
 
   const handleSave = () => {
-    // Aqui você pode colocar a lógica para salvar os dados editados
     setModalVisible(false);
     alert("Perfil atualizado com sucesso!");
+  };
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("userName");
+    await AsyncStorage.removeItem("userEmail");
+    navigation.navigate("PageInit"); // Substitua "Login" pelo nome da sua tela de login
   };
 
   const AnimatableTouchableOpacity = Animatable.createAnimatableComponent(TouchableOpacity);
@@ -57,38 +67,34 @@ export default function PerfilUsuario() {
         <Image source={require("../../assets/icons/perfil.png")} />
 
         <Animatable.Text animation="fadeInDown" style={styles.title}>
-          {nome}
-        </Animatable.Text>
-
-        <Animatable.Text animation="fadeInUp" style={styles.title}>
-          {email}
+          Olá, {nome || "Nome do Usuário"}
         </Animatable.Text>
 
         <View style={styles.buttonsContainer}>
-          <AnimatableTouchableOpacity
+          <TouchableOpacity
             animation="bounceIn"
             style={styles.button}
             onPress={() => setModalVisible(true)}
           >
             <Text style={styles.buttonText}>Editar Perfil</Text>
-          </AnimatableTouchableOpacity>
+          </TouchableOpacity>
 
-          <AnimatableTouchableOpacity
+          <TouchableOpacity
             animation="bounceIn"
             style={styles.button}
-            onPress={() => alert("Sair")}
+            onPress={handleLogout} // Chamando a função de logout
           >
             <Text style={styles.buttonText}>Sair</Text>
-          </AnimatableTouchableOpacity>
+          </TouchableOpacity>
         </View>
 
-        <AnimatableTouchableOpacity
+        <TouchableOpacity
           animation="fadeInUp"
           style={styles.deleteButton}
           onPress={() => alert("Deletar Conta")}
         >
           <Text style={styles.buttonText}>Deletar Conta</Text>
-        </AnimatableTouchableOpacity>
+        </TouchableOpacity>
       </View>
 
       {/* Modal de edição de perfil */}
@@ -145,7 +151,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#E2EDF2",
     paddingHorizontal: 20,
     paddingVertical: 40,
-    justifyContent: "center",
+    justifyContent: "top",
     alignItems: "center",
   },
   loadingContainer: {
@@ -171,7 +177,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#1F74A7",
-    padding: 10,
+    paddingVertical: 15,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
@@ -181,15 +187,15 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontFamily: "SuezOne_400Regular",
-    fontSize: 16,
+    fontSize: 20, // Aumenta o tamanho da fonte
   },
   deleteButton: {
-    backgroundColor: "#1F74A7",
-    padding: 10,
+    backgroundColor: "#FF4B4B",
+    paddingVertical: 15,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    width: "100%",
+    width: "96%",
   },
   // Estilos do Modal
   modalContainer: {
@@ -231,7 +237,7 @@ const styles = StyleSheet.create({
   modalButton: {
     flex: 1,
     backgroundColor: "#1F74A7",
-    padding: 10,
+    paddingVertical: 15,
     borderRadius: 8,
     marginHorizontal: 5,
     alignItems: "center",
@@ -239,5 +245,6 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: "#fff",
     fontFamily: "SuezOne_400Regular",
+    fontSize: 20,
   },
 });
