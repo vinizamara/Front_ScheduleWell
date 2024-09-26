@@ -91,9 +91,14 @@ export default function PerfilUsuario() {
   };
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("userName");
-    await AsyncStorage.removeItem("userEmail");
-    navigation.navigate("PageInit");
+      // Remova todos os itens relacionados ao login do AsyncStorage
+      await AsyncStorage.removeItem("authToken");
+      await AsyncStorage.removeItem("userLoggedIn");
+      await AsyncStorage.removeItem("userName");
+      await AsyncStorage.removeItem("userEmail");
+      await AsyncStorage.removeItem("userId");
+      navigation.navigate("PageInit");
+      console.log("Saiu do login")
   };
 
   const handleDeleteAccount = async () => {
@@ -133,30 +138,29 @@ export default function PerfilUsuario() {
         </Animatable.Text>
 
         <View style={styles.buttonsContainer}>
-          <AnimatableTouchableOpacity
-            animation="bounceIn"
+          <TouchableOpacity
             style={styles.button}
             onPress={() => setModalVisible(true)}
           >
             <Text style={styles.buttonText}>Editar Perfil</Text>
-          </AnimatableTouchableOpacity>
+          </TouchableOpacity>
 
-          <AnimatableTouchableOpacity
+          <TouchableOpacity
             animation="bounceIn"
             style={styles.button}
             onPress={handleLogout}
           >
             <Text style={styles.buttonText}>Sair</Text>
-          </AnimatableTouchableOpacity>
+          </TouchableOpacity>
         </View>
 
-        <AnimatableTouchableOpacity
+        <TouchableOpacity
           animation="fadeInUp"
           style={styles.deleteButton}
           onPress={handleDeleteAccount}
         >
           <Text style={styles.buttonText}>Deletar Conta</Text>
-        </AnimatableTouchableOpacity>
+        </TouchableOpacity>
       </View>
 
       {/* Modal de edição de perfil */}
