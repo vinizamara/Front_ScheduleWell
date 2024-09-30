@@ -11,6 +11,9 @@ import Anotacoes from "../pages/anotacoes";
 import Controlefinanceiro from "../pages/controlefinanceiro";
 import Financas from "../pages/financas";
 import Paginadeperfil from "../pages/paginadeperfil";
+import EditarFinanca from "../pages/editarFinanca";
+import EditarAnotacao from "../pages/editarAnotacao";
+import EditarChcecklist from "../pages/editarChecklist";
 
 const Stack = createStackNavigator();
 
@@ -77,12 +80,29 @@ export default function Rotas() {
         options={{ headerShown: false }}
       />
 
-<Stack.Screen
+      <Stack.Screen
         name="Paginadeperfil"
         component={Paginadeperfil}
         options={{ headerShown: false }}
       />
 
+      <Stack.Screen
+        name="EditarFinanca"
+        component={EditarFinanca}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="EditarAnotacao"
+        component={EditarAnotacao}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="EditarChecklist"
+        component={EditarChcecklist}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }
