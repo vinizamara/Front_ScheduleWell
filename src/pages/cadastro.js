@@ -54,21 +54,6 @@ export default function Cadastro() {
   const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
   const handleRegister = async () => {
-    if (password !== confirmPassword) {
-      Alert.alert("Erro", "As senhas não coincidem!");
-      return;
-    }
-
-    if (!name || !email || !password) {
-      Alert.alert("Erro", "Todos os campos são obrigatórios!");
-      return;
-    }
-
-    if (!isValidEmail(email)) {
-      Alert.alert("Erro", "Email inválido!");
-      return;
-    }
-
     const newUser = {
       nome: name,
       email: email,
@@ -77,21 +62,16 @@ export default function Cadastro() {
     };
 
     try {
-      const response = await sheets.createUser(newUser);
-      if (response.status === 201) {
-        Alert.alert("Sucesso", "Usuário cadastrado com sucesso!");
+        const response = await sheets.createUser(newUser);
+        Alert.alert("Sucesso", response.data.message);
 
         // Armazenar informações no AsyncStorage
         await AsyncStorage.setItem("userLoggedIn", "true");
         await AsyncStorage.setItem("userName", name);
 
         navigation.navigate("Login");
-      }
     } catch (error) {
-      const errorMessage = error.response
-        ? `${error.response.data.error}`
-        : "Erro ao conectar-se ao servidor.";
-      Alert.alert("Erro", errorMessage);
+      Alert.alert("Erro", error.response.data.error);
     }
   };
 

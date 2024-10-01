@@ -129,37 +129,14 @@ export default function Listagem() {
           });
         }
 
-        Alert.alert("Sucesso", "Checklist criado com sucesso!");
+        Alert.alert("Sucesso", response.data.message);
         navigation.navigate("Agendas");
-      } else {
-        Alert.alert(
-          "Erro",
-          "Erro ao criar o checklist: " +
-            (response.data.message || "Mensagem de erro não disponível")
-        );
       }
     } catch (error) {
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
         Alert.alert(
           "Erro",
-          "Erro ao adicionar o checklist e itens: " +
             error.response.data.message
         );
-      } else if (error.request) {
-        Alert.alert(
-          "Erro",
-          "Erro ao adicionar o checklist e itens: Não houve resposta do servidor."
-        );
-      } else {
-        Alert.alert(
-          "Erro",
-          "Erro ao adicionar o checklist e itens: " + error.message
-        );
-      }
     }
   };
 

@@ -86,6 +86,14 @@ export default function PerfilUsuario() {
     } else {
       Alert.alert("Erro", "ID do usuário não encontrado.");
     }
+    const response = await sheets.updateUser(userId, updateData);
+    Alert.alert("Sucesso", response.data.message);
+    setModalVisible(false);
+    setNovaSenha("");
+    setConfirmarSenha("");
+  } catch (error){
+    Alert.alert("Erro", error.response.data.error );
+  }
   };
 
   const handleLogout = async () => {
@@ -112,14 +120,14 @@ export default function PerfilUsuario() {
     });
 
     if (confirm) {
+      try{
       const userId = await AsyncStorage.getItem("userId");
-      if (userId) {
-        await sheets.deleteUser(userId);
-        await AsyncStorage.clear();
-        navigation.navigate("PageInit");
-        Alert.alert("Sucesso", "Conta deletada com sucesso!");
-      } else {
-        Alert.alert("Erro", "ID do usuário não encontrado.");
+      const response = await sheets.deleteUser(userId);
+      await AsyncStorage.clear();
+      navigation.navigate("PageInit");
+      Alert.alert("Sucesso", response.data.message)
+      } catch (error){
+        Alert.alert("Erro", error.response.data.error);
       }
     }
   };
