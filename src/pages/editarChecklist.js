@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#1F74A7",
+    color: "#255573",
     fontFamily: "SuezOne_400Regular",
   },
   formContainer: {
@@ -264,24 +264,31 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 60,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#C6DBE4",
     borderRadius: 8,
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
-    borderColor: "#ccc",
+    borderColor: "#1F74A7", 
     borderWidth: 1,
   },
   textarea: {
     height: 100,
+    borderColor: "#1F74A7", 
+    borderWidth: 1,
+    borderRadius: 8,
+    backgroundColor: "#C6DBE4",
+    paddingHorizontal: 15,
   },
   datePicker: {
     height: 60,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#C6DBE4",
     borderRadius: 8,
     paddingHorizontal: 15,
     marginBottom: 15,
     justifyContent: "center",
+    borderColor: "#1F74A7", 
+    borderWidth: 1,
   },
   dateText: {
     fontSize: 16,
@@ -316,7 +323,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#FFFFFF",
     marginBottom: 10,
-    borderColor: "#ccc",
+    borderColor: "#1F74A7", 
     borderWidth: 1,
   },
   checkbox: {
@@ -355,6 +362,7 @@ const styles = StyleSheet.create({
   buttons: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginBottom: 50,
   },
   saveButton: {
     backgroundColor: "#1F74A7",
