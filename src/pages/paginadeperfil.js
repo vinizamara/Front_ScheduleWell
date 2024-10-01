@@ -23,13 +23,11 @@ export default function PerfilUsuario() {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [userDefault, setUserDefault] = useState({
-    nome:'',
-    email:''
+    nome: "",
+    email: "",
+    senha: "",
   });
   const [user, setUser] = useState(userDefault);
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
@@ -38,18 +36,19 @@ export default function PerfilUsuario() {
     SuezOne_400Regular,
   });
 
-  useEffect(() => {
-    async function loadUserData() {
-      await SplashScreen.preventAutoHideAsync();
-      const userName = await AsyncStorage.getItem("userName");
-      const userEmail = await AsyncStorage.getItem("userEmail");
-      if (userName && userEmail) setUser({nome:userName,email:userEmail});
-      if (fontsLoaded) {
-        await SplashScreen.hideAsync();
-      }
+  async function loadUserData() {
+    await SplashScreen.preventAutoHideAsync();
+    const userName = await AsyncStorage.getItem("userName");
+    const userEmail = await AsyncStorage.getItem("userEmail");
+    if (userName && userEmail) setUser({ nome: userName, email: userEmail });
+    if (fontsLoaded) {
+      await SplashScreen.hideAsync();
     }
-    loadUserData();
-  }, [fontsLoaded]);
+  }
+
+  useEffect(() => {
+      loadUserData();
+  }, []);
 
   if (!fontsLoaded) {
     return (
@@ -68,11 +67,24 @@ export default function PerfilUsuario() {
   };
 
   const handleSave = async () => {
-    try{
+    if (!user.nome || !user.email || !user.senha || !confirmarSenha) {
+      Alert.alert("Erro", "Por favor, preencha todos os campos.");
+      return;
+    }
+
+    if (user.senha !== confirmarSenha) {
+      Alert.alert("Erro", "As senhas não coincidem.");
+      return;
+    }
+
     const userId = await AsyncStorage.getItem("userId");
-    const updateData = { nome, email };
-    if (novaSenha) {
-      updateData.senha = novaSenha;
+    if (userId) {
+      await sheets.updateUser(userId, user);
+      Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
+      setModalVisible(false);
+      setConfirmarSenha("");
+    } else {
+      Alert.alert("Erro", "ID do usuário não encontrado.");
     }
     const response = await sheets.updateUser(userId, updateData);
     Alert.alert("Sucesso", response.data.message);
@@ -85,20 +97,15 @@ export default function PerfilUsuario() {
   };
 
   const handleLogout = async () => {
-      // Remova todos os itens relacionados ao login do AsyncStorage
-      await AsyncStorage.removeItem("authToken");
-      await AsyncStorage.removeItem("userLoggedIn");
-      await AsyncStorage.removeItem("userName");
-      await AsyncStorage.removeItem("userEmail");
-      await AsyncStorage.removeItem("userId");
-      navigation.navigate("PageInit");
-      console.log("Saiu do login")
+    // Remova todos os itens relacionados ao login do AsyncStorage
+    await AsyncStorage.removeItem("authToken");
+    await AsyncStorage.removeItem("userLoggedIn");
+    await AsyncStorage.removeItem("userName");
+    await AsyncStorage.removeItem("userEmail");
+    await AsyncStorage.removeItem("userId");
+    navigation.navigate("PageInit");
+    console.log("Saiu do login");
   };
-
-  function onChange(event) {
-    const { name, value } = event.target;
-    setUser({ ...user, [name]: value });
-  }
 
   const handleDeleteAccount = async () => {
     const confirm = await new Promise((resolve) => {
@@ -125,12 +132,16 @@ export default function PerfilUsuario() {
     }
   };
 
-  const AnimatableTouchableOpacity = Animatable.createAnimatableComponent(TouchableOpacity);
+  const AnimatableTouchableOpacity =
+    Animatable.createAnimatableComponent(TouchableOpacity);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.profileContainer}>
-        <Image source={require("../../assets/icons/perfil.png")} style={styles.profileImage} />
+        <Image
+          source={require("../../assets/icons/perfil.png")}
+          style={styles.profileImage}
+        />
 
         <Animatable.Text animation="fadeInDown" style={styles.title}>
           Olá, {user.nome || "Nome do Usuário"}
@@ -178,8 +189,11 @@ export default function PerfilUsuario() {
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.inputWithoutBorder}
+                  name="nome"
                   value={user.nome}
-                  onChangeText={setNome}
+                  onChangeText={(text) =>
+                    setUser({ ...user, nome: text })
+                  }
                   placeholder="Insira seu nome"
                 />
               </View>
@@ -190,8 +204,9 @@ export default function PerfilUsuario() {
                   style={styles.inputWithoutBorder}
                   name="email"
                   value={user.email}
-                  onChange={onChange}
-                  onChangeText={setEmail}
+                  onChangeText={(text) =>
+                    setUser({ ...user, email: text })
+                  }
                   placeholder="Insira seu e-mail"
                   keyboardType="email-address"
                 />
@@ -203,11 +218,15 @@ export default function PerfilUsuario() {
                   placeholder="Insira sua nova senha"
                   style={styles.inputWithoutBorder}
                   secureTextEntry={!isPasswordVisible}
-                  value={novaSenha}
-                  onChangeText={setNovaSenha}
+                  name="senha"
+                  value={user.senha}
+                  onChangeText={(text) => setUser({ ...user, senha: text })}
                 />
-                {novaSenha.length > 0 && (
-                  <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
+                {user.senha && user.senha.length > 0 && (
+                  <TouchableOpacity
+                    onPress={togglePasswordVisibility}
+                    style={styles.eyeIcon}
+                  >
                     <Ionicons
                       name={isPasswordVisible ? "eye-off" : "eye"}
                       size={24}
@@ -227,7 +246,10 @@ export default function PerfilUsuario() {
                   onChangeText={setConfirmarSenha}
                 />
                 {confirmarSenha.length > 0 && (
-                  <TouchableOpacity onPress={toggleConfirmPasswordVisibility} style={styles.eyeIcon}>
+                  <TouchableOpacity
+                    onPress={toggleConfirmPasswordVisibility}
+                    style={styles.eyeIcon}
+                  >
                     <Ionicons
                       name={isConfirmPasswordVisible ? "eye-off" : "eye"}
                       size={24}
@@ -247,7 +269,10 @@ export default function PerfilUsuario() {
 
                 <TouchableOpacity
                   style={[styles.modalButton, { backgroundColor: "#f44336" }]}
-                  onPress={() => {setModalVisible(false), setUser(userDefault)}}
+                  onPress={() => {
+                    setModalVisible(false);
+                    loadUserData();
+                  }}
                 >
                   <Text style={styles.modalButtonText}>Cancelar</Text>
                 </TouchableOpacity>

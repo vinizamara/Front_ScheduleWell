@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: "#C6DBE4",
-    borderColor: "#7A7A7A",
+    borderColor: "#1F74A7", 
     borderWidth: 1,
     borderRadius: 8,
     height: 50,
@@ -229,6 +229,11 @@ const styles = StyleSheet.create({
   },
   descriptionInput: {
     height: 100,
+    borderColor: "#1F74A7", 
+    borderWidth: 1,
+    borderRadius: 8,
+    backgroundColor: "#C6DBE4",
+    paddingHorizontal: 15,
   },
   transactionTypeContainer: {
     flexDirection: "row", 
@@ -248,7 +253,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginHorizontal: 5,
     borderWidth: 1,
-    borderColor: "#7A7A7A",
+    borderColor: "#1F74A7", 
   },
   gastoButton: {
     flex: 1,
@@ -258,7 +263,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginHorizontal: 5,
     borderWidth: 1,
-    borderColor: "#7A7A7A",
+    borderColor: "#1F74A7", 
   },
   selectedButton: {
     backgroundColor: "#255573",
@@ -275,14 +280,14 @@ const styles = StyleSheet.create({
   },
   frequencyButton: {
     flex: 1,
-    backgroundColor: "#2884BB",
+    backgroundColor: "#1F74A7", // Alterado para a cor #1F74A7
     paddingVertical: 15,
     alignItems: "center",
     borderRadius: 8,
     marginHorizontal: 5,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: "#7A7A7A",
+    borderColor: "#1F74A7", 
   },
   frequencyButtonText: {
     fontSize: 18,
@@ -295,7 +300,7 @@ const styles = StyleSheet.create({
     marginTop: "10%",
   },
   saveButton: {
-    backgroundColor: "#1F74A7",
+    backgroundColor: "#1F74A7", // Botão Salvar
     paddingVertical: 15,
     paddingHorizontal: 25,
     borderRadius: 8,
@@ -303,7 +308,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   cancelButton: {
-    backgroundColor: "#FF4B4B",
+    backgroundColor: "#EC4E4E",
     paddingVertical: 15,
     paddingHorizontal: 25,
     borderRadius: 8,
