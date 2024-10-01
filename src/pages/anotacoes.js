@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#1F74A7",
+    color: "#255573",
     fontFamily: "SuezOne_400Regular",
   },
   formContainer: {
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 16,
-    color: "#1F74A7",
+    color: "#255573", 
   },
   textarea: {
     flex: 1,
