@@ -19,7 +19,7 @@ const sheets = {
 
   // Notas (Agenda)
   postNota: (nota) => api.post("/postNota", nota),
-  getNota: (idUsuario) => api.get(`/getNota/${idUsuario}`),
+  getNota: (idUsuario) => api.get(`/getAnotacao/${idUsuario}`),
   updateNota: (idNota, nota) => api.put(`/updateNota/${idNota}`, nota),
   deleteNota: (idNota) => api.delete(`/deleteNota/${idNota}`),
 
@@ -37,6 +37,9 @@ const sheets = {
 
   //Finanças
   criarFinanca: (financa) => api.post("/criarFinanca/", financa),
+  listarFinancas: (idUsuario) => api.get(`/listarFinancas/${idUsuario}`),
+  atualizarFinanca: (id_financa, financa) => api.put(`/atualizarFinanca/${id_financa}`, financa),
+  deletarFinanca: (id_financa) => api.delete(`/deletarFinanca/${id_financa}`),
 };
 
 export default sheets;
