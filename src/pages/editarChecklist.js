@@ -16,21 +16,27 @@ import * as SplashScreen from "expo-splash-screen";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import sheets from "../axios/axios";
+import Icon from "react-native-vector-icons/MaterialIcons"; // Importando o ícone
+
+import sheets from "../axios/axios"; // Certifique-se de que o axios está corretamente configurado.
 
 export default function Listagem() {
+  const route = useRoute();
+  const { id } = route.params;
+
   const [userId, setUserId] = useState(null);
+
   const [inputValues, setInputValues] = useState({
     titulo: "",
     data: "",
     descricao: "",
   });
-  const [itens, setItens] = useState([]);
-  const [itemInput, setItemInput] = useState("");
+
+  const [itens, setItens] = useState([]); // Estado para armazenar os itens do checklist
+  const [itemInput, setItemInput] = useState(""); // Estado para o campo de entrada do item
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
-  const route = useRoute(); // Para acessar os parâmetros da rota
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
@@ -47,48 +53,46 @@ export default function Listagem() {
     const fetchUserId = async () => {
       try {
         const storedUserId = await AsyncStorage.getItem("userId");
-        setUserId(storedUserId ? parseInt(storedUserId) : null);
+        console.log("User ID recuperado:", storedUserId); // Log do userId
+        setUserId(storedUserId ? parseInt(storedUserId) : null); // Converte para número se não for null
       } catch (error) {
         console.error("Erro ao obter o ID do usuário:", error);
       }
     };
 
-    const loadChecklistData = async () => {
-      const { checklistId } = route.params || {}; // Obtém o checklistId dos parâmetros da rota
-      if (checklistId) {
-        try {
-          const checklistResponse = await sheets.getChecklistById(checklistId); // Função que você vai criar para buscar o checklist
-          const checklistData = checklistResponse.data;
-
-          // Carregando dados do checklist
-          setInputValues({
-            titulo: checklistData.titulo,
-            data: checklistData.data,
-            descricao: checklistData.descricao,
-          });
-
-          // Carregando itens do checklist
-          const itemsResponse = await sheets.getItemsByChecklistId(checklistId); // Função que você vai criar para buscar os itens
-          setItens(itemsResponse.data);
-
-        } catch (error) {
-          console.error("Erro ao carregar dados do checklist:", error);
-        }
-      }
-    };
-
     fetchUserId();
-    loadChecklistData(); // Chama a função para carregar os dados do checklist
     prepare();
-  }, [fontsLoaded, route.params]);
+  }, [fontsLoaded]);
 
-  if (!fontsLoaded) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#1F74A7" />
-      </View>
-    );
-  }
+  useEffect(() => {
+    if (userId) {
+      fetchChecklist(userId); // Chama a função para buscar a anotação
+    }
+  }, [userId]); // Executa quando userId for alterado
+
+  const fetchChecklist = async (userId) => {
+    if (!userId) return;
+
+    try {
+      const response = await sheets.getChecklists(userId); // Supondo que você tenha esta função na API
+      const checklistEncontrado = response.data.find(item => item.id_checklist === id);
+
+      if (checklistEncontrado) {
+        setInputValues({
+          titulo: checklistEncontrado.titulo,
+          data: new Date(checklistEncontrado.data),
+          descricao: checklistEncontrado.descricao,
+        });
+      } else {
+        Alert.alert("Erro", "Checklist não encontrado.", response.data.message);
+      }
+    } catch (error) {
+      Alert.alert("Erro da API", error.response.data.message || "Erro desconhecido");
+      console.log("Erro ao buscar anotação:", error.response.data.message);
+    } finally {
+      setLoading(false); // Finaliza o carregamento
+    }
+  };
 
   const handleInputChange = (name, value) => {
     setInputValues({ ...inputValues, [name]: value });
@@ -96,10 +100,6 @@ export default function Listagem() {
 
   const handleItemInputChange = (text) => {
     setItemInput(text);
-  };
-
-  const handleCancel = () => {
-    navigation.navigate("Escolhanotas");
   };
 
   const showDatePicker = () => {
@@ -131,35 +131,37 @@ export default function Listagem() {
   };
 
   const handleSave = async () => {
-    const { checklistId } = route.params; // Obtendo o ID do checklist dos parâmetros
+    if (!userId) {
+      Alert.alert("Erro", "ID do usuário não encontrado.");
+      return;
+    }
 
     try {
-      // Atualiza o checklist
-      await sheets.updateChecklist({
-        idChecklist: checklistId,
+      const response = await sheets.updateChecklist(id, {
         titulo: inputValues.titulo,
-        data: inputValues.data,
         descricao: inputValues.descricao,
+        data: formatDate(inputValues.data),
       });
 
-      // Atualiza os itens
-      for (const item of itens) {
-        await sheets.updateItemChecklist({
-          fkIdChecklist: checklistId,
-          texto: item.texto,
-          concluido: item.concluido, // Se você tiver uma lógica para marcar itens como concluídos
-        });
+      if (response.status === 200) {
+        Alert.alert("Sucesso", "Anotação atualizada com sucesso!");
+        navigation.navigate("Agendas");
+      } else {
+        Alert.alert("Erro", "Erro ao atualizar a anotação: " + response.data.message);
       }
-
-      Alert.alert("Sucesso", "Checklist atualizado com sucesso!");
-      navigation.navigate("Agendas");
     } catch (error) {
-      Alert.alert(
-        "Erro",
-        "Erro ao atualizar o checklist e itens: " + (error.message || "Erro desconhecido")
-      );
+      Alert.alert("Erro da API", error.response.data.message || "Erro desconhecido");
+      console.log("Erro da API:", error.response.data.message);
     }
-  };
+};
+
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#1F74A7" />
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -167,7 +169,7 @@ export default function Listagem() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Listagem</Text>
+        <Text style={styles.title}>Edição de Listagem</Text>
       </View>
 
       <View style={styles.formContainer}>
@@ -179,7 +181,7 @@ export default function Listagem() {
         />
         <TouchableOpacity onPress={showDatePicker} style={styles.datePicker}>
           <Text style={styles.dateText}>
-            {inputValues.data || "Selecione a data"}
+            {inputValues.data ? inputValues.data.toLocaleDateString() : "Selecione a data"}
           </Text>
         </TouchableOpacity>
         <TextInput
@@ -190,29 +192,35 @@ export default function Listagem() {
           multiline
         />
 
+        {/* Botão de adicionar item acima do campo de título da tarefa */}
         <TouchableOpacity style={styles.addButtonAbove} onPress={handleAddItem}>
           <Icon name="add" size={30} color="#FFF" />
         </TouchableOpacity>
         
-        <TextInput
-          style={styles.input}
-          placeholder="Título da Tarefa"
-          value={itemInput}
-          onChangeText={handleItemInputChange}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Título da Tarefa"
+            value={itemInput}
+            onChangeText={handleItemInputChange}
+          />
 
         <FlatList
           data={itens}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item, index }) => (
             <View style={styles.itemRow}>
+              {/* Checkbox do item */}
               <TouchableOpacity style={styles.checkbox}>
                 {item.concluido && <View style={styles.checked} />}
               </TouchableOpacity>
+
+              {/* Texto do item */}
               <Text style={styles.itemText}>{item.texto}</Text>
+
+              {/* Botão para deletar o item */}
               <TouchableOpacity 
                 onPress={() => handleRemoveItem(index)} 
-                style={styles.deleteButton}
+                style={styles.deleteButton} // Adicionando estilo ao botão de deletar
               >
                 <Icon name="delete" size={24} color="#FFF" />
               </TouchableOpacity>
@@ -225,7 +233,7 @@ export default function Listagem() {
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.footerText}>Salvar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+        <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
           <Text style={styles.footerText}>Cancelar</Text>
         </TouchableOpacity>
       </View>
@@ -288,14 +296,14 @@ const styles = StyleSheet.create({
     color: "#555",
   },
   addButtonAbove: {
-    alignSelf: "flex-end",
+    alignSelf: "flex-end", // Centraliza o botão horizontalmente
     backgroundColor: "#1F74A7",
     width: 50,
     height: 50,
     borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 10, // Espaçamento entre o botão e o campo de título
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
@@ -341,12 +349,12 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   deleteButton: {
-    backgroundColor: "#FF4B4B",
-    borderRadius: 8,
-    padding: 10,
+    backgroundColor: "#FF4B4B", // Cor de fundo vermelha
+    borderRadius: 8, // Bordas arredondadas
+    padding: 10, // Padding para criar um espaço interno
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: "#000", // Sombra
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.8,
     shadowRadius: 2,

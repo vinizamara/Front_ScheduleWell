@@ -133,7 +133,7 @@ export default function Escolhanotas() {
     navigation.navigate("EditarAnotacao", { id: idAnotacao }); // Passando o ID da finança
   }
 
-  const handleEditChceklist = (idChecklist) => {
+  const handleEditChecklist = (idChecklist) => {
     navigation.navigate("EditarChecklist", { id: idChecklist }); // Passando o ID da finança
   }
 
@@ -252,7 +252,7 @@ export default function Escolhanotas() {
               <View key={checklist.id_checklist} style={styles.financaContainer}>
                 <Text style={styles.financaText}>{checklist.titulo}</Text>
                 <View style={styles.iconContainer}>
-                  <TouchableOpacity onPress={() => handleEditChceklist(checklist.id_checklist)}>
+                  <TouchableOpacity onPress={() => handleEditChecklist(checklist.id_checklist)}>
                     <Icon name="edit" size={30} color="#255573" />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => handleDeleteItem(checklist.id_checklist, "checklist")}>
