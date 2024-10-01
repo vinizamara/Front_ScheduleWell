@@ -36,7 +36,7 @@ export default function Financas() {
         console.log("User ID recuperado:", storedUserId); // Log do userId
         setUserId(storedUserId ? parseInt(storedUserId) : null); // Converte para número se não for null
       } catch (error) {
-        console.error("Erro ao obter o ID do usuário:", error);
+        console.error("Erro ao obter o ID do usuário:", error.response.message.error);
       }
     };
 
@@ -81,16 +81,10 @@ export default function Financas() {
         tipo_transacao: financa.tipoTransacao,
         frequencia: financa.frequencia,
       });
-  
-      if (response.status === 201) {
-        Alert.alert("Sucesso", "Finança criada com sucesso!");
+        Alert.alert("Sucesso", response.data.message);
         navigation.navigate("Agendas"); // Volta para a tela anterior após salvar
-      } else {
-        Alert.alert("Erro", "Erro ao criar a finança: " + response.data.message);
-      }
     } catch (error) {
-        Alert.alert("Erro da API", error.response.data.message || "Erro desconhecido");
-        console.log("Erro da API:", error.response.data);
+        Alert.alert("Erro na criação de nota", error.response.data.message);
     }
   };  
 

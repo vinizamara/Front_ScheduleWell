@@ -180,7 +180,7 @@ export default function Escolhanotas() {
                 })
               );
             } catch (error) {
-              console.error(`Erro ao deletar ${type}:`, error.response?.data?.message || error.message);
+              console.error(`Erro ao deletar ${type}:`, error.response?.data?.message.error);
               Alert.alert("Erro", `Ocorreu um erro ao deletar a ${type}.`);
             }
           },

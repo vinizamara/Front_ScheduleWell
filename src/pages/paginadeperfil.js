@@ -68,30 +68,20 @@ export default function PerfilUsuario() {
   };
 
   const handleSave = async () => {
-    if (!nome || !email || !novaSenha || !confirmarSenha) {
-      Alert.alert("Erro", "Por favor, preencha todos os campos.");
-      return;
-    }
-
-    if (novaSenha && novaSenha !== confirmarSenha) {
-      Alert.alert("Erro", "As senhas não coincidem.");
-      return;
-    }
-
+    try{
     const userId = await AsyncStorage.getItem("userId");
-    if (userId) {
-      const updateData = { nome, email };
-      if (novaSenha) {
-        updateData.senha = novaSenha;
-      }
-      await sheets.updateUser(userId, updateData);
-      Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
-      setModalVisible(false);
-      setNovaSenha("");
-      setConfirmarSenha("");
-    } else {
-      Alert.alert("Erro", "ID do usuário não encontrado.");
+    const updateData = { nome, email };
+    if (novaSenha) {
+      updateData.senha = novaSenha;
     }
+    const response = await sheets.updateUser(userId, updateData);
+    Alert.alert("Sucesso", response.data.message);
+    setModalVisible(false);
+    setNovaSenha("");
+    setConfirmarSenha("");
+  } catch (error){
+    Alert.alert("Erro", error.response.data.error );
+  }
   };
 
   const handleLogout = async () => {
@@ -123,14 +113,14 @@ export default function PerfilUsuario() {
     });
 
     if (confirm) {
+      try{
       const userId = await AsyncStorage.getItem("userId");
-      if (userId) {
-        await sheets.deleteUser(userId);
-        await AsyncStorage.clear();
-        navigation.navigate("PageInit");
-        Alert.alert("Sucesso", "Conta deletada com sucesso!");
-      } else {
-        Alert.alert("Erro", "ID do usuário não encontrado.");
+      const response = await sheets.deleteUser(userId);
+      await AsyncStorage.clear();
+      navigation.navigate("PageInit");
+      Alert.alert("Sucesso", response.data.message)
+      } catch (error){
+        Alert.alert("Erro", error.response.data.error);
       }
     }
   };

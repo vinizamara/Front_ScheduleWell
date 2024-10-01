@@ -68,11 +68,10 @@ export default function EditarAnotacao() {
           dataNota: new Date(anotacaoEncontrada.data),
         });
       } else {
-        Alert.alert("Erro", "Anotação não encontrada.");
+        Alert.alert("Erro", response.data.message);
       }
     } catch (error) {
-      Alert.alert("Erro da API", error.response.data.message || "Erro desconhecido");
-      console.log("Erro ao buscar anotação:", error);
+      Alert.alert("Erro da API", error.response.data.error);
     } finally {
       setLoading(false); // Finaliza o carregamento
     }

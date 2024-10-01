@@ -75,8 +75,7 @@ export default function EditarFinanca() {
         Alert.alert("Erro", "Finança não encontrada.");
       }
     } catch (error) {
-      Alert.alert("Erro da API", error.response.data.message || "Erro desconhecido");
-      console.log("Erro ao buscar finança:", error);
+      Alert.alert("Erro na busca de notas", error.response.data.error);
     }
   };
 
@@ -103,11 +102,6 @@ export default function EditarFinanca() {
   };
 
   const handleSave = async () => {
-    if (!userId) {
-      Alert.alert("Erro", "ID do usuário não encontrado.");
-      return;
-    }
-
     try {
       const response = await sheets.atualizarFinanca(id, {
         fk_id_usuario: userId,
@@ -119,15 +113,10 @@ export default function EditarFinanca() {
         frequencia: financa.frequencia,
       });
 
-      if (response.status === 200) {
-        Alert.alert("Sucesso", "Finança atualizada com sucesso!");
+        Alert.alert("Sucesso", response.data.message);
         navigation.navigate("Agendas");
-      } else {
-        Alert.alert("Erro", "Erro ao atualizar a finança: " + response.data.message);
-      }
-    } catch (error) {
-      Alert.alert("Erro da API", error.response.data.message || "Erro desconhecido");
-      console.log("Erro da API:", error.response.data);
+      } catch (error) {
+      Alert.alert("Erro da API", error.response.data.error);
     }
   };
 

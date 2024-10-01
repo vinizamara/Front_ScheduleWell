@@ -60,7 +60,6 @@ export default function Anotacoes() {
   };
 
   const handleSave = async () => {
-    if (title && date && description && userId) {
       try {
         const [day, month, year] = date.split("/");
         const dbFormattedDate = `${year}-${month}-${day}`;
@@ -71,20 +70,12 @@ export default function Anotacoes() {
           titulo: title,
           descricao: description,
         });
-
-        if (response.status === 201) {
+        
           Alert.alert("Sucesso", response.data.message);
           navigation.navigate("Agendas");
-        } else {
-          Alert.alert("Erro", response.data.message);
-        }
       } catch (error) {
-        console.error('Error details:', error);
-        Alert.alert("Erro", "Erro ao salvar a nota. Tente novamente.");
+        Alert.alert("Erro", error.response.data.message);
       }
-    } else {
-      Alert.alert("Erro", "Por favor, preencha todos os campos.");
-    }
   };
 
   const handleCancel = () => {
