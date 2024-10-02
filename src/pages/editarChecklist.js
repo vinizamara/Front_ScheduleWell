@@ -194,7 +194,7 @@ export default function Listagem() {
         concluido: concluido,
       });
       
-      Alert.alert("Sucesso", response.data.message);
+      console.log(response.data.message);
       fetchChecklistItems(id); // Recarrega os itens após a atualização
     } catch (error) {
       Alert.alert("Erro ao atualizar item", error.response.data.message || "Erro desconhecido");
@@ -352,6 +352,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#C6DBE4",
     borderRadius: 8,
     paddingHorizontal: 15,
+    paddingVertical: 10,
     marginBottom: 15,
     fontSize: 16,
     borderColor: "#1F74A7", 
@@ -364,6 +365,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#C6DBE4",
     paddingHorizontal: 15,
+    textAlignVertical: "top",
   },
   datePicker: {
     height: 60,

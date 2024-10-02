@@ -87,7 +87,11 @@ export default function Listagem() {
   };
 
   const handleConfirm = (date) => {
-    const formattedDate = date.toISOString().split("T")[0];
+    const formattedDate = new Date(date).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
     setInputValues({ ...inputValues, data: formattedDate });
     hideDatePicker();
   };
@@ -111,7 +115,7 @@ export default function Listagem() {
       const response = await sheets.postChecklist({
         fkIdUsuario: userId,
         titulo: inputValues.titulo,
-        data: inputValues.data,
+        data: inputValues.data.split("/").reverse().join("-"),
         descricao: inputValues.descricao,
       });
 
@@ -252,6 +256,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#C6DBE4",
     borderRadius: 8,
     paddingHorizontal: 15,
+    paddingVertical: 10,
     marginBottom: 15,
     fontSize: 16,
     borderColor: "#1F74A7", 
@@ -264,6 +269,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#C6DBE4",
     paddingHorizontal: 15,
+    textAlignVertical: "top",
   },
   datePicker: {
     height: 60,

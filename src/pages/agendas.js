@@ -221,45 +221,45 @@ export default function Escolhanotas() {
         ) : (
           <>
             {financas.map((financa) => (
-              <View key={financa.id_financa} style={styles.financaContainer}>
+              <TouchableOpacity key={financa.id_financa} style={styles.financaContainer} onPress={() => handleEditFinanca(financa.id_financa)}>
                 <Text style={styles.financaText}>{financa.titulo}</Text>
                 <View style={styles.iconContainer}>
-                  <TouchableOpacity onPress={() => handleEditFinanca(financa.id_financa)}>
+                  {/* <TouchableOpacity onPress={() => handleEditFinanca(financa.id_financa)}>
                     <Icon name="edit" size={30} color="#255573" />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                   <TouchableOpacity onPress={() => handleDeleteItem(financa.id_financa, "financa")}>
                     <Icon name="trash" size={28} color="#EC4E4E" />
                   </TouchableOpacity>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
 
             {anotacoes.map((anotacao) => (
-              <View key={anotacao.id_anotacao} style={styles.financaContainer}>
+              <TouchableOpacity key={anotacao.id_anotacao} style={styles.financaContainer} onPress={() => handleEditAnotacao(anotacao.id_anotacao)}>
                 <Text style={styles.financaText}>{anotacao.titulo}</Text>
                 <View style={styles.iconContainer}>
-                  <TouchableOpacity onPress={() => handleEditAnotacao(anotacao.id_anotacao)}>
+                  {/* <TouchableOpacity onPress={() => handleEditAnotacao(anotacao.id_anotacao)}>
                     <Icon name="edit" size={30} color="#255573" />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                   <TouchableOpacity onPress={() => handleDeleteItem(anotacao.id_anotacao, "anotacao")}>
                     <Icon name="trash" size={28} color="#EC4E4E" />
                   </TouchableOpacity>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
 
             {checklists.map((checklist) => (
-              <View key={checklist.id_checklist} style={styles.financaContainer}>
+              <TouchableOpacity key={checklist.id_checklist} style={styles.financaContainer} onPress={() => handleEditChecklist(checklist.id_checklist)}>
                 <Text style={styles.financaText}>{checklist.titulo}</Text>
                 <View style={styles.iconContainer}>
-                  <TouchableOpacity onPress={() => handleEditChecklist(checklist.id_checklist)}>
+                  {/* <TouchableOpacity onPress={() => handleEditChecklist(checklist.id_checklist)}>
                     <Icon name="edit" size={30} color="#255573" />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                   <TouchableOpacity onPress={() => handleDeleteItem(checklist.id_checklist, "checklist")}>
                     <Icon name="trash" size={28} color="#EC4E4E" />
                   </TouchableOpacity>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </>
         )}

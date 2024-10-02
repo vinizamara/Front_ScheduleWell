@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     height: 60,
     backgroundColor: "#C6DBE4",
     borderRadius: 8,
-    paddingHorizontal: 15,
+    padding: 15,
     marginBottom: 15,
     fontSize: 16,
     color: "#000000",
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 16,
-    color: "#1F74A7",
+    color: "#555",
   },
   textarea: {
     flex: 1,

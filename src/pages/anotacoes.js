@@ -19,9 +19,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Anotacoes() {
   const navigation = useNavigation();
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
-  const [description, setDescription] = useState("");
+  const [anotacao, setAnotacao] = useState({ 
+    title: "",
+    date: "",
+    description: "" 
+  });
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [userId, setUserId] = useState(null);
 
@@ -55,33 +57,31 @@ export default function Anotacoes() {
     const year = date.getFullYear();
     const formattedDate = `${day}/${month}/${year}`;
 
-    setDate(formattedDate);
+    setAnotacao({ ...anotacao, date: formattedDate }); // Atualiza a data no objeto `anotacao`
     hideDatePicker();
   };
 
   const handleSave = async () => {
-      try {
-        const [day, month, year] = date.split("/");
-        const dbFormattedDate = `${year}-${month}-${day}`;
+    try {
+      const [day, month, year] = anotacao.date.split("/");
+      const dbFormattedDate = `${year}-${month}-${day}`;
 
-        const response = await sheets.postNota({
-          fk_id_usuario: userId, // Usa o ID do usuário recuperado
-          data: dbFormattedDate,
-          titulo: title,
-          descricao: description,
-        });
-        
-          Alert.alert("Sucesso", response.data.message);
-          navigation.navigate("Agendas");
-      } catch (error) {
-        Alert.alert("Erro", error.response.data.message);
-      }
+      const response = await sheets.postNota({
+        fk_id_usuario: userId,
+        data: dbFormattedDate,
+        titulo: anotacao.title,
+        descricao: anotacao.description,
+      });
+
+      Alert.alert("Sucesso", response.data.message);
+      navigation.navigate("Agendas");
+    } catch (error) {
+      Alert.alert("Erro", error.response.data.message);
+    }
   };
 
   const handleCancel = () => {
-    setTitle("");
-    setDate("");
-    setDescription("");
+    setAnotacao({ title: "", date: "", description: "" }); // Reseta o objeto `anotacao`
     navigation.goBack();
   };
 
@@ -106,17 +106,17 @@ export default function Anotacoes() {
         <TextInput
           style={styles.input}
           placeholder="Título"
-          value={title}
-          onChangeText={setTitle}
+          value={anotacao.title}
+          onChangeText={(text) => setAnotacao({ ...anotacao, title: text })} // Atualiza o título
         />
         <TouchableOpacity onPress={showDatePicker} style={styles.datePicker}>
-          <Text style={styles.dateText}>{date || "Selecione a data"}</Text>
+          <Text style={styles.dateText}>{anotacao.date || "Selecione a data"}</Text>
         </TouchableOpacity>
         <TextInput
           style={[styles.input, styles.textarea]}
           placeholder="Descrição"
-          value={description}
-          onChangeText={setDescription}
+          value={anotacao.description}
+          onChangeText={(text) => setAnotacao({ ...anotacao, description: text })} // Atualiza a descrição
           multiline
         />
       </View>
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     height: 60,
     backgroundColor: "#C6DBE4",
     borderRadius: 8,
-    paddingHorizontal: 15,
+    padding: 15,
     marginBottom: 15,
     fontSize: 16,
     color: "#000000",
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 16,
-    color: "#255573", 
+    color: "#555", 
   },
   textarea: {
     flex: 1,

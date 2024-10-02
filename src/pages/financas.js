@@ -66,11 +66,6 @@ export default function Financas() {
   };
 
   const handleSave = async () => {
-    if (!userId) {
-      Alert.alert("Erro", "ID do usuário não encontrado.");
-      return;
-    }
-
     try {
       const response = await sheets.criarFinanca({
         fk_id_usuario: userId, // Usa o ID do usuário do AsyncStorage
@@ -109,7 +104,7 @@ export default function Financas() {
         />
 
         <TouchableOpacity onPress={showDatePickerHandler} style={styles.input}>
-          <Text>{financa.dataNota.toLocaleDateString()}</Text>
+          <Text style={styles.dateText}>{financa.dataNota.toLocaleDateString()}</Text>
         </TouchableOpacity>
         {showDatePicker && (
           <DateTimePicker
@@ -223,6 +218,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     height: 50,
     paddingHorizontal: 15,
+    paddingVertical: 10,
     marginBottom: 15,
     justifyContent: "center",
     fontSize: 18,
@@ -234,6 +230,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#C6DBE4",
     paddingHorizontal: 15,
+    textAlignVertical: "top",
   },
   transactionTypeContainer: {
     flexDirection: "row", 
@@ -318,5 +315,9 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontSize: 18,
     textAlign: "center",
+  },
+  dateText: {
+    fontSize: 16,
+    color: "#555", 
   },
 });

@@ -56,9 +56,9 @@ export default function ControleFinanceiro() {
         setGanhoMensal(
           financeiroData.ganhos ? financeiroData.ganhos.toString() : "0"
         );
-        setSaldo(financeiroData.saldo ? financeiroData.saldo.toString() : "Você ainda não realizou uma transação esse mês");
+        setSaldo(financeiroData.saldo ? financeiroData.saldo.toString() : "0");
       } catch (error) {
-        console.error("Erro ao buscar os dados financeiros:", error);
+        console.log("Erro ao buscar os dados financeiros:", error.response.data.error);
       }
 
       try {
@@ -75,7 +75,7 @@ export default function ControleFinanceiro() {
             : []
         ); // Armazenando todas as transações em uma lista unificada
       } catch (error) {
-        console.error("Erro ao buscar as transações:", error);
+        console.log("Erro ao buscar as transações:", error.response.data.error);
         setTransacoes([]); // Garantir que o estado transacoes seja um array vazio em caso de erro
       } finally {
         setLoading(false);
@@ -97,32 +97,6 @@ export default function ControleFinanceiro() {
 
   const handleEditFinanca = (idFinanca) => {
     navigation.navigate("EditarFinanca", { id: idFinanca });
-  };
-
-  const handleDeleteFinanca = async (idFinanca) => {
-    Alert.alert(
-      "Deletar Finança",
-      "Tem certeza que deseja deletar essa finança?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Deletar",
-          onPress: async () => {
-            try {
-              await sheets.deletarFinanca(idFinanca);
-              Alert.alert("Sucesso", "Finança deletada com sucesso.");
-              // Atualiza a lista após deletar
-              setTransacoes((prev) =>
-                prev.filter((transacao) => transacao.id_financa !== idFinanca)
-              );
-            } catch (error) {
-              console.error("Erro ao deletar finança:", error);
-              Alert.alert("Erro", "Ocorreu um erro ao deletar a finança.");
-            }
-          },
-        },
-      ]
-    );
   };
 
   if (!fontsLoaded || loading) {
@@ -156,7 +130,7 @@ export default function ControleFinanceiro() {
         <TextInput
           style={styles.input}
           value={rendaTotal}
-          placeholder="Você ainda não realizou uma transação"
+          placeholder="0"
           editable={false}
         />
 
@@ -166,7 +140,7 @@ export default function ControleFinanceiro() {
         <TextInput
           style={styles.input}
           value={gastoMensal}
-          placeholder="Você ainda não realizou uma transação esse mês"
+          placeholder="0"
           editable={false}
         />
 
@@ -174,7 +148,7 @@ export default function ControleFinanceiro() {
         <TextInput
           style={styles.input}
           value={ganhoMensal}
-          placeholder="Você ainda não realizou uma transação esse mês"
+          placeholder="0"
           editable={false}
         />
 
@@ -182,7 +156,7 @@ export default function ControleFinanceiro() {
         <TextInput
           style={styles.input}
           value={saldo}
-          placeholder="Você ainda não realizou uma transação esse mês"
+          placeholder="0"
           editable={false}
         />
 
@@ -190,27 +164,32 @@ export default function ControleFinanceiro() {
         <Text style={styles.label}>Transações:</Text>
         <View style={styles.listContainer}>
           {transacoes.length === 0 ? (
-            <Text style={styles.emptyText}>Nenhuma transação.</Text>
+            <View>
+              <View  style={styles.transacaoItem}>
+                <Text style={styles.transacaoTextCabecalho}>titulo</Text>
+                <Text style={styles.transacaoTextCabecalho}>tipo de transacao</Text>
+                <Text style={styles.transacaoTextCabecalho}>valor</Text>
+                <Text style={styles.transacaoTextCabecalho}>frequencia</Text>
+              </View>
+              <Text style={[styles.emptyText, {marginTop: 20}]}>Nenhuma transação.</Text>
+            </View>
           ) : (
-            transacoes.map((transacao) => (
+            <View>
+              <View  style={styles.transacaoItem}>
+                <Text style={styles.transacaoTextCabecalho}>titulo</Text>
+                <Text style={styles.transacaoTextCabecalho}>tipo de transacao</Text>
+                <Text style={styles.transacaoTextCabecalho}>valor</Text>
+                <Text style={styles.transacaoTextCabecalho}>frequencia</Text>
+              </View>
+              {transacoes.map((transacao) => (
               <View key={transacao.id_financa} style={styles.transacaoItem}>
                 <Text style={styles.transacaoText}>{transacao.titulo}</Text>
-                <View style={styles.iconContainer}>
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    onPress={() => handleEditFinanca(transacao.id_financa)}
-                  >
-                    <Icon name="edit" size={25} color="#255573" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.actionButton}
-                    onPress={() => handleDeleteFinanca(transacao.id_financa)}
-                  >
-                    <Icon name="trash" size={25} color="#EC4E4E" />
-                  </TouchableOpacity>
-                </View>
+                <Text style={styles.transacaoText}>{transacao.tipo_transacao}</Text>
+                <Text style={styles.transacaoText}>{transacao.valor}</Text>
+                <Text style={styles.transacaoText}>{transacao.frequencia}</Text>
               </View>
-            ))
+            ))}
+            </View>
           )}
         </View>
       </View>
@@ -281,6 +260,14 @@ const styles = StyleSheet.create({
   transacaoText: {
     fontSize: 16,
     color: "#000",
+  },
+  transacaoText: {
+    fontSize: 16,
+    color: "#000",
+  },
+  transacaoTextCabecalho: {
+    fontSize: 16,
+    color: "#255573",
   },
   iconContainer: {
     flexDirection: "row",

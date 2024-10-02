@@ -141,7 +141,7 @@ export default function EditarFinanca() {
         />
 
         <TouchableOpacity onPress={showDatePickerHandler} style={styles.input}>
-          <Text>{financa.dataNota.toLocaleDateString()}</Text>
+          <Text style={styles.dateText}>{financa.dataNota.toLocaleDateString()}</Text>
         </TouchableOpacity>
         {showDatePicker && (
           <DateTimePicker
@@ -258,9 +258,11 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         justifyContent: "center",
         fontSize: 18,
+        paddingVertical: 10,
       },
       descriptionInput: {
         height: 100,
+        textAlignVertical: "top"
       },
       transactionTypeContainer: {
         flexDirection: "row", 
@@ -345,5 +347,9 @@ const styles = StyleSheet.create({
         color: "#FFF",
         fontSize: 18,
         textAlign: "center",
+      },
+      dateText: {
+        fontSize: 16,
+        color: "#555", 
       },
 });
