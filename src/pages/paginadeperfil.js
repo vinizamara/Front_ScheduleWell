@@ -77,6 +77,7 @@ export default function PerfilUsuario() {
       return;
     }
 
+    try{
     const userId = await AsyncStorage.getItem("userId");
     if (userId) {
       await sheets.updateUser(userId, user);

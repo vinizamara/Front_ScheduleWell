@@ -3,7 +3,7 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Text,
+  Text, 
   TextInput,
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -68,7 +68,10 @@ export default function Listagem() {
     if (userId) {
       fetchChecklist(userId); // Chama a função para buscar a anotação
     }
-  }, [userId]); // Executa quando userId for alterado
+    if (id) {
+      fetchChecklistItems(id); // Chama a função para buscar os itens do checklist
+    }
+  }, [userId, id]); // Executa quando userId for alterado
 
   const fetchChecklist = async (userId) => {
     if (!userId) return;
@@ -76,13 +79,17 @@ export default function Listagem() {
     try {
       const response = await sheets.getChecklists(userId); // Supondo que você tenha esta função na API
       const checklistEncontrado = response.data.find(item => item.id_checklist === id);
-
       if (checklistEncontrado) {
         setInputValues({
           titulo: checklistEncontrado.titulo,
-          data: new Date(checklistEncontrado.data),
+          data: new Date(checklistEncontrado.data).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          }),
           descricao: checklistEncontrado.descricao,
         });
+        console.log(inputValues.data)
       } else {
         Alert.alert("Erro", "Checklist não encontrado.", response.data.message);
       }
@@ -91,6 +98,15 @@ export default function Listagem() {
       console.log("Erro ao buscar anotação:", error.response.data.message);
     } finally {
       setLoading(false); // Finaliza o carregamento
+    }
+  };
+
+  const fetchChecklistItems = async (idChecklist) => {
+    try {
+      const response = await sheets.getItemChecklists(idChecklist); // Faz a requisição para a API
+      setItens(response.data); // Atualiza o estado com os itens do checklist
+    } catch (error) {
+      console.log("Erro", error.response.data.message);
     }
   };
 
@@ -111,24 +127,44 @@ export default function Listagem() {
   };
 
   const handleConfirm = (date) => {
-    const formattedDate = date.toISOString().split("T")[0];
+    const formattedDate = new Date(date).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    })
     setInputValues({ ...inputValues, data: formattedDate });
     hideDatePicker();
   };
 
-  const handleAddItem = () => {
-    if (itemInput.trim() === "") {
-      Alert.alert("Erro", "O item não pode ser vazio.");
-      return;
-    }
-    setItens([...itens, { texto: itemInput, concluido: false }]);
-    setItemInput("");
-  };
-
-  const handleRemoveItem = (index) => {
-    const newItems = itens.filter((_, i) => i !== index);
-    setItens(newItems);
-  };
+  const handleRemoveItem = (idItem) => {
+    Alert.alert(
+      "Confirmação de Deleção",
+      "Você tem certeza que deseja remover este item?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel", // Define o estilo do botão como "cancel"
+        },
+        {
+          text: "Remover",
+          onPress: async () => {
+            console.log("ID do item a ser removido:", idItem);
+            try {
+              const response = await sheets.deleteItemChecklist(idItem); // Função para deletar o item da API
+              setItens(itens.filter((item) => item.id_item_checklist !== idItem)); // Atualiza a lista removendo o item
+              Alert.alert("Sucesso", response.data.message);
+              console.log("ID recebido para remover:", idItem);
+            } catch (error) {
+              Alert.alert("Erro", error.response.data.message);
+              console.error("Erro ao remover item:", error.response.data.message);
+            }
+          },
+          style: "destructive", // Define o estilo do botão como "destructive" para indicar ação perigosa
+        },
+      ],
+      { cancelable: true } // Permite fechar o alerta tocando fora dele
+    );
+  };  
 
   const handleSave = async () => {
     if (!userId) {
@@ -140,20 +176,59 @@ export default function Listagem() {
       const response = await sheets.updateChecklist(id, {
         titulo: inputValues.titulo,
         descricao: inputValues.descricao,
-        data: formatDate(inputValues.data),
+        data:  inputValues.data.split("/").reverse().join("-")
       });
 
-      if (response.status === 200) {
-        Alert.alert("Sucesso", "Anotação atualizada com sucesso!");
+        Alert.alert("Sucesso",response.data.message );
         navigation.navigate("Agendas");
-      } else {
-        Alert.alert("Erro", "Erro ao atualizar a anotação: " + response.data.message);
-      }
+     
     } catch (error) {
-      Alert.alert("Erro da API", error.response.data.message || "Erro desconhecido");
-      console.log("Erro da API:", error.response.data.message);
+      Alert.alert("Erro da API", error.response.data.message);
     }
-};
+  };
+
+  const handleUpdateItem = async (idItemChecklist, texto, concluido) => {
+    try {
+      const response = await sheets.updateItemChecklist(idItemChecklist, {
+        texto: texto,
+        concluido: concluido,
+      });
+      
+      Alert.alert("Sucesso", response.data.message);
+      fetchChecklistItems(id); // Recarrega os itens após a atualização
+    } catch (error) {
+      Alert.alert("Erro ao atualizar item", error.response.data.message || "Erro desconhecido");
+      console.error("Erro ao atualizar item:", error.response.data.message);
+    }
+  };
+
+  const handleAddItem = async () => {
+    if (itemInput.trim() === "") {
+      Alert.alert("Erro", "O item não pode ser vazio.");
+      return;
+    }
+  
+    // Adicionar o item ao estado
+    const newItem = { texto: itemInput, concluido: false };
+    setItens([...itens, newItem]);
+  
+    // Salvar o item na API
+    try {
+      const response = await sheets.postItemChecklist({
+        fkIdChecklist: id, // ID da checklist atual
+        texto: itemInput,
+        concluido: false,
+      });
+      
+      // Limpar o campo de entrada após adicionar o item
+      setItemInput("");
+  
+      Alert.alert("Sucesso", response.data.message);
+    } catch (error) {
+      Alert.alert("Erro ao adicionar item", error.response.data.message);
+    }
+  };
+  
 
   if (!fontsLoaded) {
     return (
@@ -164,9 +239,7 @@ export default function Listagem() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    <View style={styles.container}
     >
       <View style={styles.header}>
         <Text style={styles.title}>Edição de Listagem</Text>
@@ -181,7 +254,7 @@ export default function Listagem() {
         />
         <TouchableOpacity onPress={showDatePicker} style={styles.datePicker}>
           <Text style={styles.dateText}>
-            {inputValues.data ? inputValues.data.toLocaleDateString() : "Selecione a data"}
+            {inputValues.data ? inputValues.data.toString() : "Selecione a data"}
           </Text>
         </TouchableOpacity>
         <TextInput
@@ -203,30 +276,34 @@ export default function Listagem() {
             value={itemInput}
             onChangeText={handleItemInputChange}
           />
-
+          
         <FlatList
           data={itens}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item, index }) => (
+          keyExtractor={(item) => item.id_item_checklist}
+          renderItem={({ item }) => (
             <View style={styles.itemRow}>
-              {/* Checkbox do item */}
-              <TouchableOpacity style={styles.checkbox}>
-                {item.concluido && <View style={styles.checked} />}
-              </TouchableOpacity>
-
-              {/* Texto do item */}
-              <Text style={styles.itemText}>{item.texto}</Text>
-
-              {/* Botão para deletar o item */}
               <TouchableOpacity 
-                onPress={() => handleRemoveItem(index)} 
-                style={styles.deleteButton} // Adicionando estilo ao botão de deletar
+                style={styles.checkbox}
+                onPress={() => handleUpdateItem(item.id_item_checklist, item.texto, !item.concluido)}
+              >
+                {item.concluido ? <View style={styles.checked} /> : null}
+              </TouchableOpacity>
+              <TextInput
+                style={styles.itemText}
+                value={item.texto}
+                editable={false}
+              />
+              <TouchableOpacity 
+                onPress={() => handleRemoveItem(item.id_item_checklist)} 
+                style={styles.deleteButton}
               >
                 <Icon name="delete" size={24} color="#FFF" />
               </TouchableOpacity>
             </View>
           )}
+          keyboardShouldPersistTaps="handled"
         />
+
       </View>
 
       <View style={styles.buttons}>
@@ -244,7 +321,7 @@ export default function Listagem() {
         onConfirm={handleConfirm}
         onCancel={hideDatePicker}
       />
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 

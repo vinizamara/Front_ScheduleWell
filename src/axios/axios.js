@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://10.89.240.98:5000/api/", // Remover espaço extra
+  baseURL: "http://192.168.100.44:5000/api/", // Remover espaço extra
   headers: {
     Accept: "application/json",
   },
@@ -30,8 +30,8 @@ const sheets = {
   // Itens de Checklist
   postItemChecklist: (item) => api.post("/postItemChecklist/", item),
   getItemChecklists: (idChecklist) => api.get(`/getItemChecklist/${idChecklist}`),
-  updateItemChecklist: (idChecklist, item) => api.put(`/updateItemChecklist/${idChecklist}`, item),
-  deleteItemChecklist: (fkIdChecklist) => api.delete(`/deleteItemChecklist/${fkIdChecklist}`),
+  updateItemChecklist: (idItemChecklist, item) => api.put(`/updateItemChecklist/${idItemChecklist}`, item),
+  deleteItemChecklist: (idItemChecklist) => api.delete(`/deleteItemChecklist/${idItemChecklist}`),
 
   // Finanças
   criarFinanca: (financa) => api.post("/criarFinanca/", financa),
