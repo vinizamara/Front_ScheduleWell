@@ -40,7 +40,7 @@ const sheets = {
   deletarFinanca: (id_financa) => api.delete(`/deletarFinanca/${id_financa}`),
 
   // Novas rotas de finanças
-  obterRendaAtual: (idUsuario) => api.get(`/obterRendaAtual/${idUsuario}`),
+  obterRendaTotal: (idUsuario) => api.get(`/obterRendaTotal/${idUsuario}`),
   resumoFinanceiro: (idUsuario) => api.get(`/resumoFinanceiro/${idUsuario}`),
   transacoes: (idUsuario) => api.get(`/transacoes/${idUsuario}`),
 };

@@ -15,16 +15,18 @@ import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
 import sheets from "../axios/axios";
 import Icon from "react-native-vector-icons/FontAwesome";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ControleFinanceiro() {
   const navigation = useNavigation();
 
-  const [rendaAtual, setRendaAtual] = useState("");
+  const [rendaTotal, setRendaTotal] = useState("");
   const [gastoMensal, setGastoMensal] = useState("");
   const [ganhoMensal, setGanhoMensal] = useState("");
   const [saldo, setSaldo] = useState("");
   const [transacoes, setTransacoes] = useState([]); // Atualizado para uma lista unificada de transações
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
@@ -34,29 +36,36 @@ export default function ControleFinanceiro() {
     async function fetchData() {
       setLoading(true);
       try {
+        // Recolhendo o ID usuário do AsyncStorage
+        const id = await AsyncStorage.getItem("userId");
         // Chamada para obter resumo financeiro
-        const financeiroResponse = await sheets.resumoFinanceiro(1); // Supondo que o idUsuario seja 1
+        const financeiroResponse = await sheets.resumoFinanceiro(id);
         const financeiroData = financeiroResponse.data;
+        //Chamada para obter renda total
+        const rendaTotalResponse = await sheets.obterRendaTotal(id)
+        const rendaTotalData = rendaTotalResponse.data;
 
-        setRendaAtual(
-          financeiroData.renda_atual
-            ? financeiroData.renda_atual.toString()
+        setRendaTotal(
+          rendaTotalData.renda_total
+            ? rendaTotalData.renda_total.toString()
             : ""
         );
         setGastoMensal(
-          financeiroData.gastos ? financeiroData.gastos.toString() : ""
+          financeiroData.gastos ? financeiroData.gastos.toString() : "0"
         );
         setGanhoMensal(
-          financeiroData.ganhos ? financeiroData.ganhos.toString() : ""
+          financeiroData.ganhos ? financeiroData.ganhos.toString() : "0"
         );
-        setSaldo(financeiroData.saldo ? financeiroData.saldo.toString() : "");
+        setSaldo(financeiroData.saldo ? financeiroData.saldo.toString() : "Você ainda não realizou uma transação esse mês");
       } catch (error) {
         console.error("Erro ao buscar os dados financeiros:", error);
       }
 
       try {
+        // Recolhendo o ID usuário do AsyncStorage
+        const id = await AsyncStorage.getItem("userId");
         // Chamada para obter transações
-        const transacoesResponse = await sheets.transacoes(1); // Supondo que o idUsuario seja 1
+        const transacoesResponse = await sheets.transacoes(id);
         const transacoesData = transacoesResponse.data;
 
         // Verifica se transacoesData.transacoes é um array
@@ -142,22 +151,22 @@ export default function ControleFinanceiro() {
         </AnimatableText>
       </View>
 
-      <View style={styles.containerForm}>
-        <Text style={styles.label}>Renda Atual:</Text>
+      <View style={[styles.containerForm, {marginTop: 0}]}>
+        <Text style={styles.label}>Renda Total:</Text>
         <TextInput
           style={styles.input}
-          value={rendaAtual}
-          placeholder="Renda Atual"
+          value={rendaTotal}
+          placeholder="Você ainda não realizou uma transação"
           editable={false}
         />
 
-        <Text style={styles.title}>Gasto e Ganho Mensal</Text>
+        <Text style={[styles.title, {marginTop: "8%"}]}>Gasto e Ganho Mensal</Text>
 
         <Text style={styles.label}>Gasto:</Text>
         <TextInput
           style={styles.input}
           value={gastoMensal}
-          placeholder="Gasto Mensal"
+          placeholder="Você ainda não realizou uma transação esse mês"
           editable={false}
         />
 
@@ -165,7 +174,7 @@ export default function ControleFinanceiro() {
         <TextInput
           style={styles.input}
           value={ganhoMensal}
-          placeholder="Ganho Mensal"
+          placeholder="Você ainda não realizou uma transação esse mês"
           editable={false}
         />
 
@@ -173,7 +182,7 @@ export default function ControleFinanceiro() {
         <TextInput
           style={styles.input}
           value={saldo}
-          placeholder="Saldo Total"
+          placeholder="Você ainda não realizou uma transação esse mês"
           editable={false}
         />
 
@@ -215,7 +224,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#E2EDF2",
     paddingHorizontal: 20,
     paddingVertical: 40,
-    justifyContent: "center",
+    justifyContent: "top",
     alignItems: "center",
   },
   header: {
