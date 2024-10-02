@@ -67,33 +67,19 @@ export default function PerfilUsuario() {
   };
 
   const handleSave = async () => {
-    if (!user.nome || !user.email || !user.senha || !confirmarSenha) {
-      Alert.alert("Erro", "Por favor, preencha todos os campos.");
-      return;
-    }
-
-    if (user.senha !== confirmarSenha) {
-      Alert.alert("Erro", "As senhas não coincidem.");
-      return;
-    }
-
     try{
     const userId = await AsyncStorage.getItem("userId");
-    if (userId) {
-      await sheets.updateUser(userId, user);
-      Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
-      setModalVisible(false);
-      setConfirmarSenha("");
-    } else {
-      Alert.alert("Erro", "ID do usuário não encontrado.");
-    }
-    const response = await sheets.updateUser(userId, updateData);
+    const response = await sheets.updateUser(userId, user);
     Alert.alert("Sucesso", response.data.message);
+
+    await AsyncStorage.setItem("userName", user.nome);
+    await AsyncStorage.setItem("userEmail", user.email);
+
     setModalVisible(false);
     setNovaSenha("");
     setConfirmarSenha("");
   } catch (error){
-    Alert.alert("Erro", error.response.data.error );
+    console.log(error.response);
   }
   };
 
