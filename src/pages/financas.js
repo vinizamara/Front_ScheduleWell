@@ -47,6 +47,7 @@ export default function Financas() {
     setShowDatePicker(true);
   };
 
+  //Função para atualizar o id da nota
   const onChangeDate = (event, selectedDate) => {
     const currentDate = selectedDate || financa.dataNota;
     setShowDatePicker(Platform.OS === 'ios');
@@ -65,19 +66,20 @@ export default function Financas() {
     return `${year}-${month}-${day}`; // Formato 'YYYY-MM-DD'
   };
 
+  //Função para criar a nota
   const handleSave = async () => {
     try {
       const response = await sheets.criarFinanca({
-        fk_id_usuario: userId, // Usa o ID do usuário do AsyncStorage
+        fk_id_usuario: userId,
         titulo: financa.tituloNota,
         descricao: financa.descricaoNota,
         data: formatDate(financa.dataNota),
-        valor: parseFloat(financa.valorNota), // Converte valor para número
+        valor: parseFloat(financa.valorNota),
         tipo_transacao: financa.tipoTransacao,
         frequencia: financa.frequencia,
       });
         Alert.alert("Sucesso", response.data.message);
-        navigation.navigate("Agendas"); // Volta para a tela anterior após salvar
+        navigation.navigate("Agendas");
     } catch (error) {
         Alert.alert("Erro na criação de nota", error.response.data.message);
     }
