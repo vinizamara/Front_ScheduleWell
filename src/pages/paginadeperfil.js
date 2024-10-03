@@ -47,7 +47,7 @@ export default function PerfilUsuario() {
   }
 
   useEffect(() => {
-      loadUserData();
+    loadUserData();
   }, []);
 
   if (!fontsLoaded) {
@@ -67,22 +67,27 @@ export default function PerfilUsuario() {
   };
 
   const handleSave = async () => {
-    try{
-    const userId = await AsyncStorage.getItem("userId");
-    const response = await sheets.updateUser(userId, user);
-    Alert.alert("Sucesso", response.data.message);
-
-    await AsyncStorage.setItem("userName", user.nome);
-    await AsyncStorage.setItem("userEmail", user.email);
-
-    setModalVisible(false);
-    setNovaSenha("");
-    setConfirmarSenha("");
-  } catch (error){
-    console.log(error.response);
-  }
+    if (user.senha !== confirmarSenha) {
+      Alert.alert("Erro", "As senhas não coincidem");
+      return;  // Interrompe a execução para evitar salvar os dados
+    } else {
+      try {
+        const userId = await AsyncStorage.getItem("userId");
+        const response = await sheets.updateUser(userId, user);
+        Alert.alert("Sucesso", response.data.message);
+  
+        await AsyncStorage.setItem("userName", user.nome);
+        await AsyncStorage.setItem("userEmail", user.email);
+  
+        setModalVisible(false);
+        setNovaSenha("");
+        setConfirmarSenha("");
+      } catch (error) {
+        console.log(error.response);
+      }
+    }
   };
-
+  
   const handleLogout = async () => {
     // Remova todos os itens relacionados ao login do AsyncStorage
     await AsyncStorage.removeItem("authToken");
@@ -107,13 +112,13 @@ export default function PerfilUsuario() {
     });
 
     if (confirm) {
-      try{
-      const userId = await AsyncStorage.getItem("userId");
-      const response = await sheets.deleteUser(userId);
-      await AsyncStorage.clear();
-      navigation.navigate("PageInit");
-      Alert.alert("Sucesso", response.data.message)
-      } catch (error){
+      try {
+        const userId = await AsyncStorage.getItem("userId");
+        const response = await sheets.deleteUser(userId);
+        await AsyncStorage.clear();
+        navigation.navigate("PageInit");
+        Alert.alert("Sucesso", response.data.message);
+      } catch (error) {
         Alert.alert("Erro", error.response.data.error);
       }
     }
@@ -178,9 +183,7 @@ export default function PerfilUsuario() {
                   style={styles.inputWithoutBorder}
                   name="nome"
                   value={user.nome}
-                  onChangeText={(text) =>
-                    setUser({ ...user, nome: text })
-                  }
+                  onChangeText={(text) => setUser({ ...user, nome: text })}
                   placeholder="Insira seu nome"
                 />
               </View>
@@ -191,9 +194,7 @@ export default function PerfilUsuario() {
                   style={styles.inputWithoutBorder}
                   name="email"
                   value={user.email}
-                  onChangeText={(text) =>
-                    setUser({ ...user, email: text })
-                  }
+                  onChangeText={(text) => setUser({ ...user, email: text })}
                   placeholder="Insira seu e-mail"
                   keyboardType="email-address"
                 />
