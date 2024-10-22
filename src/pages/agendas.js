@@ -50,7 +50,7 @@ export default function Escolhanotas() {
         listarFinancas(idUsuario);
         listarAnotacoes(idUsuario);
         listarChecklists(idUsuario);
-      } else {
+      } else {  
         setIsLoggedIn(false);
       }
     } catch (error) {
@@ -188,74 +188,47 @@ export default function Escolhanotas() {
       ]
     );
   };
-
+  
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.plusIconContainer} onPress={handlePlusPress}>
         <Icon name="plus" size={30} color="#1F74A7" />
       </TouchableOpacity>
-
+  
       {isLoggedIn && (
         <TouchableOpacity style={styles.newButton} onPress={handleNewButton}>
           <Text style={styles.buttonText}>Controle Financeiro</Text>
         </TouchableOpacity>
       )}
-
+  
       {!isLoggedIn && (
         <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate("Login")}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
       )}
-
+  
       {isLoggedIn && (
         <TouchableOpacity style={styles.profileButton} onPress={handleProfilePage}>
           <Image source={require("../../assets/icons/perfil.png")} style={styles.perfilImage} />
         </TouchableOpacity>
       )}
-
-      <Text style={styles.notesText}>Suas Anotações</Text>
-
+  
+      <Text style={styles.notesText}>Suas Notas</Text>
+  
       <ScrollView>
-        {financas.length === 0 && anotacoes.length === 0 && checklists.length === 0 ? (
-          <Text style={styles.batataText}>Você ainda não possui nenhuma anotação criada</Text>
-        ) : (
+        {/* Exibição de Finanças */}
+        {financas.length > 0 && (
           <>
+            <Text style={styles.sectionTitle}>Finanças</Text>
             {financas.map((financa) => (
-              <TouchableOpacity key={financa.id_financa} style={styles.financaContainer} onPress={() => handleEditFinanca(financa.id_financa)}>
+              <TouchableOpacity
+                key={financa.id_financa}
+                style={styles.financaContainer}
+                onPress={() => handleEditFinanca(financa.id_financa)}
+              >
                 <Text style={styles.financaText}>{financa.titulo}</Text>
                 <View style={styles.iconContainer}>
-                  {/* <TouchableOpacity onPress={() => handleEditFinanca(financa.id_financa)}>
-                    <Icon name="edit" size={30} color="#255573" />
-                  </TouchableOpacity> */}
                   <TouchableOpacity onPress={() => handleDeleteItem(financa.id_financa, "financa")}>
-                    <Icon name="trash" size={28} color="#EC4E4E" />
-                  </TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            ))}
-
-            {anotacoes.map((anotacao) => (
-              <TouchableOpacity key={anotacao.id_anotacao} style={styles.financaContainer} onPress={() => handleEditAnotacao(anotacao.id_anotacao)}>
-                <Text style={styles.financaText}>{anotacao.titulo}</Text>
-                <View style={styles.iconContainer}>
-                  {/* <TouchableOpacity onPress={() => handleEditAnotacao(anotacao.id_anotacao)}>
-                    <Icon name="edit" size={30} color="#255573" />
-                  </TouchableOpacity> */}
-                  <TouchableOpacity onPress={() => handleDeleteItem(anotacao.id_anotacao, "anotacao")}>
-                    <Icon name="trash" size={28} color="#EC4E4E" />
-                  </TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            ))}
-
-            {checklists.map((checklist) => (
-              <TouchableOpacity key={checklist.id_checklist} style={styles.financaContainer} onPress={() => handleEditChecklist(checklist.id_checklist)}>
-                <Text style={styles.financaText}>{checklist.titulo}</Text>
-                <View style={styles.iconContainer}>
-                  {/* <TouchableOpacity onPress={() => handleEditChecklist(checklist.id_checklist)}>
-                    <Icon name="edit" size={30} color="#255573" />
-                  </TouchableOpacity> */}
-                  <TouchableOpacity onPress={() => handleDeleteItem(checklist.id_checklist, "checklist")}>
                     <Icon name="trash" size={28} color="#EC4E4E" />
                   </TouchableOpacity>
                 </View>
@@ -263,9 +236,52 @@ export default function Escolhanotas() {
             ))}
           </>
         )}
+  
+        {/* Exibição de Anotações */}
+        {anotacoes.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Anotações</Text>
+            {anotacoes.map((anotacao) => (
+              <TouchableOpacity
+                key={anotacao.id_anotacao}
+                style={styles.financaContainer}
+                onPress={() => handleEditAnotacao(anotacao.id_anotacao)}
+              >
+                <Text style={styles.financaText}>{anotacao.titulo}</Text>
+                <View style={styles.iconContainer}>
+                  <TouchableOpacity onPress={() => handleDeleteItem(anotacao.id_anotacao, "anotacao")}>
+                    <Icon name="trash" size={28} color="#EC4E4E" />
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </>
+        )}
+  
+        {/* Exibição de Checklists */}
+        {checklists.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Checklists</Text>
+            {checklists.map((checklist) => (
+              <TouchableOpacity key={checklist.id_checklist} style={styles.financaContainer} onPress={() => handleEditChecklist(checklist.id_checklist)}>
+                <Text style={styles.financaText}>{checklist.titulo}</Text>
+                <View style={styles.iconContainer}>
+                  <TouchableOpacity  onPress={() => handleDeleteItem(checklist.id_checklist, "checklist")}>
+                    <Icon name="trash" size={28} color="#EC4E4E" />
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+              
+            ))}
+          </>
+        )}
+  
+        {financas.length === 0 && anotacoes.length === 0 && checklists.length === 0 && (
+          <Text style={styles.batataText}>Você ainda não possui nenhuma anotação criada</Text>
+        )}
       </ScrollView>
     </View>
-  );
+  );  
 }
 
 const styles = StyleSheet.create({
@@ -334,7 +350,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#C6DBE4",
     padding: 15,
     borderRadius: 10,
-    marginTop: "10%",
+    marginTop: "3%",
+    marginBottom: "5%",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -355,4 +372,12 @@ const styles = StyleSheet.create({
     marginTop: "10%",
     fontFamily: "SuezOne_400Regular",
   },
+  sectionTitle: {
+    lineHeight: 28,
+    fontSize: 25,
+    fontWeight: "bold",
+    color: "#255573",
+    marginTop: 30,
+    marginBottom: 0,
+  },  
 });
