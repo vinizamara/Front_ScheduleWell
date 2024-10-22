@@ -49,11 +49,6 @@ export default function Login() {
   };
 
   const handleLogin = async () => {
-    if (user.email.trim() === "" || user.senha.trim() === "") {
-      Alert.alert("Preencha os campos para entrar");
-      return;
-    }
-  
     try {
       const response = await sheets.postLogin(user);
       Alert.alert("Sucesso", response.data.message);

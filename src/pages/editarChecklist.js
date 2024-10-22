@@ -136,34 +136,17 @@ export default function Listagem() {
     hideDatePicker();
   };
 
-  const handleRemoveItem = (idItem) => {
-    Alert.alert(
-      "Confirmação de Deleção",
-      "Você tem certeza que deseja remover este item?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel", // Define o estilo do botão como "cancel"
-        },
-        {
-          text: "Remover",
-          onPress: async () => {
-            console.log("ID do item a ser removido:", idItem);
-            try {
-              const response = await sheets.deleteItemChecklist(idItem); // Função para deletar o item da API
-              setItens(itens.filter((item) => item.id_item_checklist !== idItem)); // Atualiza a lista removendo o item
-              Alert.alert("Sucesso", response.data.message);
-              console.log("ID recebido para remover:", idItem);
-            } catch (error) {
-              Alert.alert("Erro", error.response.data.message);
-              console.error("Erro ao remover item:", error.response.data.message);
-            }
-          },
-          style: "destructive", // Define o estilo do botão como "destructive" para indicar ação perigosa
-        },
-      ],
-      { cancelable: true } // Permite fechar o alerta tocando fora dele
-    );
+  const handleRemoveItem = async (idItem) => {
+      console.log("ID do item a ser removido:", idItem);
+      try {
+        const response = await sheets.deleteItemChecklist(idItem); // Função para deletar o item da API
+        setItens(itens.filter((item) => item.id_item_checklist !== idItem)); // Atualiza a lista removendo o item
+        // Alert.alert("Sucesso", response.data.message);
+        console.log("ID recebido para remover:", idItem);
+      } catch (error) {
+        Alert.alert("Erro", error.response.data.message);
+        console.error("Erro ao remover item:", error.response.data.message);
+      }
   };  
 
   const handleSave = async () => {
@@ -222,8 +205,6 @@ export default function Listagem() {
       
       // Limpar o campo de entrada após adicionar o item
       setItemInput("");
-  
-      Alert.alert("Sucesso", response.data.message);
     } catch (error) {
       Alert.alert("Erro ao adicionar item", error.response.data.message);
     }
