@@ -21,7 +21,8 @@ import sheets from "../axios/axios"; // Ajuste o caminho conforme necessário
 
 export default function PerfilUsuario() {
   const navigation = useNavigation();
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalProfileVisible, setModalProfileVisible] = useState(false);
+  const [modalPasswordVisible, setModalPasswordVisible] = useState(false);
   const [userDefault, setUserDefault] = useState({
     nome: "",
     email: "",
@@ -66,27 +67,44 @@ export default function PerfilUsuario() {
     setConfirmPasswordVisible(!isConfirmPasswordVisible);
   };
 
-  const handleSave = async () => {
+  const handleSaveProfile = async () => {
+    try {
+      const userId = await AsyncStorage.getItem("userId");
+      const response = await sheets.updateUser(userId, user);
+      Alert.alert("Sucesso", response.data.message);
+
+      await AsyncStorage.setItem("userName", user.nome);
+      await AsyncStorage.setItem("userEmail", user.email);
+
+      setModalProfileVisible(false);
+    } catch (error) {
+      console.log(error.response);
+      if (error.response && error.response.data && error.response.data.error) {
+        Alert.alert("Erro", error.response.data.error);
+      } else {
+        Alert.alert("Erro", "Ocorreu um erro ao atualizar o perfil.");
+      }
+    }
+  };
+
+  const handleSavePassword = async () => {
     if (user.senha !== confirmarSenha) {
       Alert.alert("Erro", "As senhas não coincidem");
-      return;  // Interrompe a execução para evitar salvar os dados
+      return;
     } else {
       try {
         const userId = await AsyncStorage.getItem("userId");
-        const response = await sheets.updateUser(userId, user);
+        const response = await sheets.updateUser(userId, { senha: user.senha });
         Alert.alert("Sucesso", response.data.message);
 
-        await AsyncStorage.setItem("userName", user.nome);
-        await AsyncStorage.setItem("userEmail", user.email);
-
-        setModalVisible(false);
+        setModalPasswordVisible(false);
         setConfirmarSenha("");
       } catch (error) {
         console.log(error.response);
         if (error.response && error.response.data && error.response.data.error) {
           Alert.alert("Erro", error.response.data.error);
         } else {
-          Alert.alert("Erro", "Ocorreu um erro ao atualizar o perfil.");
+          Alert.alert("Erro", "Ocorreu um erro ao atualizar a senha.");
         }
       }
     }
@@ -145,11 +163,20 @@ export default function PerfilUsuario() {
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => setModalVisible(true)}
+            onPress={() => setModalProfileVisible(true)}
           >
             <Text style={styles.buttonText}>Editar Perfil</Text>
           </TouchableOpacity>
 
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => setModalPasswordVisible(true)}
+          >
+            <Text style={styles.buttonText}>Alterar Senha</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.buttonsContainer}>
           <TouchableOpacity
             animation="bounceIn"
             style={styles.button}
@@ -157,23 +184,23 @@ export default function PerfilUsuario() {
           >
             <Text style={styles.buttonText}>Sair</Text>
           </TouchableOpacity>
-        </View>
 
-        <TouchableOpacity
-          animation="fadeInUp"
-          style={styles.deleteButton}
-          onPress={handleDeleteAccount}
-        >
-          <Text style={styles.buttonText}>Deletar Conta</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            animation="fadeInUp"
+            style={styles.deleteButton}
+            onPress={handleDeleteAccount}
+          >
+            <Text style={styles.buttonText}>Deletar Conta</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Modal de edição de perfil */}
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        visible={modalProfileVisible}
+        onRequestClose={() => setModalProfileVisible(false)}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
@@ -203,28 +230,60 @@ export default function PerfilUsuario() {
                 />
               </View>
 
+              <View style={styles.modalButtonsContainer}>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={handleSaveProfile}
+                >
+                  <Text style={styles.modalButtonText}>Salvar</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.modalButton, { backgroundColor: "#f44336" }]}
+                  onPress={() => {
+                    setModalProfileVisible(false);
+                    loadUserData();
+                  }}
+                >
+                  <Text style={styles.modalButtonText}>Cancelar</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de alteração de senha */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalPasswordVisible}
+        onRequestClose={() => setModalPasswordVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <ScrollView>
+              <Text style={styles.modalTitle}>Alterar Senha</Text>
+
               <Text style={styles.title}>Nova Senha</Text>
               <View style={styles.inputContainer}>
                 <TextInput
                   placeholder="Insira sua nova senha"
                   style={styles.inputWithoutBorder}
                   secureTextEntry={!isPasswordVisible}
-                  name="senha"
                   value={user.senha}
                   onChangeText={(text) => setUser({ ...user, senha: text })}
                 />
-                {user.senha && user.senha.length > 0 && (
-                  <TouchableOpacity
-                    onPress={togglePasswordVisibility}
-                    style={styles.eyeIcon}
-                  >
-                    <Ionicons
-                      name={isPasswordVisible ? "eye-off" : "eye"}
-                      size={24}
-                      color="#555"
-                    />
-                  </TouchableOpacity>
-                )}
+                <TouchableOpacity
+                  style={styles.iconContainer}
+                  onPress={togglePasswordVisibility}
+                >
+                  <Ionicons
+                    name={isPasswordVisible ? "eye-off" : "eye"}
+                    size={24}
+                    color="gray"
+                  />
+                </TouchableOpacity>
               </View>
 
               <Text style={styles.title}>Confirmar Senha</Text>
@@ -234,26 +293,24 @@ export default function PerfilUsuario() {
                   style={styles.inputWithoutBorder}
                   secureTextEntry={!isConfirmPasswordVisible}
                   value={confirmarSenha}
-                  onChangeText={setConfirmarSenha}
+                  onChangeText={(text) => setConfirmarSenha(text)}
                 />
-                {confirmarSenha.length > 0 && (
-                  <TouchableOpacity
-                    onPress={toggleConfirmPasswordVisibility}
-                    style={styles.eyeIcon}
-                  >
-                    <Ionicons
-                      name={isConfirmPasswordVisible ? "eye-off" : "eye"}
-                      size={24}
-                      color="#555"
-                    />
-                  </TouchableOpacity>
-                )}
+                <TouchableOpacity
+                  style={styles.iconContainer}
+                  onPress={toggleConfirmPasswordVisibility}
+                >
+                  <Ionicons
+                    name={isConfirmPasswordVisible ? "eye-off" : "eye"}
+                    size={24}
+                    color="gray"
+                  />
+                </TouchableOpacity>
               </View>
 
               <View style={styles.modalButtonsContainer}>
                 <TouchableOpacity
                   style={styles.modalButton}
-                  onPress={handleSave}
+                  onPress={handleSavePassword}
                 >
                   <Text style={styles.modalButtonText}>Salvar</Text>
                 </TouchableOpacity>
@@ -261,8 +318,8 @@ export default function PerfilUsuario() {
                 <TouchableOpacity
                   style={[styles.modalButton, { backgroundColor: "#f44336" }]}
                   onPress={() => {
-                    setModalVisible(false);
-                    loadUserData();
+                    setModalPasswordVisible(false);
+                    setConfirmarSenha("");
                   }}
                 >
                   <Text style={styles.modalButtonText}>Cancelar</Text>
@@ -321,11 +378,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   deleteButton: {
-    marginTop: 20,
     backgroundColor: "#f44336",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
+    margin: 5,
+    width: "40%",
   },
   loadingContainer: {
     flex: 1,
