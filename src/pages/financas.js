@@ -120,15 +120,15 @@ export default function Financas() {
         <Text style={styles.transactionTypeLabel}>Tipo de Transação:</Text>
         <View style={styles.transactionTypeContainer}>
           <TouchableOpacity
-            style={[styles.ganhoButton, financa.tipoTransacao === "Ganho" && styles.selectedButton]}
-            onPress={() => handleInputChange("tipoTransacao", "Ganho")}
+            style={[styles.receitaButton, financa.tipoTransacao === "Receita" && styles.selectedButton]}
+            onPress={() => handleInputChange("tipoTransacao", "Receita")}
           >
             <Text style={styles.transactionButtonText}>Receita <Icon name="plus" size={20} color="#FFF" /></Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.gastoButton, financa.tipoTransacao === "Gasto" && styles.selectedButton]}
-            onPress={() => handleInputChange("tipoTransacao", "Gasto")}
+            style={[styles.despesaButton, financa.tipoTransacao === "Despesa" && styles.selectedButton]}
+            onPress={() => handleInputChange("tipoTransacao", "Despesa")}
           >
             <Text style={styles.transactionButtonText}>Despesa <Icon name="minus" size={20} color="#FFF" /></Text>
           </TouchableOpacity>
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-between",
   },
-  ganhoButton: {
+  receitaButton: {
     flex: 1,
     backgroundColor: "#00C288",
     paddingVertical: 15,
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#1F74A7", 
   },
-  gastoButton: {
+  despesaButton: {
     flex: 1,
     backgroundColor: "#EC4E4E",
     paddingVertical: 15,
