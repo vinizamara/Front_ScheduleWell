@@ -69,7 +69,7 @@ export default function Login() {
   
       navigation.navigate("Agendas");
     } catch (error) {
-      Alert.alert("Erro no login", error.response.data.error);
+      Alert.alert("Atenção", error.response.data.error);
     }
   };  
 

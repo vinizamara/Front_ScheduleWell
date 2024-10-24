@@ -373,9 +373,8 @@ const styles = StyleSheet.create({
     fontFamily: "SuezOne_400Regular",
   },
   sectionTitle: {
-    lineHeight: 28,
+    fontFamily: "SuezOne_400Regular",
     fontSize: 25,
-    fontWeight: "bold",
     color: "#255573",
     marginTop: 30,
     marginBottom: 0,

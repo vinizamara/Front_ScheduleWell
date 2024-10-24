@@ -58,7 +58,7 @@ export default function Cadastro() {
       nome: name,
       email: email,
       senha: password,
-      confirmarSenha: password,
+      confirmarSenha: confirmPassword,
     };
 
     try {

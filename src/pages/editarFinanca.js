@@ -156,16 +156,16 @@ export default function EditarFinanca() {
         <View style={styles.transactionTypeContainer}>
           <TouchableOpacity
             style={[styles.ganhoButton, financa.tipoTransacao === "Ganho" && styles.selectedButton]}
-            onPress={() => handleInputChange("tipoTransacao", "Ganho")}
+            onPress={() => handleInputChange("tipoTransacao", "Receita")}
           >
-            <Text style={styles.transactionButtonText}>Ganho <Icon name="plus" size={20} color="#FFF" /></Text>
+            <Text style={styles.transactionButtonText}>Receita <Icon name="plus" size={20} color="#FFF" /></Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.gastoButton, financa.tipoTransacao === "Gasto" && styles.selectedButton]}
-            onPress={() => handleInputChange("tipoTransacao", "Gasto")}
+            onPress={() => handleInputChange("tipoTransacao", "Despesa")}
           >
-            <Text style={styles.transactionButtonText}>Gasto <Icon name="minus" size={20} color="#FFF" /></Text>
+            <Text style={styles.transactionButtonText}>Despesa <Icon name="minus" size={20} color="#FFF" /></Text>
           </TouchableOpacity>
         </View>
 
