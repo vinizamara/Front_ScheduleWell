@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
-  ScrollView,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -131,147 +130,144 @@ export default function EditarFinanca() {
 
   return (
     <ScrollView style={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Text style={styles.pageTitle}>Edição de Finanças</Text>
+    <View style={styles.container}>
+      <Text style={styles.pageTitle}>Edição de Finanças</Text>
 
-        <View style={styles.containerForm}>
-          <TextInput
-            style={styles.input}
-            placeholder="Título da Nota"
-            value={financa.tituloNota}
-            onChangeText={(value) => handleInputChange("tituloNota", value)}
+      <View style={styles.containerForm}>
+        <TextInput
+          style={styles.input}
+          placeholder="Título da Nota"
+          value={financa.tituloNota}
+          onChangeText={(value) => handleInputChange("tituloNota", value)}
+        />
+
+        <TextInput
+          style={[styles.input, styles.descriptionInput]}
+          placeholder="Descrição (opcional)"
+          value={financa.descricaoNota}
+          onChangeText={(value) => handleInputChange("descricaoNota", value)}
+          multiline={true}
+        />
+
+        <TouchableOpacity onPress={showDatePickerHandler} style={styles.input}>
+          <Text style={styles.dateText}>
+            {financa.dataNota.toLocaleDateString()}
+          </Text>
+        </TouchableOpacity>
+        {showDatePicker && (
+          <DateTimePicker
+            value={financa.dataNota}
+            mode="date"
+            display="default"
+            onChange={onChangeDate}
           />
+        )}
 
-          <TextInput
-            style={[styles.input, styles.descriptionInput]}
-            placeholder="Descrição (opcional)"
-            value={financa.descricaoNota}
-            onChangeText={(value) => handleInputChange("descricaoNota", value)}
-            multiline={true}
-          />
-
+        <Text style={styles.transactionTypeLabel}>Tipo de Transação:</Text>
+        <View style={styles.transactionTypeContainer}>
           <TouchableOpacity
-            onPress={showDatePickerHandler}
-            style={styles.input}
+            style={[
+              styles.receitaButton,
+              financa.tipoTransacao === "Receita" && styles.selectedButton,
+            ]}
+            onPress={() => handleInputChange("tipoTransacao", "Receita")}
           >
-            <Text style={styles.dateText}>
-              {financa.dataNota.toLocaleDateString()}
+            <Text style={styles.transactionButtonText}>
+              Receita <Icon name="plus" size={20} color="#FFF" />
             </Text>
           </TouchableOpacity>
-          {showDatePicker && (
-            <DateTimePicker
-              value={financa.dataNota}
-              mode="date"
-              display="default"
-              onChange={onChangeDate}
-            />
-          )}
 
-          <Text style={styles.transactionTypeLabel}>Tipo de Transação:</Text>
-          <View style={styles.transactionTypeContainer}>
-            <TouchableOpacity
-              style={[
-                styles.receitaButton,
-                financa.tipoTransacao === "Receita" && styles.selectedButton,
-              ]}
-              onPress={() => handleInputChange("tipoTransacao", "Receita")}
-            >
-              <Text style={styles.transactionButtonText}>
-                Receita <Icon name="plus" size={20} color="#FFF" />
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.despesaButton,
-                financa.tipoTransacao === "Despesa" && styles.selectedButton,
-              ]}
-              onPress={() => handleInputChange("tipoTransacao", "Despesa")}
-            >
-              <Text style={styles.transactionButtonText}>
-                Despesa <Icon name="minus" size={20} color="#FFF" />
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <TextInput
-            style={styles.input}
-            placeholder="Valor"
-            value={financa.valorNota}
-            onChangeText={(value) => handleInputChange("valorNota", value)}
-            keyboardType="numeric"
-          />
-
-          <Text style={styles.transactionTypeLabel}>Frequência:</Text>
-          <View style={styles.frequencyContainer}>
-            <TouchableOpacity
-              style={[
-                styles.frequencyButton,
-                financa.frequencia === "Diária" && styles.selectedButton,
-              ]}
-              onPress={() => handleInputChange("frequencia", "Diária")}
-            >
-              <Text style={styles.frequencyButtonText}>Diária</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.frequencyButton,
-                financa.frequencia === "Semanal" && styles.selectedButton,
-              ]}
-              onPress={() => handleInputChange("frequencia", "Semanal")}
-            >
-              <Text style={styles.frequencyButtonText}>Semanal</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.frequencyContainer}>
-            <TouchableOpacity
-              style={[
-                styles.frequencyButton,
-                financa.frequencia === "Mensal" && styles.selectedButton,
-              ]}
-              onPress={() => handleInputChange("frequencia", "Mensal")}
-            >
-              <Text style={styles.frequencyButtonText}>Mensal</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.frequencyButton,
-                financa.frequencia === "Anual" && styles.selectedButton,
-              ]}
-              onPress={() => handleInputChange("frequencia", "Anual")}
-            >
-              <Text style={styles.frequencyButtonText}>Anual</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.frequencyContainer}>
-            <TouchableOpacity
-              style={[
-                styles.frequencyButton,
-                financa.frequencia === "Única" && styles.selectedButton,
-              ]}
-              onPress={() => handleInputChange("frequencia", "Única")}
-            >
-              <Text style={styles.frequencyButtonText}>Única</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={[
+              styles.despesaButton,
+              financa.tipoTransacao === "Despesa" && styles.selectedButton,
+            ]}
+            onPress={() => handleInputChange("tipoTransacao", "Despesa")}
+          >
+            <Text style={styles.transactionButtonText}>
+              Despesa <Icon name="minus" size={20} color="#FFF" />
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.footer}>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.footerText}>Editar</Text>
-          </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Valor"
+          value={financa.valorNota}
+          onChangeText={(value) => handleInputChange("valorNota", value)}
+          keyboardType="numeric"
+        />
+
+        <Text style={styles.transactionTypeLabel}>Frequência:</Text>
+        <View style={styles.frequencyContainer}>
           <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={() => navigation.goBack()}
+            style={[
+              styles.frequencyButton,
+              financa.frequencia === "Diária" && styles.selectedButton,
+            ]}
+            onPress={() => handleInputChange("frequencia", "Diária")}
           >
-            <Text style={styles.footerText}>Voltar</Text>
+            <Text style={styles.frequencyButtonText}>Diária</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.frequencyButton,
+              financa.frequencia === "Semanal" && styles.selectedButton,
+            ]}
+            onPress={() => handleInputChange("frequencia", "Semanal")}
+          >
+            <Text style={styles.frequencyButtonText}>Semanal</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.frequencyContainer}>
+          <TouchableOpacity
+            style={[
+              styles.frequencyButton,
+              financa.frequencia === "Mensal" && styles.selectedButton,
+            ]}
+            onPress={() => handleInputChange("frequencia", "Mensal")}
+          >
+            <Text style={styles.frequencyButtonText}>Mensal</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.frequencyButton,
+              financa.frequencia === "Anual" && styles.selectedButton,
+            ]}
+            onPress={() => handleInputChange("frequencia", "Anual")}
+          >
+            <Text style={styles.frequencyButtonText}>Anual</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.frequencyContainer}>
+          <TouchableOpacity
+            style={[
+              styles.frequencyButton,
+              financa.frequencia === "Única" && styles.selectedButton,
+            ]}
+            onPress={() => handleInputChange("frequencia", "Única")}
+          >
+            <Text style={styles.frequencyButtonText}>Única</Text>
           </TouchableOpacity>
         </View>
       </View>
+
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.footerText}>Editar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.cancelButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.footerText}>Voltar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
     </ScrollView>
   );
 }
@@ -282,10 +278,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#E2EDF2",
     paddingTop: 50,
     alignItems: "center",
-  },
-  scrollContainer: {
-    flexGrow:1,
-    paddingBottom: 20,
   },
   pageTitle: {
     fontSize: 26,
