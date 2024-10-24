@@ -5,11 +5,14 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Platform,
   Alert,
   ScrollView,
 } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import sheets from "../axios/axios"; 
+import sheets from "../axios/axios"; // Importa o Axios configurado
+import Icon from "react-native-vector-icons/FontAwesome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function EditarFinanca() {
@@ -20,30 +23,41 @@ export default function EditarFinanca() {
   const [financa, setFinanca] = useState({
     tituloNota: "",
     descricaoNota: "",
-    dataNota: "",
+    dataNota: new Date(),
     valorNota: "",
     tipoTransacao: "",
-    frequencia: ""
+    frequencia: "",
   });
 
   const [userId, setUserId] = useState(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     const fetchUserId = async () => {
       try {
         const storedUserId = await AsyncStorage.getItem("userId");
-        setUserId(storedUserId ? parseInt(storedUserId) : null);
+        console.log("User ID recuperado:", storedUserId);
+        if (storedUserId) {
+          setUserId(parseInt(storedUserId)); // Atualiza o estado do userId
+        } else {
+          Alert.alert("Erro", "ID do usuário não encontrado.");
+        }
       } catch (error) {
-        console.error("Erro ao obter o ID do usuário:", error.message);
+        console.error("Erro ao obter o ID do usuário:", error);
       }
     };
 
-    fetchUserId();
-    fetchFinanca(userId);
-  }, [userId]);
+    fetchUserId(); // Chama a função para obter o ID do usuário
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      fetchFinanca(userId); // Chama a função para buscar a finança
+    }
+  }, [userId]); // Executa quando userId for alterado
 
   const fetchFinanca = async (userId) => {
-    if (!userId) return;
+    if (!userId) return; // Adiciona verificação aqui
 
     try {
       const response = await sheets.listarFinancas(userId);
@@ -53,7 +67,7 @@ export default function EditarFinanca() {
         setFinanca({
           tituloNota: finance.titulo,
           descricaoNota: finance.descricao,
-          dataNota: finance.data,
+          dataNota: new Date(finance.data),
           valorNota: finance.valor.toString(),
           tipoTransacao: finance.tipo_transacao,
           frequencia: finance.frequencia,
@@ -62,43 +76,56 @@ export default function EditarFinanca() {
         Alert.alert("Erro", "Finança não encontrada.");
       }
     } catch (error) {
-      console.error("Erro na busca de notas:", error);
       Alert.alert("Erro na busca de notas", error.response.data.error);
     }
   };
 
+  const showDatePickerHandler = () => {
+    setShowDatePicker(true);
+  };
+
+  const onChangeDate = (event, selectedDate) => {
+    if (event.type === "dismissed") {
+      return; // Se o usuário cancelar o seletor de data
+    }
+
+    const currentDate = selectedDate || financa.dataNota;
+    setShowDatePicker(Platform.OS === "ios");
+    setFinanca((prevState) => ({ ...prevState, dataNota: currentDate }));
+  };
+
   const handleInputChange = (name, value) => {
-    setFinanca(prevState => ({ ...prevState, [name]: value }));
+    setFinanca((prevState) => ({ ...prevState, [name]: value }));
   };
 
   const formatDate = (date) => {
     const d = new Date(date);
-    const year = d.getUTCFullYear();
-    const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(d.getUTCDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    // Aplica a correção de fuso horário apenas ao salvar a data
+    const adjustedDate = new Date(
+      d.getTime() + Math.abs(d.getTimezoneOffset() * 60000)
+    );
+    const year = adjustedDate.getFullYear();
+    const month = String(adjustedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(adjustedDate.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`; // Formato 'YYYY-MM-DD'
   };
 
   const handleSave = async () => {
-    const financeData = {
-      fk_id_usuario: userId,
-      titulo: financa.tituloNota,
-      descricao: financa.descricaoNota,
-      data: formatDate(financa.dataNota),
-      valor: parseFloat(financa.valorNota),
-      tipo_transacao: financa.tipoTransacao,
-      frequencia: financa.frequencia,
-    };
-
-    console.log(financeData);
-
     try {
-      const response = await sheets.atualizarFinanca(id, financeData);
+      const response = await sheets.atualizarFinanca(id, {
+        fk_id_usuario: userId,
+        titulo: financa.tituloNota,
+        descricao: financa.descricaoNota,
+        data: formatDate(financa.dataNota),
+        valor: parseFloat(financa.valorNota),
+        tipo_transacao: financa.tipoTransacao,
+        frequencia: financa.frequencia,
+      });
+
       Alert.alert("Sucesso", response.data.message);
       navigation.navigate("Agendas");
     } catch (error) {
-      console.error("Erro:", error);
-      Alert.alert("Erro na atualização de nota", error.response.data.message);
+      Alert.alert("Erro da API", error.response.data.error);
     }
   };
 
@@ -112,60 +139,86 @@ export default function EditarFinanca() {
             style={styles.input}
             placeholder="Título da Nota"
             value={financa.tituloNota}
-            onChangeText={value => handleInputChange("tituloNota", value)}
+            onChangeText={(value) => handleInputChange("tituloNota", value)}
           />
 
           <TextInput
             style={[styles.input, styles.descriptionInput]}
             placeholder="Descrição (opcional)"
             value={financa.descricaoNota}
-            onChangeText={value => handleInputChange("descricaoNota", value)}
+            onChangeText={(value) => handleInputChange("descricaoNota", value)}
             multiline={true}
           />
 
-          <TextInput
+          <TouchableOpacity
+            onPress={showDatePickerHandler}
             style={styles.input}
-            placeholder="Data"
-            value={formatDate(financa.dataNota)}
-            editable={false}
-          />
+          >
+            <Text style={styles.dateText}>
+              {financa.dataNota.toLocaleDateString()}
+            </Text>
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={financa.dataNota}
+              mode="date"
+              display="default"
+              onChange={onChangeDate}
+            />
+          )}
+
+          <Text style={styles.transactionTypeLabel}>Tipo de Transação:</Text>
+          <View style={styles.transactionTypeContainer}>
+            <TouchableOpacity
+              style={[
+                styles.receitaButton,
+                financa.tipoTransacao === "Receita" && styles.selectedButton,
+              ]}
+              onPress={() => handleInputChange("tipoTransacao", "Receita")}
+            >
+              <Text style={styles.transactionButtonText}>
+                Receita <Icon name="plus" size={20} color="#FFF" />
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.despesaButton,
+                financa.tipoTransacao === "Despesa" && styles.selectedButton,
+              ]}
+              onPress={() => handleInputChange("tipoTransacao", "Despesa")}
+            >
+              <Text style={styles.transactionButtonText}>
+                Despesa <Icon name="minus" size={20} color="#FFF" />
+              </Text>
+            </TouchableOpacity>
+          </View>
 
           <TextInput
             style={styles.input}
             placeholder="Valor"
             value={financa.valorNota}
-            onChangeText={value => handleInputChange("valorNota", value)}
+            onChangeText={(value) => handleInputChange("valorNota", value)}
             keyboardType="numeric"
           />
-
-          <Text style={styles.transactionTypeLabel}>Tipo de Transação:</Text>
-          <View style={styles.transactionTypeContainer}>
-            <TouchableOpacity
-              style={[styles.receitaButton, financa.tipoTransacao === "Receita" && styles.selectedButton]}
-              onPress={() => handleInputChange("tipoTransacao", "Receita")}
-            >
-              <Text style={styles.transactionButtonText}>Receita</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.despesaButton, financa.tipoTransacao === "Despesa" && styles.selectedButton]}
-              onPress={() => handleInputChange("tipoTransacao", "Despesa")}
-            >
-              <Text style={styles.transactionButtonText}>Despesa</Text>
-            </TouchableOpacity>
-          </View>
 
           <Text style={styles.transactionTypeLabel}>Frequência:</Text>
           <View style={styles.frequencyContainer}>
             <TouchableOpacity
-              style={[styles.frequencyButton, financa.frequencia === "Diária" && styles.selectedButton]}
+              style={[
+                styles.frequencyButton,
+                financa.frequencia === "Diária" && styles.selectedButton,
+              ]}
               onPress={() => handleInputChange("frequencia", "Diária")}
             >
               <Text style={styles.frequencyButtonText}>Diária</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.frequencyButton, financa.frequencia === "Semanal" && styles.selectedButton]}
+              style={[
+                styles.frequencyButton,
+                financa.frequencia === "Semanal" && styles.selectedButton,
+              ]}
               onPress={() => handleInputChange("frequencia", "Semanal")}
             >
               <Text style={styles.frequencyButtonText}>Semanal</Text>
@@ -174,14 +227,20 @@ export default function EditarFinanca() {
 
           <View style={styles.frequencyContainer}>
             <TouchableOpacity
-              style={[styles.frequencyButton, financa.frequencia === "Mensal" && styles.selectedButton]}
+              style={[
+                styles.frequencyButton,
+                financa.frequencia === "Mensal" && styles.selectedButton,
+              ]}
               onPress={() => handleInputChange("frequencia", "Mensal")}
             >
               <Text style={styles.frequencyButtonText}>Mensal</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.frequencyButton, financa.frequencia === "Anual" && styles.selectedButton]}
+              style={[
+                styles.frequencyButton,
+                financa.frequencia === "Anual" && styles.selectedButton,
+              ]}
               onPress={() => handleInputChange("frequencia", "Anual")}
             >
               <Text style={styles.frequencyButtonText}>Anual</Text>
@@ -190,7 +249,10 @@ export default function EditarFinanca() {
 
           <View style={styles.frequencyContainer}>
             <TouchableOpacity
-              style={[styles.frequencyButton, financa.frequencia === "Única" && styles.selectedButton]}
+              style={[
+                styles.frequencyButton,
+                financa.frequencia === "Única" && styles.selectedButton,
+              ]}
               onPress={() => handleInputChange("frequencia", "Única")}
             >
               <Text style={styles.frequencyButtonText}>Única</Text>
@@ -200,10 +262,13 @@ export default function EditarFinanca() {
 
         <View style={styles.footer}>
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.footerText}>Salvar</Text>
+            <Text style={styles.footerText}>Editar</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.footerText}>Cancelar</Text>
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.footerText}>Voltar</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -213,12 +278,13 @@ export default function EditarFinanca() {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: "#E2EDF2",
     paddingTop: 50,
     alignItems: "center",
   },
   scrollContainer: {
-    flexGrow: 1,
+    flexGrow:1,
     paddingBottom: 20,
   },
   pageTitle: {
@@ -232,27 +298,22 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: "#C6DBE4",
-    borderColor: "#1F74A7", 
+    borderColor: "#7A7A7A",
     borderWidth: 1,
     borderRadius: 8,
     height: 50,
     paddingHorizontal: 15,
-    paddingVertical: 10,
     marginBottom: 15,
     justifyContent: "center",
     fontSize: 18,
+    paddingVertical: 10,
   },
   descriptionInput: {
     height: 100,
-    borderColor: "#1F74A7", 
-    borderWidth: 1,
-    borderRadius: 8,
-    backgroundColor: "#C6DBE4",
-    paddingHorizontal: 15,
     textAlignVertical: "top",
   },
   transactionTypeContainer: {
-    flexDirection: "row", 
+    flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 15,
   },
@@ -269,7 +330,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginHorizontal: 5,
     borderWidth: 1,
-    borderColor: "#1F74A7", 
+    borderColor: "#7A7A7A",
   },
   despesaButton: {
     flex: 1,
@@ -279,7 +340,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginHorizontal: 5,
     borderWidth: 1,
-    borderColor: "#1F74A7", 
+    borderColor: "#7A7A7A",
   },
   selectedButton: {
     backgroundColor: "#255573",
@@ -296,14 +357,14 @@ const styles = StyleSheet.create({
   },
   frequencyButton: {
     flex: 1,
-    backgroundColor: "#1F74A7",
+    backgroundColor: "#2884BB",
     paddingVertical: 15,
     alignItems: "center",
     borderRadius: 8,
     marginHorizontal: 5,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: "#1F74A7", 
+    borderColor: "#7A7A7A",
   },
   frequencyButtonText: {
     fontSize: 18,
@@ -324,7 +385,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   cancelButton: {
-    backgroundColor: "#EC4E4E",
+    backgroundColor: "#FF4B4B",
     paddingVertical: 15,
     paddingHorizontal: 25,
     borderRadius: 8,
@@ -334,5 +395,9 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontSize: 18,
     textAlign: "center",
+  },
+  dateText: {
+    fontSize: 16,
+    color: "#555",
   },
 });
