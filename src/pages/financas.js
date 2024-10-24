@@ -123,14 +123,14 @@ export default function Financas() {
             style={[styles.ganhoButton, financa.tipoTransacao === "Ganho" && styles.selectedButton]}
             onPress={() => handleInputChange("tipoTransacao", "Ganho")}
           >
-            <Text style={styles.transactionButtonText}>Ganho <Icon name="plus" size={20} color="#FFF" /></Text>
+            <Text style={styles.transactionButtonText}>Receita <Icon name="plus" size={20} color="#FFF" /></Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.gastoButton, financa.tipoTransacao === "Gasto" && styles.selectedButton]}
             onPress={() => handleInputChange("tipoTransacao", "Gasto")}
           >
-            <Text style={styles.transactionButtonText}>Gasto <Icon name="minus" size={20} color="#FFF" /></Text>
+            <Text style={styles.transactionButtonText}>Despesa <Icon name="minus" size={20} color="#FFF" /></Text>
           </TouchableOpacity>
         </View>
 

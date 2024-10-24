@@ -134,9 +134,9 @@ export default function ControleFinanceiro() {
           editable={false}
         />
 
-        <Text style={[styles.title, {marginTop: "8%"}]}>Gasto e Ganho Mensal</Text>
+        <Text style={[styles.title, {marginTop: "8%"}]}>Despesa e Receita Mensal</Text>
 
-        <Text style={styles.label}>Gasto:</Text>
+        <Text style={styles.label}>Despesa:</Text>
         <TextInput
           style={styles.input}
           value={gastoMensal}
@@ -144,7 +144,7 @@ export default function ControleFinanceiro() {
           editable={false}
         />
 
-        <Text style={styles.label}>Ganho:</Text>
+        <Text style={styles.label}>Receita:</Text>
         <TextInput
           style={styles.input}
           value={ganhoMensal}

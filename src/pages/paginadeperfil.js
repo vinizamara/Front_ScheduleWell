@@ -75,21 +75,24 @@ export default function PerfilUsuario() {
         const userId = await AsyncStorage.getItem("userId");
         const response = await sheets.updateUser(userId, user);
         Alert.alert("Sucesso", response.data.message);
-  
+
         await AsyncStorage.setItem("userName", user.nome);
         await AsyncStorage.setItem("userEmail", user.email);
-  
+
         setModalVisible(false);
-        setNovaSenha("");
         setConfirmarSenha("");
       } catch (error) {
         console.log(error.response);
+        if (error.response && error.response.data && error.response.data.error) {
+          Alert.alert("Erro", error.response.data.error);
+        } else {
+          Alert.alert("Erro", "Ocorreu um erro ao atualizar o perfil.");
+        }
       }
     }
   };
-  
+
   const handleLogout = async () => {
-    // Remova todos os itens relacionados ao login do AsyncStorage
     await AsyncStorage.removeItem("authToken");
     await AsyncStorage.removeItem("userLoggedIn");
     await AsyncStorage.removeItem("userName");
@@ -291,44 +294,35 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
+    fontSize: 24,
     fontFamily: "SuezOne_400Regular",
-    fontSize: 20,
-    color: "#255573",
-    textAlign: "center",
+    color: "#333",
   },
   buttonsContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-    marginVertical: 10,
+    justifyContent: "space-between",
+    width: "80%",
+    marginBottom: 20,
   },
   button: {
-    backgroundColor: "#1F74A7",
-    paddingVertical: 10,
+    backgroundColor: "#2196F3",
+    paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 8,
-    margin: 5,
-    width: "40%",
+    borderRadius: 5,
+    width: "45%",
+    alignItems: "center",
   },
   buttonText: {
-    color: "#FFF",
+    color: "#fff",
     fontSize: 16,
-    fontWeight: "bold",
-    fontFamily: "SuezOne_400Regular",
-    textAlign: "center",
   },
   deleteButton: {
-    marginTop: 20,
     backgroundColor: "#f44336",
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
+    borderRadius: 5,
+    width: "80%",
     alignItems: "center",
-    backgroundColor: "#E2EDF2",
   },
   modalContainer: {
     flex: 1,
@@ -338,34 +332,32 @@ const styles = StyleSheet.create({
   },
   modalView: {
     width: "80%",
-    backgroundColor: "white",
-    borderRadius: 10,
+    backgroundColor: "#fff",
+    borderRadius: 20,
     padding: 20,
     alignItems: "center",
+    elevation: 5,
   },
   modalTitle: {
-    fontFamily: "SuezOne_400Regular",
     fontSize: 24,
-    color: "#255573",
+    fontFamily: "SuezOne_400Regular",
     marginBottom: 20,
   },
   inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    marginBottom: 12,
     width: "100%",
+    marginBottom: 15,
   },
   inputWithoutBorder: {
-    fontFamily: "SuezOne_400Regular",
-    height: 40,
-    fontSize: 16,
-    paddingHorizontal: 8,
-    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    width: "100%",
   },
   eyeIcon: {
     position: "absolute",
     right: 10,
+    top: 10,
   },
   modalButtonsContainer: {
     flexDirection: "row",
@@ -374,18 +366,15 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   modalButton: {
-    backgroundColor: "#1F74A7",
-    paddingVertical: 10,
+    backgroundColor: "#2196F3",
+    paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 8,
-    marginHorizontal: 5,
-    flex: 1,
+    borderRadius: 5,
+    width: "45%",
+    alignItems: "center",
   },
   modalButtonText: {
-    color: "#FFF",
+    color: "#fff",
     fontSize: 16,
-    fontWeight: "bold",
-    fontFamily: "SuezOne_400Regular",
-    textAlign: "center",
   },
 });
