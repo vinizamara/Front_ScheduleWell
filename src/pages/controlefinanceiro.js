@@ -21,8 +21,8 @@ export default function ControleFinanceiro() {
   const navigation = useNavigation();
 
   const [rendaTotal, setRendaTotal] = useState("");
-  const [gastoMensal, setGastoMensal] = useState("");
-  const [ganhoMensal, setGanhoMensal] = useState("");
+  const [despesaMensal, setDespesaMensal] = useState("");
+  const [receitaMensal, setReceitaMensal] = useState("");
   const [saldo, setSaldo] = useState("");
   const [transacoes, setTransacoes] = useState([]); // Atualizado para uma lista unificada de transações
   const [loading, setLoading] = useState(true);
@@ -41,8 +41,8 @@ export default function ControleFinanceiro() {
         // Chamada para obter resumo financeiro
         const financeiroResponse = await sheets.resumoFinanceiro(id);
         const financeiroData = financeiroResponse.data;
-        //Chamada para obter renda total
-        const rendaTotalResponse = await sheets.obterRendaTotal(id)
+        // Chamada para obter renda total
+        const rendaTotalResponse = await sheets.obterRendaTotal(id);
         const rendaTotalData = rendaTotalResponse.data;
 
         setRendaTotal(
@@ -50,15 +50,18 @@ export default function ControleFinanceiro() {
             ? rendaTotalData.renda_total.toString()
             : ""
         );
-        setGastoMensal(
-          financeiroData.gastos ? financeiroData.gastos.toString() : "0"
+        setDespesaMensal(
+          financeiroData.despesa ? financeiroData.despesa.toString() : "0"
         );
-        setGanhoMensal(
-          financeiroData.ganhos ? financeiroData.ganhos.toString() : "0"
+        setReceitaMensal(
+          financeiroData.receita ? financeiroData.receita.toString() : "0"
         );
         setSaldo(financeiroData.saldo ? financeiroData.saldo.toString() : "0");
       } catch (error) {
-        console.log("Erro ao buscar os dados financeiros:", error.response.data.error);
+        console.log(
+          "Erro ao buscar os dados financeiros:",
+          error.response.data.error
+        );
       }
 
       try {
@@ -125,7 +128,7 @@ export default function ControleFinanceiro() {
         </AnimatableText>
       </View>
 
-      <View style={[styles.containerForm, {marginTop: 0}]}>
+      <View style={[styles.containerForm, { marginTop: 0 }]}>
         <Text style={styles.label}>Renda Total:</Text>
         <TextInput
           style={styles.input}
@@ -134,12 +137,14 @@ export default function ControleFinanceiro() {
           editable={false}
         />
 
-        <Text style={[styles.title, {marginTop: "8%"}]}>Despesa e Receita Mensal</Text>
+        <Text style={[styles.title, { marginTop: "8%" }]}>
+          Despesa e Receita Mensal
+        </Text>
 
         <Text style={styles.label}>Despesa:</Text>
         <TextInput
           style={styles.input}
-          value={gastoMensal}
+          value={despesaMensal}
           placeholder="0"
           editable={false}
         />
@@ -147,7 +152,7 @@ export default function ControleFinanceiro() {
         <Text style={styles.label}>Receita:</Text>
         <TextInput
           style={styles.input}
-          value={ganhoMensal}
+          value={receitaMensal}
           placeholder="0"
           editable={false}
         />
@@ -165,30 +170,53 @@ export default function ControleFinanceiro() {
         <View style={styles.listContainer}>
           {transacoes.length === 0 ? (
             <View>
-              <View  style={styles.transacaoItem}>
-                <Text style={styles.transacaoTextCabecalho}>titulo</Text>
-                <Text style={styles.transacaoTextCabecalho}>tipo de transacao</Text>
-                <Text style={styles.transacaoTextCabecalho}>valor</Text>
-                <Text style={styles.transacaoTextCabecalho}>frequencia</Text>
+              <View style={styles.transacaoItem}>
+                <Text style={styles.transacaoTextCabecalho}>Título</Text>
+                <Text style={styles.transacaoTextCabecalho}>
+                  Tipo de Transação
+                </Text>
+                <Text style={styles.transacaoTextCabecalho}>Valor</Text>
+                <Text style={styles.transacaoTextCabecalho}>Frequência</Text>
               </View>
-              <Text style={[styles.emptyText, {marginTop: 20}]}>Nenhuma transação.</Text>
+              <Text style={[styles.emptyText, { marginTop: 20 }]}>
+                Nenhuma transação.
+              </Text>
             </View>
           ) : (
             <View>
-              <View  style={styles.transacaoItem}>
-                <Text style={styles.transacaoTextCabecalho}>titulo</Text>
-                <Text style={styles.transacaoTextCabecalho}>tipo de transacao</Text>
-                <Text style={styles.transacaoTextCabecalho}>valor</Text>
-                <Text style={styles.transacaoTextCabecalho}>frequencia</Text>
+              <View style={styles.transacaoItem}>
+                <Text style={styles.transacaoTextCabecalho}>Título</Text>
+                <Text style={styles.transacaoTextCabecalho}>
+                  Tipo de Transação
+                </Text>
+                <Text style={styles.transacaoTextCabecalho}>Valor</Text>
+                <Text style={styles.transacaoTextCabecalho}>Frequência</Text>
               </View>
-              {transacoes.map((transacao) => (
-              <View key={transacao.id_financa} style={styles.transacaoItem}>
-                <Text style={styles.transacaoText}>{transacao.titulo}</Text>
-                <Text style={styles.transacaoText}>{transacao.tipo_transacao}</Text>
-                <Text style={styles.transacaoText}>{transacao.valor}</Text>
-                <Text style={styles.transacaoText}>{transacao.frequencia}</Text>
-              </View>
-            ))}
+              {transacoes.map((transacao, index) => (
+                <View
+                  key={transacao.id_financa}
+                  style={[
+                    styles.transacaoItem,
+                    index % 2 === 0 ? styles.evenRow : styles.oddRow,
+                  ]}
+                >
+                  <Text style={styles.transacaoText}>{transacao.titulo}</Text>
+                  <Text
+                    style={[
+                      styles.transacaoText,
+                      transacao.tipo_transacao === "Receita"
+                        ? styles.receitaText
+                        : styles.despesaText,
+                    ]}
+                  >
+                    {transacao.tipo_transacao}
+                  </Text>
+                  <Text style={styles.transacaoText}>{transacao.valor}</Text>
+                  <Text style={styles.transacaoText}>
+                    {transacao.frequencia}
+                  </Text>
+                </View>
+              ))}
             </View>
           )}
         </View>
@@ -245,35 +273,46 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: "#C6DBE4",
   },
-  emptyText: {
-    textAlign: "center",
-    color: "#A9A9A9",
-  },
   transacaoItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 5,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
-  },
-  transacaoText: {
-    fontSize: 16,
-    color: "#000",
-  },
-  transacaoText: {
-    fontSize: 16,
-    color: "#000",
+    backgroundColor: "#C6DBE4",
   },
   transacaoTextCabecalho: {
+    flex: 1,
+    fontWeight: "bold",
+    fontSize: 15,
+    color: "#255573",
+    width: "25%",
+    alignSelf: "center",
+    textAlign: "center",
+  },
+  transacaoText: {
+    flex: 1,
+    fontSize: 15,
+    width: "20%",
+    alignSelf: "center",
+    textAlign: "center",
+  },
+  receitaText: {
+    color: "#00C288",
+  },
+  despesaText: {
+    color: "#EC4E4E",
+  },
+  evenRow: {
+    backgroundColor: "#D7E5EC",
+  },
+  oddRow: {
+    backgroundColor: "#C6DBE4",
+  },
+  emptyText: {
     fontSize: 16,
     color: "#255573",
-  },
-  iconContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  actionButton: {
-    marginHorizontal: 5,
+    textAlign: "center",
   },
 });
