@@ -71,7 +71,7 @@ export default function Cadastro() {
 
         navigation.navigate("Login");
     } catch (error) {
-      Alert.alert("Erro", error.response.data.error);
+      Alert.alert("Atenção", error.response.data.error);
     }
   };
 
