@@ -7,10 +7,11 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
+  ScrollView,
 } from "react-native";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from "@react-navigation/native";
-import sheets from "../axios/axios"; // Importa o Axios configurado
+import sheets from "../axios/axios"; 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -25,7 +26,7 @@ export default function Financas() {
     tipoTransacao: "",
     frequencia: ""
   });
-  
+
   const [userId, setUserId] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -33,10 +34,10 @@ export default function Financas() {
     const fetchUserId = async () => {
       try {
         const storedUserId = await AsyncStorage.getItem("userId");
-        console.log("User ID recuperado:", storedUserId); // Log do userId
-        setUserId(storedUserId ? parseInt(storedUserId) : null); // Converte para número se não for null
+        console.log("User ID recuperado:", storedUserId);
+        setUserId(storedUserId ? parseInt(storedUserId) : null);
       } catch (error) {
-        console.error("Erro ao obter o ID do usuário:", error.response.message.error);
+        console.error("Erro ao obter o ID do usuário:", error.message);
       }
     };
 
@@ -47,11 +48,14 @@ export default function Financas() {
     setShowDatePicker(true);
   };
 
-  //Função para atualizar o id da nota
   const onChangeDate = (event, selectedDate) => {
     const currentDate = selectedDate || financa.dataNota;
     setShowDatePicker(Platform.OS === 'ios');
-    setFinanca(prevState => ({ ...prevState, dataNota: currentDate }));
+
+    // Ajustar a data para o início do dia
+    const adjustedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+    console.log("Data ajustada:", formatDate(adjustedDate)); // Log da data ajustada
+    setFinanca(prevState => ({ ...prevState, dataNota: adjustedDate }));
   };
 
   const handleInputChange = (name, value) => {
@@ -60,149 +64,158 @@ export default function Financas() {
 
   const formatDate = (date) => {
     const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`; // Formato 'YYYY-MM-DD'
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
-  //Função para criar a nota
   const handleSave = async () => {
+    const financeData = {
+      fk_id_usuario: userId,
+      titulo: financa.tituloNota,
+      descricao: financa.descricaoNota,
+      data: formatDate(financa.dataNota),
+      valor: parseFloat(financa.valorNota),
+      tipo_transacao: financa.tipoTransacao,
+      frequencia: financa.frequencia,
+    };
+
+    console.log(financeData); // Log para verificar os dados
+
     try {
-      const response = await sheets.criarFinanca({
-        fk_id_usuario: userId,
-        titulo: financa.tituloNota,
-        descricao: financa.descricaoNota,
-        data: formatDate(financa.dataNota),
-        valor: parseFloat(financa.valorNota),
-        tipo_transacao: financa.tipoTransacao,
-        frequencia: financa.frequencia,
-      });
-        Alert.alert("Sucesso", response.data.message);
-        navigation.navigate("Agendas");
+      const response = await sheets.criarFinanca(financeData);
+      Alert.alert("Sucesso", response.data.message);
+      navigation.navigate("Agendas");
     } catch (error) {
-        Alert.alert("Erro na criação de nota", error.response.data.message);
+      console.error("Erro:", error); // Log do erro completo
+      Alert.alert("Erro na criação de nota", error.response.data.message);
     }
-  };  
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.pageTitle}>Criação de Finanças</Text>
+    <ScrollView style={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Text style={styles.pageTitle}>Criação de Finanças</Text>
 
-      <View style={styles.containerForm}>
-        <TextInput
-          style={styles.input}
-          placeholder="Título da Nota"
-          value={financa.tituloNota}
-          onChangeText={value => handleInputChange("tituloNota", value)}
-        />
-
-        <TextInput
-          style={[styles.input, styles.descriptionInput]}
-          placeholder="Descrição (opcional)"
-          value={financa.descricaoNota}
-          onChangeText={value => handleInputChange("descricaoNota", value)}
-          multiline={true}
-        />
-
-        <TouchableOpacity onPress={showDatePickerHandler} style={styles.input}>
-          <Text style={styles.dateText}>{financa.dataNota.toLocaleDateString()}</Text>
-        </TouchableOpacity>
-        {showDatePicker && (
-          <DateTimePicker
-            value={financa.dataNota}
-            mode="date"
-            display="default"
-            onChange={onChangeDate}
+        <View style={styles.containerForm}>
+          <TextInput
+            style={styles.input}
+            placeholder="Título da Nota"
+            value={financa.tituloNota}
+            onChangeText={value => handleInputChange("tituloNota", value)}
           />
-        )}
 
-        <Text style={styles.transactionTypeLabel}>Tipo de Transação:</Text>
-        <View style={styles.transactionTypeContainer}>
-          <TouchableOpacity
-            style={[styles.receitaButton, financa.tipoTransacao === "Receita" && styles.selectedButton]}
-            onPress={() => handleInputChange("tipoTransacao", "Receita")}
-          >
-            <Text style={styles.transactionButtonText}>Receita <Icon name="plus" size={20} color="#FFF" /></Text>
-          </TouchableOpacity>
+          <TextInput
+            style={[styles.input, styles.descriptionInput]}
+            placeholder="Descrição (opcional)"
+            value={financa.descricaoNota}
+            onChangeText={value => handleInputChange("descricaoNota", value)}
+            multiline={true}
+          />
 
-          <TouchableOpacity
-            style={[styles.despesaButton, financa.tipoTransacao === "Despesa" && styles.selectedButton]}
-            onPress={() => handleInputChange("tipoTransacao", "Despesa")}
-          >
-            <Text style={styles.transactionButtonText}>Despesa <Icon name="minus" size={20} color="#FFF" /></Text>
+          <TouchableOpacity onPress={showDatePickerHandler} style={styles.input}>
+            <Text style={styles.dateText}>{formatDate(financa.dataNota)}</Text>
           </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={financa.dataNota}
+              mode="date"
+              display="default"
+              onChange={onChangeDate}
+            />
+          )}
+
+          <Text style={styles.transactionTypeLabel}>Tipo de Transação:</Text>
+          <View style={styles.transactionTypeContainer}>
+            <TouchableOpacity
+              style={[styles.receitaButton, financa.tipoTransacao === "Receita" && styles.selectedButton]}
+              onPress={() => handleInputChange("tipoTransacao", "Receita")}
+            >
+              <Text style={styles.transactionButtonText}>Receita <Icon name="plus" size={20} color="#FFF" /></Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.despesaButton, financa.tipoTransacao === "Despesa" && styles.selectedButton]}
+              onPress={() => handleInputChange("tipoTransacao", "Despesa")}
+            >
+              <Text style={styles.transactionButtonText}>Despesa <Icon name="minus" size={20} color="#FFF" /></Text>
+            </TouchableOpacity>
+          </View>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Valor"
+            value={financa.valorNota}
+            onChangeText={value => handleInputChange("valorNota", value)}
+            keyboardType="numeric"
+          />
+
+          <Text style={styles.transactionTypeLabel}>Frequência:</Text>
+          <View style={styles.frequencyContainer}>
+            <TouchableOpacity
+              style={[styles.frequencyButton, financa.frequencia === "Diária" && styles.selectedButton]}
+              onPress={() => handleInputChange("frequencia", "Diária")}
+            >
+              <Text style={styles.frequencyButtonText}>Diária</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.frequencyButton, financa.frequencia === "Semanal" && styles.selectedButton]}
+              onPress={() => handleInputChange("frequencia", "Semanal")}
+            >
+              <Text style={styles.frequencyButtonText}>Semanal</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.frequencyContainer}>
+            <TouchableOpacity
+              style={[styles.frequencyButton, financa.frequencia === "Mensal" && styles.selectedButton]}
+              onPress={() => handleInputChange("frequencia", "Mensal")}
+            >
+              <Text style={styles.frequencyButtonText}>Mensal</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.frequencyButton, financa.frequencia === "Anual" && styles.selectedButton]}
+              onPress={() => handleInputChange("frequencia", "Anual")}
+            >
+              <Text style={styles.frequencyButtonText}>Anual</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.frequencyContainer}>
+            <TouchableOpacity
+              style={[styles.frequencyButton, financa.frequencia === "Única" && styles.selectedButton]}
+              onPress={() => handleInputChange("frequencia", "Única")}
+            >
+              <Text style={styles.frequencyButtonText}>Única</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Valor"
-          value={financa.valorNota}
-          onChangeText={value => handleInputChange("valorNota", value)}
-          keyboardType="numeric"
-        />
-
-        <Text style={styles.transactionTypeLabel}>Frequência:</Text>
-        <View style={styles.frequencyContainer}>
-          <TouchableOpacity
-            style={[styles.frequencyButton, financa.frequencia === "Diária" && styles.selectedButton]}
-            onPress={() => handleInputChange("frequencia", "Diária")}
-          >
-            <Text style={styles.frequencyButtonText}>Diária</Text>
+        <View style={styles.footer}>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <Text style={styles.footerText}>Salvar</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.frequencyButton, financa.frequencia === "Semanal" && styles.selectedButton]}
-            onPress={() => handleInputChange("frequencia", "Semanal")}
-          >
-            <Text style={styles.frequencyButtonText}>Semanal</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.frequencyContainer}>
-          <TouchableOpacity
-            style={[styles.frequencyButton, financa.frequencia === "Mensal" && styles.selectedButton]}
-            onPress={() => handleInputChange("frequencia", "Mensal")}
-          >
-            <Text style={styles.frequencyButtonText}>Mensal</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.frequencyButton, financa.frequencia === "Anual" && styles.selectedButton]}
-            onPress={() => handleInputChange("frequencia", "Anual")}
-          >
-            <Text style={styles.frequencyButtonText}>Anual</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.frequencyContainer}>
-          <TouchableOpacity
-            style={[styles.frequencyButton, financa.frequencia === "Única" && styles.selectedButton]}
-            onPress={() => handleInputChange("frequencia", "Única")}
-          >
-            <Text style={styles.frequencyButtonText}>Única</Text>
+          <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
+            <Text style={styles.footerText}>Cancelar</Text>
           </TouchableOpacity>
         </View>
       </View>
-
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.footerText}>Salvar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.footerText}>Cancelar</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#E2EDF2",
     paddingTop: 50,
     alignItems: "center",
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
   pageTitle: {
     fontSize: 26,
@@ -279,7 +292,7 @@ const styles = StyleSheet.create({
   },
   frequencyButton: {
     flex: 1,
-    backgroundColor: "#1F74A7", // Alterado para a cor #1F74A7
+    backgroundColor: "#1F74A7",
     paddingVertical: 15,
     alignItems: "center",
     borderRadius: 8,
@@ -299,7 +312,7 @@ const styles = StyleSheet.create({
     marginTop: "10%",
   },
   saveButton: {
-    backgroundColor: "#1F74A7", // Botão Salvar
+    backgroundColor: "#1F74A7",
     paddingVertical: 15,
     paddingHorizontal: 25,
     borderRadius: 8,
