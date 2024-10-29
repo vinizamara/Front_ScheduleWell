@@ -99,6 +99,18 @@ export default function EditarAnotacao() {
     return `${year}-${month}-${day}`; // Formato 'YYYY-MM-DD'
   };
 
+  const formatDateExibition = (date) => {
+    const d = new Date(date);
+    // Aplica a correção de fuso horário apenas ao salvar a data
+    const adjustedDate = new Date(
+      d.getTime() + Math.abs(d.getTimezoneOffset() * 60000)
+    );
+    const year = adjustedDate.getFullYear();
+    const month = String(adjustedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(adjustedDate.getDate()).padStart(2, "0");
+    return `${day}/${month}/${year}`; // Formato 'YYYY-MM-DD'
+  };
+
   const handleSave = async () => {
     if (!userId) {
       Alert.alert("Erro", "ID do usuário não encontrado.");
@@ -150,12 +162,17 @@ export default function EditarAnotacao() {
         />
 
         <TouchableOpacity onPress={showDatePickerHandler} style={styles.datePicker}>
-          <Text style={styles.dateText}>{anotacao.dataNota.toLocaleDateString() || "Selecione a data"}</Text>
+          <Text style={styles.dateText}>{formatDateExibition(anotacao.dataNota)}</Text>
         </TouchableOpacity>
 
         {showDatePicker && (
           <DateTimePicker
-            value={anotacao.dataNota}
+            value={
+              new Date(
+                anotacao.dataNota.getTime() +
+                  Math.abs(anotacao.dataNota.getTimezoneOffset() * 60000)
+              )
+            }
             mode="date"
             display="default"
             onChange={onChangeDate}
