@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
+  ScrollView
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -203,9 +204,9 @@ export default function EditarFinanca() {
           <TouchableOpacity
             style={[
               styles.frequencyButton,
-              financa.frequencia === "Diária" && styles.selectedButton,
+              financa.frequencia === "Diaria" && styles.selectedButton,
             ]}
-            onPress={() => handleInputChange("frequencia", "Diária")}
+            onPress={() => handleInputChange("frequencia", "Diaria")}
           >
             <Text style={styles.frequencyButtonText}>Diária</Text>
           </TouchableOpacity>
@@ -247,9 +248,9 @@ export default function EditarFinanca() {
           <TouchableOpacity
             style={[
               styles.frequencyButton,
-              financa.frequencia === "Única" && styles.selectedButton,
+              financa.frequencia === "Unica" && styles.selectedButton,
             ]}
-            onPress={() => handleInputChange("frequencia", "Única")}
+            onPress={() => handleInputChange("frequencia", "Unica")}
           >
             <Text style={styles.frequencyButtonText}>Única</Text>
           </TouchableOpacity>

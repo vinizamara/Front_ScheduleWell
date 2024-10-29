@@ -51,10 +51,10 @@ export default function ControleFinanceiro() {
             : ""
         );
         setDespesaMensal(
-          financeiroData.despesa ? financeiroData.despesa.toString() : "0"
+          financeiroData.despesas ? financeiroData.despesas.toString() : "0"
         );
         setReceitaMensal(
-          financeiroData.receita ? financeiroData.receita.toString() : "0"
+          financeiroData.receitas ? financeiroData.receitas.toString() : "0"
         );
         setSaldo(financeiroData.saldo ? financeiroData.saldo.toString() : "0");
       } catch (error) {
