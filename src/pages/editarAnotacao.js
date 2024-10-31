@@ -169,7 +169,7 @@ export default function EditarAnotacao() {
           <DateTimePicker
             value={
               new Date(
-                anotacao.dataNota.getTime() +
+                  anotacao.dataNota.getTime() +
                   Math.abs(anotacao.dataNota.getTimezoneOffset() * 60000)
               )
             }
