@@ -1,8 +1,8 @@
-import { createStackNavigator } from '@react-navigation/stack';
-import React from 'react';
+import { createStackNavigator } from "@react-navigation/stack";
+import React from "react";
 
 // Importe o BottomTabs e outras páginas
-import BottomTabs from '../components/BottomTabs';
+import BottomTabs from "../components/BottomTabs";
 import Login from "../pages/login";
 import PageInit from "../pages/pageInit";
 import Cadastro from "../pages/cadastro";
@@ -12,6 +12,8 @@ import Checklist from "../pages/listagem";
 import EditarFinanca from "../pages/editarFinanca";
 import EditarAnotacao from "../pages/editarAnotacao";
 import EditarChecklist from "../pages/editarChecklist";
+import Financas from "../pages/financas";
+import Anotacoes from "../pages/anotacoes";
 
 const Stack = createStackNavigator();
 
@@ -34,7 +36,17 @@ export default function Rotas() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="Main" // Adiciona a nova rota principal para o BottomTabs
+        name="Financas"
+        component={Financas}
+        options={{ headerShown: false }}
+      />
+            <Stack.Screen
+        name="Anotacoes"
+        component={Anotacoes}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Main"
         component={BottomTabs}
         options={{ headerShown: false }}
       />

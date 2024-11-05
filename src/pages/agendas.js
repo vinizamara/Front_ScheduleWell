@@ -191,29 +191,12 @@ export default function Escolhanotas() {
   
   return (
     <View style={styles.container}>
+
+      <Text style={styles.notesText}>Suas Notas</Text>
+
       <TouchableOpacity style={styles.plusIconContainer} onPress={handlePlusPress}>
         <Icon name="plus" size={30} color="#1F74A7" />
       </TouchableOpacity>
-  
-      {isLoggedIn && (
-        <TouchableOpacity style={styles.newButton} onPress={handleNewButton}>
-          <Text style={styles.buttonText}>Controle Financeiro</Text>
-        </TouchableOpacity>
-      )}
-  
-      {!isLoggedIn && (
-        <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-      )}
-  
-      {isLoggedIn && (
-        <TouchableOpacity style={styles.profileButton} onPress={handleProfilePage}>
-          <Image source={require("../../assets/icons/perfil.png")} style={styles.perfilImage} />
-        </TouchableOpacity>
-      )}
-  
-      <Text style={styles.notesText}>Suas Notas</Text>
   
       <ScrollView>
         {/* Exibição de Finanças */}
@@ -302,28 +285,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     borderRadius: 10,
   },
-  loginButton: {
-    position: "absolute",
-    top: 10,
-    right: 20,
-    height: 45,
-    backgroundColor: "#1F74A7",
-    paddingVertical: 8,
-    paddingHorizontal: 25,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  profileButton: {
-    position: "absolute",
-    top: 0,
-    right: 20,
-    backgroundColor: "#E2EDF2",
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   buttonText: {
     color: "#FFF",
     fontSize: 22,
@@ -331,7 +292,7 @@ const styles = StyleSheet.create({
   },
   plusIconContainer: {
     position: "absolute",
-    top: "12%",
+    top: "10%",
     right: "5%",
     zIndex: 1,
   },
@@ -340,7 +301,7 @@ const styles = StyleSheet.create({
     color: "#255573",
     fontFamily: "SuezOne_400Regular",
     alignSelf: "center",
-    marginTop: 50,
+    marginTop: 0,
   },
   perfilImage: {
     width: 60,
@@ -369,7 +330,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 25,
     color: "#255573",
-    marginTop: "10%",
+    marginTop: "20%",
     fontFamily: "SuezOne_400Regular",
   },
   sectionTitle: {
