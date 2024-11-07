@@ -63,10 +63,10 @@ export default function BottomTabs() {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
           let iconName;
-          if (route.name === "Agendas") iconName = "calendar-outline";
-          else if (route.name === "Controlefinanceiro")
+          if (route.name === "Notas") iconName = "calendar-outline";
+          else if (route.name === "Controle Financeiro")
             iconName = "wallet-outline";
-          else if (route.name === "Paginadeperfil") iconName = "person-outline";
+          else if (route.name === "Pagina De Perfil") iconName = "person-outline";
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: "#1F74A7",//#1F74A7
@@ -78,7 +78,7 @@ export default function BottomTabs() {
       })}
     >
       <Tab.Screen
-        name="Controlefinanceiro"
+        name="Controle Financeiro"
         component={Controlefinanceiro}
         listeners={{
           tabPress: (e) => {
@@ -89,10 +89,10 @@ export default function BottomTabs() {
         }}
       />
 
-      <Tab.Screen name="Agendas" component={Agendas} />
+      <Tab.Screen name="Notas" component={Agendas} />
 
       <Tab.Screen
-        name="Paginadeperfil"
+        name="Pagina De Perfil"
         component={Paginadeperfil}
         listeners={{
           tabPress: (e) => {
