@@ -52,11 +52,11 @@ export default function Login() {
     try {
       const response = await sheets.postLogin(user);
       Alert.alert("Sucesso", response.data.message);
-  
+
       const userName = response.data.user.nome;
       const userEmail = response.data.user.email;
       const userId = response.data.user.id_usuario;
-  
+
       try {
         await AsyncStorage.setItem("userLoggedIn", "true");
         await AsyncStorage.setItem("userName", userName);
@@ -66,12 +66,12 @@ export default function Login() {
       } catch (e) {
         console.error("Erro ao armazenar dados no AsyncStorage:", e);
       }
-  
-      navigation.navigate("Agendas");
+
+      navigation.navigate("Main");
     } catch (error) {
       Alert.alert("Atenção", error.response.data.error);
     }
-  };  
+  };
 
   return (
     <View style={styles.container}>
