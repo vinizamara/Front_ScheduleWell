@@ -83,7 +83,7 @@ export default function Financas() {
         frequencia: financa.frequencia,
       });
       Alert.alert("Sucesso", response.data.message);
-      navigation.navigate("Agendas");
+      navigation.navigate("Main", { screen: "Agendas" });
     } catch (error) {
       Alert.alert("Erro na criação de nota", error.response.data.message);
     }

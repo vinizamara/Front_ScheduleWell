@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
   Text,
   Alert,
-  Image,
   ScrollView,
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
@@ -18,7 +17,7 @@ import sheets from "../axios/axios";
 
 export default function Escolhanotas() {
   const navigation = useNavigation();
-  const isFocused = useIsFocused(); // Hook para verificar o foco na tela
+  const isFocused = useIsFocused();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [financas, setFinancas] = useState([]);
@@ -28,16 +27,6 @@ export default function Escolhanotas() {
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
   });
-
-  useEffect(() => {
-    async function prepare() {
-      await SplashScreen.preventAutoHideAsync();
-      if (fontsLoaded) {
-        await SplashScreen.hideAsync();
-      }
-    }
-    prepare();
-  }, [fontsLoaded]);
 
   const checkLoginStatus = async () => {
     try {
@@ -50,7 +39,7 @@ export default function Escolhanotas() {
         listarFinancas(idUsuario);
         listarAnotacoes(idUsuario);
         listarChecklists(idUsuario);
-      } else {  
+      } else {
         setIsLoggedIn(false);
       }
     } catch (error) {
@@ -88,55 +77,6 @@ export default function Escolhanotas() {
     }
   };
 
-  useEffect(() => {
-    if (isFocused) {
-      checkLoginStatus();
-    }
-  }, [isFocused]);
-
-  if (loading || !fontsLoaded) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#2196F3" />
-      </View>
-    );
-  }
-
-  const handlePlusPress = () => {
-    if (!isLoggedIn) {
-      Alert.alert(
-        "Faça Login",
-        "Você precisa fazer login para criar uma nova nota. Deseja fazer login agora?",
-        [
-          { text: "Cancelar", style: "cancel" },
-          { text: "Login", onPress: () => navigation.navigate("Login") },
-        ]
-      );
-    } else {
-      navigation.navigate("Escolhanotas");
-    }
-  };
-
-  const handleNewButton = () => {
-    navigation.navigate("Controlefinanceiro");
-  };
-
-  const handleProfilePage = () => {
-    navigation.navigate("Paginadeperfil");
-  };
-
-  const handleEditFinanca = (idFinanca) => {
-    navigation.navigate("EditarFinanca", { id: idFinanca }); // Passando o ID da finança
-  }
-
-  const handleEditAnotacao = (idAnotacao) => {
-    navigation.navigate("EditarAnotacao", { id: idAnotacao }); // Passando o ID da finança
-  }
-
-  const handleEditChecklist = (idChecklist) => {
-    navigation.navigate("EditarChecklist", { id: idChecklist }); // Passando o ID da finança
-  }
-
   const handleDeleteItem = async (id, type) => {
     let deleteFunction;
     let setStateFunction;
@@ -169,7 +109,12 @@ export default function Escolhanotas() {
           onPress: async () => {
             try {
               await deleteFunction(id); // Chama a função de deleção
-              Alert.alert("Sucesso", `${type.charAt(0).toUpperCase() + type.slice(1)} deletada com sucesso.`);
+              Alert.alert(
+                "Sucesso",
+                `${
+                  type.charAt(0).toUpperCase() + type.slice(1)
+                } deletada com sucesso.`
+              );
 
               // Atualiza a lista removendo o item deletado
               setStateFunction((prevItems) =>
@@ -180,7 +125,10 @@ export default function Escolhanotas() {
                 })
               );
             } catch (error) {
-              console.error(`Erro ao deletar ${type}:`, error.response?.data?.message.error);
+              console.error(
+                `Erro ao deletar ${type}:`,
+                error.response?.data?.message.error
+              );
               Alert.alert("Erro", `Ocorreu um erro ao deletar a ${type}.`);
             }
           },
@@ -188,30 +136,61 @@ export default function Escolhanotas() {
       ]
     );
   };
-  
+
+  useEffect(() => {
+    if (isFocused) {
+      checkLoginStatus();
+    }
+  }, [isFocused]);
+
+  const handlePlusPress = () => {
+    if (!isLoggedIn) {
+      Alert.alert(
+        "Faça Login",
+        "Você precisa fazer login para criar uma nova nota. Deseja fazer login agora?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          { text: "Login", onPress: () => navigation.navigate("Login") },
+        ]
+      );
+    } else {
+      navigation.navigate("Escolhanotas");
+    }
+  };
+
   return (
     <View style={styles.container}>
-
       <Text style={styles.notesText}>Suas Notas</Text>
 
-      <TouchableOpacity style={styles.plusIconContainer} onPress={handlePlusPress}>
-        <Icon name="plus" size={30} color="#1F74A7" />
-      </TouchableOpacity>
-  
+      {/* Botão "+" centralizado na parte inferior */}
+      <View style={styles.plusButtonContainer}>
+        <TouchableOpacity style={styles.plusButton} onPress={handlePlusPress}>
+          <Icon name="plus" size={30} color="#FFF" />
+        </TouchableOpacity>
+      </View>
+
       <ScrollView>
         {/* Exibição de Finanças */}
         {financas.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>Finanças</Text>
+            <Text style={styles.sectionTitleTop}>Finanças</Text>
             {financas.map((financa) => (
               <TouchableOpacity
                 key={financa.id_financa}
                 style={styles.financaContainer}
-                onPress={() => handleEditFinanca(financa.id_financa)}
+                onPress={() =>
+                  navigation.navigate("EditarFinanca", {
+                    id: financa.id_financa,
+                  })
+                }
               >
                 <Text style={styles.financaText}>{financa.titulo}</Text>
                 <View style={styles.iconContainer}>
-                  <TouchableOpacity onPress={() => handleDeleteItem(financa.id_financa, "financa")}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleDeleteItem(financa.id_financa, "financa")
+                    }
+                  >
                     <Icon name="trash" size={28} color="#EC4E4E" />
                   </TouchableOpacity>
                 </View>
@@ -219,7 +198,7 @@ export default function Escolhanotas() {
             ))}
           </>
         )}
-  
+
         {/* Exibição de Anotações */}
         {anotacoes.length > 0 && (
           <>
@@ -228,11 +207,19 @@ export default function Escolhanotas() {
               <TouchableOpacity
                 key={anotacao.id_anotacao}
                 style={styles.financaContainer}
-                onPress={() => handleEditAnotacao(anotacao.id_anotacao)}
+                onPress={() =>
+                  navigation.navigate("EditarAnotacao", {
+                    id: anotacao.id_anotacao,
+                  })
+                }
               >
                 <Text style={styles.financaText}>{anotacao.titulo}</Text>
                 <View style={styles.iconContainer}>
-                  <TouchableOpacity onPress={() => handleDeleteItem(anotacao.id_anotacao, "anotacao")}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleDeleteItem(anotacao.id_anotacao, "anotacao")
+                    }
+                  >
                     <Icon name="trash" size={28} color="#EC4E4E" />
                   </TouchableOpacity>
                 </View>
@@ -240,72 +227,60 @@ export default function Escolhanotas() {
             ))}
           </>
         )}
-  
+
         {/* Exibição de Checklists */}
         {checklists.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Checklists</Text>
             {checklists.map((checklist) => (
-              <TouchableOpacity key={checklist.id_checklist} style={styles.financaContainer} onPress={() => handleEditChecklist(checklist.id_checklist)}>
+              <TouchableOpacity
+                key={checklist.id_checklist}
+                style={styles.financaContainer}
+                onPress={() =>
+                  navigation.navigate("EditarChecklist", {
+                    id: checklist.id_checklist,
+                  })
+                }
+              >
                 <Text style={styles.financaText}>{checklist.titulo}</Text>
                 <View style={styles.iconContainer}>
-                  <TouchableOpacity  onPress={() => handleDeleteItem(checklist.id_checklist, "checklist")}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleDeleteItem(checklist.id_checklist, "checklist")
+                    }
+                  >
                     <Icon name="trash" size={28} color="#EC4E4E" />
                   </TouchableOpacity>
                 </View>
               </TouchableOpacity>
-              
             ))}
           </>
         )}
-  
-        {financas.length === 0 && anotacoes.length === 0 && checklists.length === 0 && (
-          <Text style={styles.batataText}>Você ainda não possui nenhuma anotação criada</Text>
-        )}
+
+        {financas.length === 0 &&
+          anotacoes.length === 0 &&
+          checklists.length === 0 && (
+            <Text style={styles.batataText}>
+              Você ainda não possui nenhuma anotação criada
+            </Text>
+          )}
       </ScrollView>
     </View>
-  );  
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#E2EDF2",
-    justifyContent: "flex-start",
-    paddingTop: 20,
     paddingHorizontal: 20,
-  },
-  newButton: {
-    position: "absolute",
-    top: 10,
-    left: 20,
-    height: 45,
-    backgroundColor: "#1F74A7",
-    paddingVertical: 8,
-    paddingHorizontal: 25,
-    borderRadius: 10,
-  },
-  buttonText: {
-    color: "#FFF",
-    fontSize: 22,
-    fontFamily: "SuezOne_400Regular",
-  },
-  plusIconContainer: {
-    position: "absolute",
-    top: "10%",
-    right: "5%",
-    zIndex: 1,
   },
   notesText: {
     fontSize: 24,
     color: "#255573",
     fontFamily: "SuezOne_400Regular",
     alignSelf: "center",
-    marginTop: 0,
-  },
-  perfilImage: {
-    width: 60,
-    height: 60,
+    marginTop: 20,
   },
   financaContainer: {
     backgroundColor: "#C6DBE4",
@@ -337,7 +312,27 @@ const styles = StyleSheet.create({
     fontFamily: "SuezOne_400Regular",
     fontSize: 25,
     color: "#255573",
-    marginTop: 30,
+    marginTop: 20,
     marginBottom: 0,
-  },  
+  },
+  sectionTitleTop: {
+    fontFamily: "SuezOne_400Regular",
+    fontSize: 25,
+    color: "#255573",
+    marginTop: 0,
+    marginBottom: 0,
+  },
+  plusButtonContainer: {
+    alignItems: "flex-end",
+    paddingVertical: 10,
+    backgroundColor: "#E2EDF2",
+  },
+  plusButton: {
+    backgroundColor: "#1F74A7",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });

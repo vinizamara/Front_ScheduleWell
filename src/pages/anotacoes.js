@@ -74,7 +74,7 @@ export default function Anotacoes() {
       });
 
       Alert.alert("Sucesso", response.data.message);
-      navigation.navigate("Agendas");
+      navigation.navigate("Main", { screen: "Agendas" });
     } catch (error) {
       Alert.alert("Erro", error.response.data.message);
     }

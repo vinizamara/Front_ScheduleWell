@@ -136,7 +136,7 @@ export default function EditarFinanca() {
       });
 
       Alert.alert("Sucesso", response.data.message);
-      navigation.navigate("Agendas");
+      navigation.navigate("Main", { screen: "Agendas" });
     } catch (error) {
       Alert.alert("Erro da API", error.response.data.error);
     }
