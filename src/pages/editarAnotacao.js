@@ -126,7 +126,7 @@ export default function EditarAnotacao() {
 
       if (response.status === 200) {
         Alert.alert("Sucesso", "Anotação atualizada com sucesso!");
-        navigation.navigate("Agendas");
+        navigation.navigate("Main", { screen: "Agendas" });
       } else {
         Alert.alert("Erro", "Erro ao atualizar a anotação: " + response.data.message);
       }
@@ -169,7 +169,7 @@ export default function EditarAnotacao() {
           <DateTimePicker
             value={
               new Date(
-                anotacao.dataNota.getTime() +
+                  anotacao.dataNota.getTime() +
                   Math.abs(anotacao.dataNota.getTimezoneOffset() * 60000)
               )
             }

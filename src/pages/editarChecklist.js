@@ -3,7 +3,7 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Text, 
+  Text,
   TextInput,
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/MaterialIcons"; // Importando o ícone
@@ -28,7 +28,7 @@ export default function Listagem() {
 
   const [inputValues, setInputValues] = useState({
     titulo: "",
-    data: "",
+    data: new Date(),
     descricao: "",
   });
 
@@ -78,23 +78,25 @@ export default function Listagem() {
 
     try {
       const response = await sheets.getChecklists(userId); // Supondo que você tenha esta função na API
-      const checklistEncontrado = response.data.find(item => item.id_checklist === id);
+      const checklistEncontrado = response.data.find(
+        (item) => item.id_checklist === id
+      );
+      console.log(checklistEncontrado.data);
       if (checklistEncontrado) {
         setInputValues({
           titulo: checklistEncontrado.titulo,
-          data: new Date(checklistEncontrado.data).toLocaleDateString("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          }),
+          data: new Date(checklistEncontrado.data),
           descricao: checklistEncontrado.descricao,
         });
-        console.log(inputValues.data)
+        console.log(inputValues.data);
       } else {
         Alert.alert("Erro", "Checklist não encontrado.", response.data.message);
       }
     } catch (error) {
-      Alert.alert("Erro da API", error.response.data.message || "Erro desconhecido");
+      Alert.alert(
+        "Erro da API",
+        error.response.data.message || "Erro desconhecido"
+      );
       console.log("Erro ao buscar anotação:", error.response.data.message);
     } finally {
       setLoading(false); // Finaliza o carregamento
@@ -126,28 +128,33 @@ export default function Listagem() {
     setDatePickerVisibility(false);
   };
 
-  const handleConfirm = (date) => {
-    const formattedDate = new Date(date).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    })
-    setInputValues({ ...inputValues, data: formattedDate });
-    hideDatePicker();
+  // const handleConfirm = (date) => {
+  //   const formattedDate = new Date(date).toLocaleDateString("pt-BR", {
+  //     day: "2-digit",
+  //     month: "2-digit",
+  //     year: "numeric",
+  //   });
+  //   setInputValues({ ...inputValues, data: formattedDate });
+  //   hideDatePicker();
+  // };
+  const onChangeDate = (event, selectedDate) => {
+    const currentDate = selectedDate || inputValues.data;
+    setDatePickerVisibility(Platform.OS === 'ios');
+    setInputValues(prevState => ({ ...prevState, data: currentDate }));
   };
 
   const handleRemoveItem = async (idItem) => {
-      console.log("ID do item a ser removido:", idItem);
-      try {
-        const response = await sheets.deleteItemChecklist(idItem); // Função para deletar o item da API
-        setItens(itens.filter((item) => item.id_item_checklist !== idItem)); // Atualiza a lista removendo o item
-        // Alert.alert("Sucesso", response.data.message);
-        console.log("ID recebido para remover:", idItem);
-      } catch (error) {
-        Alert.alert("Erro", error.response.data.message);
-        console.error("Erro ao remover item:", error.response.data.message);
-      }
-  };  
+    console.log("ID do item a ser removido:", idItem);
+    try {
+      const response = await sheets.deleteItemChecklist(idItem); // Função para deletar o item da API
+      setItens(itens.filter((item) => item.id_item_checklist !== idItem)); // Atualiza a lista removendo o item
+      // Alert.alert("Sucesso", response.data.message);
+      console.log("ID recebido para remover:", idItem);
+    } catch (error) {
+      Alert.alert("Erro", error.response.data.message);
+      console.error("Erro ao remover item:", error.response.data.message);
+    }
+  };
 
   const handleSave = async () => {
     if (!userId) {
@@ -159,12 +166,11 @@ export default function Listagem() {
       const response = await sheets.updateChecklist(id, {
         titulo: inputValues.titulo,
         descricao: inputValues.descricao,
-        data:  inputValues.data.split("/").reverse().join("-")
+        data: formatDate(inputValues.data),
       });
 
-        Alert.alert("Sucesso",response.data.message );
-        navigation.navigate("Agendas");
-     
+      Alert.alert("Sucesso", response.data.message);
+      navigation.navigate("Main", { screen: "Agendas" });
     } catch (error) {
       Alert.alert("Erro da API", error.response.data.message);
     }
@@ -176,11 +182,14 @@ export default function Listagem() {
         texto: texto,
         concluido: concluido,
       });
-      
+
       console.log(response.data.message);
       fetchChecklistItems(id); // Recarrega os itens após a atualização
     } catch (error) {
-      Alert.alert("Erro ao atualizar item", error.response.data.message || "Erro desconhecido");
+      Alert.alert(
+        "Erro ao atualizar item",
+        error.response.data.message || "Erro desconhecido"
+      );
       console.error("Erro ao atualizar item:", error.response.data.message);
     }
   };
@@ -190,11 +199,11 @@ export default function Listagem() {
       Alert.alert("Erro", "O item não pode ser vazio.");
       return;
     }
-  
+
     // Adicionar o item ao estado
     const newItem = { texto: itemInput, concluido: false };
     setItens([...itens, newItem]);
-  
+
     // Salvar o item na API
     try {
       const response = await sheets.postItemChecklist({
@@ -202,14 +211,13 @@ export default function Listagem() {
         texto: itemInput,
         concluido: false,
       });
-      
+
       // Limpar o campo de entrada após adicionar o item
       setItemInput("");
     } catch (error) {
       Alert.alert("Erro ao adicionar item", error.response.data.message);
     }
   };
-  
 
   if (!fontsLoaded) {
     return (
@@ -219,9 +227,32 @@ export default function Listagem() {
     );
   }
 
+  const formatDate = (date) => {
+    const d = new Date(date);
+    // Aplica a correção de fuso horário apenas ao salvar a data
+    const adjustedDate = new Date(
+      d.getTime() + Math.abs(d.getTimezoneOffset() * 60000)
+    );
+    const year = adjustedDate.getFullYear();
+    const month = String(adjustedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(adjustedDate.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`; // Formato 'YYYY-MM-DD'
+  };
+
+  const formatDateExibition = (date) => {
+    const d = new Date(date);
+    // Aplica a correção de fuso horário apenas ao salvar a data
+    const adjustedDate = new Date(
+      d.getTime() + Math.abs(d.getTimezoneOffset() * 60000)
+    );
+    const year = adjustedDate.getFullYear();
+    const month = String(adjustedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(adjustedDate.getDate()).padStart(2, "0");
+    return `${day}/${month}/${year}`; // Formato 'YYYY-MM-DD'
+  };
+
   return (
-    <View style={styles.container}
-    >
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Edição de Listagem</Text>
       </View>
@@ -235,7 +266,7 @@ export default function Listagem() {
         />
         <TouchableOpacity onPress={showDatePicker} style={styles.datePicker}>
           <Text style={styles.dateText}>
-            {inputValues.data ? inputValues.data.toString() : "Selecione a data"}
+            {formatDateExibition(inputValues.data)}
           </Text>
         </TouchableOpacity>
         <TextInput
@@ -250,22 +281,28 @@ export default function Listagem() {
         <TouchableOpacity style={styles.addButtonAbove} onPress={handleAddItem}>
           <Icon name="add" size={30} color="#FFF" />
         </TouchableOpacity>
-        
-          <TextInput
-            style={styles.input}
-            placeholder="Título da Tarefa"
-            value={itemInput}
-            onChangeText={handleItemInputChange}
-          />
-          
+
+        <TextInput
+          style={styles.input}
+          placeholder="Título da Tarefa"
+          value={itemInput}
+          onChangeText={handleItemInputChange}
+        />
+
         <FlatList
           data={itens}
           keyExtractor={(item) => item.id_item_checklist}
           renderItem={({ item }) => (
             <View style={styles.itemRow}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.checkbox}
-                onPress={() => handleUpdateItem(item.id_item_checklist, item.texto, !item.concluido)}
+                onPress={() =>
+                  handleUpdateItem(
+                    item.id_item_checklist,
+                    item.texto,
+                    !item.concluido
+                  )
+                }
               >
                 {item.concluido ? <View style={styles.checked} /> : null}
               </TouchableOpacity>
@@ -274,8 +311,8 @@ export default function Listagem() {
                 value={item.texto}
                 editable={false}
               />
-              <TouchableOpacity 
-                onPress={() => handleRemoveItem(item.id_item_checklist)} 
+              <TouchableOpacity
+                onPress={() => handleRemoveItem(item.id_item_checklist)}
                 style={styles.deleteButton}
               >
                 <Icon name="delete" size={24} color="#FFF" />
@@ -284,24 +321,33 @@ export default function Listagem() {
           )}
           keyboardShouldPersistTaps="handled"
         />
-
       </View>
 
       <View style={styles.buttons}>
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.footerText}>Salvar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.cancelButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.cancelButton}
+          onPress={() => navigation.goBack()}
+        >
           <Text style={styles.footerText}>Cancelar</Text>
         </TouchableOpacity>
       </View>
 
-      <DateTimePickerModal
-        isVisible={isDatePickerVisible}
-        mode="date"
-        onConfirm={handleConfirm}
-        onCancel={hideDatePicker}
-      />
+      {isDatePickerVisible && (
+        <DateTimePicker
+          value={
+            new Date(
+              inputValues.data.getTime() +
+                Math.abs(inputValues.data.getTimezoneOffset() * 60000)
+            )
+          }
+          mode="date"
+          display="default"
+          onChange={onChangeDate}
+        />
+      )}
     </View>
   );
 }
@@ -336,12 +382,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 15,
     fontSize: 16,
-    borderColor: "#1F74A7", 
+    borderColor: "#1F74A7",
     borderWidth: 1,
   },
   textarea: {
     height: 100,
-    borderColor: "#1F74A7", 
+    borderColor: "#1F74A7",
     borderWidth: 1,
     borderRadius: 8,
     backgroundColor: "#C6DBE4",
@@ -355,7 +401,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 15,
     justifyContent: "center",
-    borderColor: "#1F74A7", 
+    borderColor: "#1F74A7",
     borderWidth: 1,
   },
   dateText: {
@@ -391,7 +437,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#FFFFFF",
     marginBottom: 10,
-    borderColor: "#1F74A7", 
+    borderColor: "#1F74A7",
     borderWidth: 1,
   },
   checkbox: {

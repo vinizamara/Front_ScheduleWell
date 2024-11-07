@@ -134,7 +134,7 @@ export default function Listagem() {
         }
 
         Alert.alert("Sucesso", response.data.message);
-        navigation.navigate("Agendas");
+        navigation.navigate("Main", { screen: "Agendas" });
       }
     } catch (error) {
         Alert.alert(

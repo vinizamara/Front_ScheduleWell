@@ -88,15 +88,15 @@ export default function ControleFinanceiro() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    async function prepare() {
-      await SplashScreen.preventAutoHideAsync();
-      if (fontsLoaded) {
-        await SplashScreen.hideAsync();
-      }
-    }
-    prepare();
-  }, [fontsLoaded]);
+  // useEffect(() => {
+  //   async function prepare() {
+  //     await SplashScreen.preventAutoHideAsync();
+  //     if (fontsLoaded) {
+  //       await SplashScreen.hideAsync();
+  //     }
+  //   }
+  //   prepare();
+  // }, [fontsLoaded]);
 
   const handleEditFinanca = (idFinanca) => {
     navigation.navigate("EditarFinanca", { id: idFinanca });

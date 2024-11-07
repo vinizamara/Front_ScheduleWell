@@ -8,7 +8,6 @@ import {
   TextInput,
   Button,
   Alert,
-  Image,
   ScrollView,
   Modal
 } from "react-native";
@@ -21,7 +20,7 @@ import sheets from "../axios/axios";
 
 export default function Escolhanotas() {
   const navigation = useNavigation();
-  const isFocused = useIsFocused(); // Hook para verificar o foco na tela
+  const isFocused = useIsFocused();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
   const [financas, setFinancas] = useState([]);
@@ -34,16 +33,6 @@ export default function Escolhanotas() {
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
   });
-
-  useEffect(() => {
-    async function prepare() {
-      await SplashScreen.preventAutoHideAsync();
-      if (fontsLoaded) {
-        await SplashScreen.hideAsync();
-      }
-    }
-    prepare();
-  }, [fontsLoaded]);
 
   const checkLoginStatus = async () => {
     try {
@@ -261,12 +250,16 @@ export default function Escolhanotas() {
         {/* Exibição de Finanças */}
         {financas.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>Finanças</Text>
+            <Text style={styles.sectionTitleTop}>Finanças</Text>
             {financas.map((financa) => (
               <TouchableOpacity
                 key={financa.id_financa}
                 style={styles.financaContainer}
-                onPress={() => handleEditFinanca(financa.id_financa)}
+                onPress={() =>
+                  navigation.navigate("EditarFinanca", {
+                    id: financa.id_financa,
+                  })
+                }
               >
                 <Text style={styles.financaText}>{financa.titulo}</Text>
                 <View style={styles.iconContainer}>
@@ -291,7 +284,11 @@ export default function Escolhanotas() {
               <TouchableOpacity
                 key={anotacao.id_anotacao}
                 style={styles.financaContainer}
-                onPress={() => handleEditAnotacao(anotacao.id_anotacao)}
+                onPress={() =>
+                  navigation.navigate("EditarAnotacao", {
+                    id: anotacao.id_anotacao,
+                  })
+                }
               >
                 <Text style={styles.financaText}>{anotacao.titulo}</Text>
                 <View style={styles.iconContainer}>
@@ -408,63 +405,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#E2EDF2",
-    justifyContent: "flex-start",
-    paddingTop: 20,
     paddingHorizontal: 20,
-  },
-  newButton: {
-    position: "absolute",
-    top: 10,
-    left: 20,
-    height: 45,
-    backgroundColor: "#1F74A7",
-    paddingVertical: 8,
-    paddingHorizontal: 25,
-    borderRadius: 10,
-  },
-  loginButton: {
-    position: "absolute",
-    top: 10,
-    right: 20,
-    height: 45,
-    backgroundColor: "#1F74A7",
-    paddingVertical: 8,
-    paddingHorizontal: 25,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  profileButton: {
-    position: "absolute",
-    top: 0,
-    right: 20,
-    backgroundColor: "#E2EDF2",
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonText: {
-    color: "#FFF",
-    fontSize: 22,
-    fontFamily: "SuezOne_400Regular",
-  },
-  plusIconContainer: {
-    position: "absolute",
-    top: "12%",
-    right: "5%",
-    zIndex: 1,
   },
   notesText: {
     fontSize: 24,
     color: "#255573",
     fontFamily: "SuezOne_400Regular",
     alignSelf: "center",
-    marginTop: 50,
-  },
-  perfilImage: {
-    width: 60,
-    height: 60,
+    marginTop: 20,
   },
   financaContainer: {
     backgroundColor: "#C6DBE4",
@@ -489,14 +437,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 25,
     color: "#255573",
-    marginTop: "10%",
+    marginTop: "20%",
     fontFamily: "SuezOne_400Regular",
   },
   sectionTitle: {
     fontFamily: "SuezOne_400Regular",
     fontSize: 25,
     color: "#255573",
-    marginTop: 30,
+    marginTop: 20,
     marginBottom: 0,
   },
   Botão_de_pesquisa: {

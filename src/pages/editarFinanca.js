@@ -87,7 +87,7 @@ export default function EditarFinanca() {
 
   const onChangeDate = (event, selectedDate) => {
     if (event.type === "dismissed") {
-      return; // Se o usuário cancelar o seletor de data
+      setShowDatePicker(false);
     }
 
     const currentDate = selectedDate || financa.dataNota;
@@ -136,7 +136,7 @@ export default function EditarFinanca() {
       });
 
       Alert.alert("Sucesso", response.data.message);
-      navigation.navigate("Agendas");
+      navigation.navigate("Main", { screen: "Agendas" });
     } catch (error) {
       Alert.alert("Erro da API", error.response.data.error);
     }
@@ -178,7 +178,6 @@ export default function EditarFinanca() {
                 )
               }
               mode="date"
-              display="default"
               onChange={onChangeDate}
             />
           )}
