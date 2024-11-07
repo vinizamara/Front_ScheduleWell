@@ -59,7 +59,7 @@ export default function BottomTabs() {
 
   return (
     <Tab.Navigator
-      initialRouteName="Agendas"
+      initialRouteName="Notas"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
           let iconName;
@@ -82,7 +82,7 @@ export default function BottomTabs() {
         component={Controlefinanceiro}
         listeners={{
           tabPress: (e) => {
-            if (!handleRestrictedAccess("Controlefinanceiro")) {
+            if (!handleRestrictedAccess("Controle Financeiro")) {
               e.preventDefault();
             }
           },
@@ -96,7 +96,7 @@ export default function BottomTabs() {
         component={Paginadeperfil}
         listeners={{
           tabPress: (e) => {
-            if (!handleRestrictedAccess("Paginadeperfil")) {
+            if (!handleRestrictedAccess("Pagina De Perfil")) {
               e.preventDefault();
             }
           },

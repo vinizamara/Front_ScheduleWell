@@ -428,7 +428,7 @@ export default function Escolhanotas() {
                   onPress={() => setModalVisible(false)}
                   style={styles.closeButtonContainer}
                 >
-                  <Text style={styles.footerText}>Fechar Modal</Text>
+                  <Text style={styles.footerText}>Fechar</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>

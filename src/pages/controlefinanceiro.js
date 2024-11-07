@@ -15,6 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import * as Animatable from "react-native-animatable";
 import sheets from "../axios/axios";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ControleFinanceiro() {
@@ -32,61 +33,51 @@ export default function ControleFinanceiro() {
     SuezOne_400Regular,
   });
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      try {
-        // Recolhendo o ID usuário do AsyncStorage
-        const id = await AsyncStorage.getItem("userId");
-        // Chamada para obter resumo financeiro
-        const financeiroResponse = await sheets.resumoFinanceiro(id);
-        const financeiroData = financeiroResponse.data;
-        // Chamada para obter renda total
-        const rendaTotalResponse = await sheets.obterRendaTotal(id);
-        const rendaTotalData = rendaTotalResponse.data;
-
-        setRendaTotal(
-          rendaTotalData.renda_total
-            ? rendaTotalData.renda_total.toString()
-            : ""
-        );
-        setDespesaMensal(
-          financeiroData.despesas ? financeiroData.despesas.toString() : "0"
-        );
-        setReceitaMensal(
-          financeiroData.receitas ? financeiroData.receitas.toString() : "0"
-        );
-        setSaldo(financeiroData.saldo ? financeiroData.saldo.toString() : "0");
-      } catch (error) {
-        console.log(
-          "Erro ao buscar os dados financeiros:",
-          error.response.data.error
-        );
+  useFocusEffect(
+    React.useCallback(() => {
+      async function fetchData() {
+        setLoading(true);
+        try {
+          const id = await AsyncStorage.getItem("userId");
+          const financeiroResponse = await sheets.resumoFinanceiro(id);
+          const financeiroData = financeiroResponse.data;
+          const rendaTotalResponse = await sheets.obterRendaTotal(id);
+          const rendaTotalData = rendaTotalResponse.data;
+  
+          setRendaTotal(
+            rendaTotalData.renda_total ? rendaTotalData.renda_total.toString() : ""
+          );
+          setDespesaMensal(
+            financeiroData.despesas ? financeiroData.despesas.toString() : "0"
+          );
+          setReceitaMensal(
+            financeiroData.receitas ? financeiroData.receitas.toString() : "0"
+          );
+          setSaldo(financeiroData.saldo ? financeiroData.saldo.toString() : "0");
+        } catch (error) {
+          console.log("Erro ao buscar os dados financeiros:", error.response.data.error);
+        }
+  
+        try {
+          const id = await AsyncStorage.getItem("userId");
+          const transacoesResponse = await sheets.transacoes(id);
+          const transacoesData = transacoesResponse.data;
+  
+          setTransacoes(
+            Array.isArray(transacoesData.transacoes) ? transacoesData.transacoes : []
+          );
+        } catch (error) {
+          console.log("Erro ao buscar as transações:", error.response.data.error);
+          setTransacoes([]);
+        } finally {
+          setLoading(false);
+        }
       }
-
-      try {
-        // Recolhendo o ID usuário do AsyncStorage
-        const id = await AsyncStorage.getItem("userId");
-        // Chamada para obter transações
-        const transacoesResponse = await sheets.transacoes(id);
-        const transacoesData = transacoesResponse.data;
-
-        // Verifica se transacoesData.transacoes é um array
-        setTransacoes(
-          Array.isArray(transacoesData.transacoes)
-            ? transacoesData.transacoes
-            : []
-        ); // Armazenando todas as transações em uma lista unificada
-      } catch (error) {
-        console.log("Erro ao buscar as transações:", error.response.data.error);
-        setTransacoes([]); // Garantir que o estado transacoes seja um array vazio em caso de erro
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
+  
+      fetchData();
+    }, [])
+  );
+  
 
   // useEffect(() => {
   //   async function prepare() {
@@ -117,13 +108,7 @@ export default function ControleFinanceiro() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        <AnimatableTouchableOpacity
-          onPress={() => navigation.goBack()}
-          animation="fadeInLeft"
-        >
-          {/* Ícone de voltar pode ser adicionado aqui, se necessário */}
-        </AnimatableTouchableOpacity>
-        <AnimatableText style={styles.title} animation="fadeInDown">
+        <AnimatableText style={styles.title}>
           Controle Financeiro
         </AnimatableText>
       </View>
