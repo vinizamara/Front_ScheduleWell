@@ -216,6 +216,16 @@ export default function Escolhanotas() {
 
       {/* Botão "+" centralizado na parte inferior */}
       <View style={styles.plusButtonContainer}>
+        <TouchableOpacity
+          style={styles.plusButton}
+          onPress={() => {
+            setTitulos("");
+            setResultados([]);
+            setModalVisible(true);
+          }}
+        >
+          <Icon name="search" size={30} color="#FFF" />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.plusButton} onPress={handlePlusPress}>
           <Icon name="plus" size={30} color="#FFF" />
         </TouchableOpacity>
@@ -313,7 +323,7 @@ export default function Escolhanotas() {
             </Text>
           )}
 
-        {/* Botão para abrir o modal */}
+        {/* Botão para abrir o modal
         <Button
           title="Abrir Modal de Busca"
           onPress={() => {
@@ -321,8 +331,9 @@ export default function Escolhanotas() {
             setResultados([]);
             setModalVisible(true);
           }}
-        />
+        /> */}
 
+        {/* Modal */}
         {/* Modal */}
         <Modal
           animationType="slide"
@@ -332,6 +343,7 @@ export default function Escolhanotas() {
         >
           <View style={styles.modalContainer}>
             <ScrollView style={styles.modalContent}>
+              <Text style={styles.notesText}>Pesquisar</Text>
               {/* Campo de busca de títulos */}
               <View>
                 <TextInput
@@ -340,10 +352,13 @@ export default function Escolhanotas() {
                   placeholder="Digite o título"
                   style={styles.Botão_de_pesquisa}
                 />
-                <Button
+                <TouchableOpacity
                   title="Buscar"
                   onPress={() => TitulosSemelhantes(titulos)}
-                />
+                  style={styles.saveButton}
+                >
+                  <Text style={styles.footerText}>Buscar</Text>
+                </TouchableOpacity>
               </View>
 
               {resultados.length > 0 ? (
@@ -352,7 +367,7 @@ export default function Escolhanotas() {
                   {resultados.map((resultado, index) => (
                     <TouchableOpacity
                       key={index}
-                      style={styles.resultadoItem}
+                      style={styles.financaContainer}
                       onPress={() => {
                         // Verifica o tipo de nota e redireciona para a página de edição correspondente
                         if (resultado.tipo === "financa") {
@@ -373,28 +388,49 @@ export default function Escolhanotas() {
                         }
                       }}
                     >
-                      <Text style={styles.resultadoText}>
+                      <Text style={styles.anotacaoText}>
                         {resultado.titulo}
                       </Text>
-                      <Text style={styles.resultadoText}>
-                        Tipo: {resultado.tipo}
-                      </Text>
-                      <Text style={styles.resultadoText}>
-                        Descrição: {resultado.descricao || "Sem descrição"}
-                      </Text>
+                      {/* Usando o mesmo estilo */}
+                      <View style={styles.iconContainer}>
+                        <TouchableOpacity
+                          onPress={() => {
+                            // Verifica o tipo de nota e redireciona para a página de edição correspondente
+                            if (resultado.tipo === "financa") {
+                              handleDeleteItem(resultado.id, "financa")
+                              setModalVisible(false);
+                            } else if (resultado.tipo === "anotacao") {
+                              handleDeleteItem(resultado.id, "anotacao")
+                              setModalVisible(false);
+                            } else if (resultado.tipo === "checklist") {
+                              handleDeleteItem(resultado.id, "checklist")
+                              setModalVisible(false);
+                            }
+                          }}
+                        >
+                          <Icon name="trash" size={28} color="#EC4E4E" />
+                        </TouchableOpacity>
+                      </View>
                     </TouchableOpacity>
                   ))}
                 </View>
               ) : (
-                <Text style={styles.resultadoText}>
-                  Nenhum resultado encontrado
-                </Text>
+                <View style={{ alignContent: "center" }}>
+                  <Text style={styles.batataText}>
+                    Nenhum resultado encontrado
+                  </Text>
+                </View>
               )}
-              {/* Botão para fechar o modal */}
-              <Button
-                title="Fechar Modal"
-                onPress={() => setModalVisible(false)}
-              />
+              {/* Botão para fechar o modal, agora alinhado ao fundo */}
+              <View style={styles.footer}>
+                <TouchableOpacity
+                  title="Fechar Modal"
+                  onPress={() => setModalVisible(false)}
+                  style={styles.closeButtonContainer}
+                >
+                  <Text style={styles.footerText}>Fechar Modal</Text>
+                </TouchableOpacity>
+              </View>
             </ScrollView>
           </View>
         </Modal>
@@ -495,7 +531,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   plusButtonContainer: {
-    alignItems: "flex-end",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 10,
     backgroundColor: "#E2EDF2",
   },
@@ -506,5 +544,65 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
+  },
+  closeButtonContainer: {
+    backgroundColor: "#EC4E4E",
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    flex: 1,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+    marginTop: "10%",
+  },
+  footerText: {
+    color: "#FFF",
+    fontSize: 18,
+    textAlign: "center",
+  },
+  saveButton: {
+    backgroundColor: "#1F74A7", // Botão Salvar
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    flex: 1,
+    marginRight: 10,
+  },
+  anotacaoContainer: {
+    backgroundColor: "#C6DBE4",
+    padding: 15,
+    borderRadius: 10,
+    marginTop: "3%",
+    marginBottom: "5%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  anotacaoText: {
+    color: "#255573",
+    fontSize: 18,
+    fontFamily: "SuezOne_400Regular",
+  },
+  resultadosContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: "#f1f1f1",
+    borderRadius: 10,
+  },
+  resultadoItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    backgroundColor: "#C6DBE4", // Mesma cor de fundo para manter consistência
+    borderRadius: 10, // Manter borda arredondada igual
+    marginBottom: 10,
+  },
+  resultadoText: {
+    fontSize: 18,
+    color: "#255573",
+    fontWeight: "500",
   },
 });
