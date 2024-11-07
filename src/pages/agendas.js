@@ -5,9 +5,12 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Text,
+  TextInput,
+  Button,
   Alert,
   Image,
   ScrollView,
+  Modal
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
@@ -24,6 +27,9 @@ export default function Escolhanotas() {
   const [financas, setFinancas] = useState([]);
   const [anotacoes, setAnotacoes] = useState([]);
   const [checklists, setChecklists] = useState([]);
+  const [titulos, setTitulos] = useState("");
+  const [resultados, setResultados] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
@@ -50,7 +56,7 @@ export default function Escolhanotas() {
         listarFinancas(idUsuario);
         listarAnotacoes(idUsuario);
         listarChecklists(idUsuario);
-      } else {  
+      } else {
         setIsLoggedIn(false);
       }
     } catch (error) {
@@ -87,6 +93,23 @@ export default function Escolhanotas() {
       console.log("Erro ao buscar checklists:", error.response.data.message);
     }
   };
+
+  const TitulosSemelhantes = async (titulo) => {
+    try {
+      const idUsuario = await AsyncStorage.getItem("userId");
+      console.log(titulo);
+      console.log(idUsuario);
+      const response = await sheets.buscarTitulosSemelhantes(idUsuario, titulo);
+      console.log(response.data);
+      setResultados(response.data.resultados);
+    } catch (error) {
+      console.log("Erro ao buscar titulos:", error.response.data.message);
+    }
+  };
+
+  useEffect(() => {
+    console.log("Resultados atualizados:", resultados);
+  }, [resultados]);
 
   useEffect(() => {
     if (isFocused) {
@@ -127,15 +150,15 @@ export default function Escolhanotas() {
 
   const handleEditFinanca = (idFinanca) => {
     navigation.navigate("EditarFinanca", { id: idFinanca }); // Passando o ID da finança
-  }
+  };
 
   const handleEditAnotacao = (idAnotacao) => {
     navigation.navigate("EditarAnotacao", { id: idAnotacao }); // Passando o ID da finança
-  }
+  };
 
   const handleEditChecklist = (idChecklist) => {
     navigation.navigate("EditarChecklist", { id: idChecklist }); // Passando o ID da finança
-  }
+  };
 
   const handleDeleteItem = async (id, type) => {
     let deleteFunction;
@@ -169,7 +192,11 @@ export default function Escolhanotas() {
           onPress: async () => {
             try {
               await deleteFunction(id); // Chama a função de deleção
-              Alert.alert("Sucesso", `${type.charAt(0).toUpperCase() + type.slice(1)} deletada com sucesso.`);
+              Alert.alert(
+                "Sucesso",
+                `${type.charAt(0).toUpperCase() + type.slice(1)
+                } deletada com sucesso.`
+              );
 
               // Atualiza a lista removendo o item deletado
               setStateFunction((prevItems) =>
@@ -180,7 +207,10 @@ export default function Escolhanotas() {
                 })
               );
             } catch (error) {
-              console.error(`Erro ao deletar ${type}:`, error.response?.data?.message.error);
+              console.error(
+                `Erro ao deletar ${type}:`,
+                error.response?.data?.message.error
+              );
               Alert.alert("Erro", `Ocorreu um erro ao deletar a ${type}.`);
             }
           },
@@ -188,33 +218,45 @@ export default function Escolhanotas() {
       ]
     );
   };
-  
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.plusIconContainer} onPress={handlePlusPress}>
+      <TouchableOpacity
+        style={styles.plusIconContainer}
+        onPress={handlePlusPress}
+      >
         <Icon name="plus" size={30} color="#1F74A7" />
       </TouchableOpacity>
-  
+
       {isLoggedIn && (
         <TouchableOpacity style={styles.newButton} onPress={handleNewButton}>
           <Text style={styles.buttonText}>Controle Financeiro</Text>
         </TouchableOpacity>
       )}
-  
+
       {!isLoggedIn && (
-        <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate("Login")}>
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={() => navigation.navigate("Login")}
+        >
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
       )}
-  
+
       {isLoggedIn && (
-        <TouchableOpacity style={styles.profileButton} onPress={handleProfilePage}>
-          <Image source={require("../../assets/icons/perfil.png")} style={styles.perfilImage} />
+        <TouchableOpacity
+          style={styles.profileButton}
+          onPress={handleProfilePage}
+        >
+          <Image
+            source={require("../../assets/icons/perfil.png")}
+            style={styles.perfilImage}
+          />
         </TouchableOpacity>
       )}
-  
+
       <Text style={styles.notesText}>Suas Notas</Text>
-  
+
       <ScrollView>
         {/* Exibição de Finanças */}
         {financas.length > 0 && (
@@ -228,7 +270,11 @@ export default function Escolhanotas() {
               >
                 <Text style={styles.financaText}>{financa.titulo}</Text>
                 <View style={styles.iconContainer}>
-                  <TouchableOpacity onPress={() => handleDeleteItem(financa.id_financa, "financa")}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleDeleteItem(financa.id_financa, "financa")
+                    }
+                  >
                     <Icon name="trash" size={28} color="#EC4E4E" />
                   </TouchableOpacity>
                 </View>
@@ -236,7 +282,7 @@ export default function Escolhanotas() {
             ))}
           </>
         )}
-  
+
         {/* Exibição de Anotações */}
         {anotacoes.length > 0 && (
           <>
@@ -249,7 +295,11 @@ export default function Escolhanotas() {
               >
                 <Text style={styles.financaText}>{anotacao.titulo}</Text>
                 <View style={styles.iconContainer}>
-                  <TouchableOpacity onPress={() => handleDeleteItem(anotacao.id_anotacao, "anotacao")}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleDeleteItem(anotacao.id_anotacao, "anotacao")
+                    }
+                  >
                     <Icon name="trash" size={28} color="#EC4E4E" />
                   </TouchableOpacity>
                 </View>
@@ -257,31 +307,101 @@ export default function Escolhanotas() {
             ))}
           </>
         )}
-  
+
         {/* Exibição de Checklists */}
         {checklists.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Checklists</Text>
             {checklists.map((checklist) => (
-              <TouchableOpacity key={checklist.id_checklist} style={styles.financaContainer} onPress={() => handleEditChecklist(checklist.id_checklist)}>
+              <TouchableOpacity
+                key={checklist.id_checklist}
+                style={styles.financaContainer}
+                onPress={() => handleEditChecklist(checklist.id_checklist)}
+              >
                 <Text style={styles.financaText}>{checklist.titulo}</Text>
                 <View style={styles.iconContainer}>
-                  <TouchableOpacity  onPress={() => handleDeleteItem(checklist.id_checklist, "checklist")}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      handleDeleteItem(checklist.id_checklist, "checklist")
+                    }
+                  >
                     <Icon name="trash" size={28} color="#EC4E4E" />
                   </TouchableOpacity>
                 </View>
               </TouchableOpacity>
-              
             ))}
           </>
         )}
-  
-        {financas.length === 0 && anotacoes.length === 0 && checklists.length === 0 && (
-          <Text style={styles.batataText}>Você ainda não possui nenhuma anotação criada</Text>
-        )}
+
+        {financas.length === 0 &&
+          anotacoes.length === 0 &&
+          checklists.length === 0 && (
+            <Text style={styles.batataText}>
+              Você ainda não possui nenhuma anotação criada
+            </Text>
+          )}
+
+        {/* Botão para abrir o modal */}
+        <Button title="Abrir Modal de Busca" onPress={() => { setTitulos(''); setResultados([]); setModalVisible(true); }} />
+
+        {/* Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <ScrollView style={styles.modalContent}>
+              {/* Campo de busca de títulos */}
+              <View>
+                <TextInput
+                  value={titulos}
+                  onChangeText={setTitulos}
+                  placeholder="Digite o título"
+                  style={styles.Botão_de_pesquisa}
+                />
+                <Button title="Buscar" onPress={() => TitulosSemelhantes(titulos)} />
+              </View>
+
+              {resultados.length > 0 ? (
+                <View style={styles.resultadosContainer}>
+                  <Text style={styles.resultadoText}>Resultados da busca:</Text>
+                  {resultados.map((resultado, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.resultadoItem}
+                      onPress={() => {
+                        // Verifica o tipo de nota e redireciona para a página de edição correspondente
+                        if (resultado.tipo === 'financa') {
+                          navigation.navigate('EditarFinanca', { id: resultado.id });
+                          setModalVisible(false)
+                        } else if (resultado.tipo === 'anotacao') {
+                          navigation.navigate('EditarAnotacao', { id: resultado.id });
+                          setModalVisible(false)
+                        } else if (resultado.tipo === 'checklist') {
+                          navigation.navigate('EditarChecklist', { id: resultado.id });
+                          setModalVisible(false)
+                        }
+                      }}
+                    >
+                      <Text style={styles.resultadoText}>{resultado.titulo}</Text>
+                      <Text style={styles.resultadoText}>Tipo: {resultado.tipo}</Text>
+                      <Text style={styles.resultadoText}>Descrição: {resultado.descricao || "Sem descrição"}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ) : (
+                <Text style={styles.resultadoText}>Nenhum resultado encontrado</Text>
+              )}
+              {/* Botão para fechar o modal */}
+              <Button title="Fechar Modal" onPress={() => setModalVisible(false)} />
+            </ScrollView>
+          </View>
+        </Modal>
       </ScrollView>
     </View>
-  );  
+  );
 }
 
 const styles = StyleSheet.create({
@@ -378,5 +498,43 @@ const styles = StyleSheet.create({
     color: "#255573",
     marginTop: 30,
     marginBottom: 0,
-  },  
+  },
+  Botão_de_pesquisa: {
+    marginTop: 56,
+    fontSize: 18,
+    fontWeight: "bold",
+    fontStyle: "italic",
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    paddingLeft: 10,
+    marginBottom: 10,
+  },
+  resultadosContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: "#f1f1f1",
+    borderRadius: 10,
+  },
+  resultadoItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  resultadoText: {
+    fontSize: 18,
+    color: "#333",
+    fontWeight: "500",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+  },
 });
