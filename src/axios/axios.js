@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://10.89.240.73:5000/api/", // Remover espaço extra
+  baseURL: "http://10.89.240.98:5000/api/", // Remover espaço extra
   headers: {
     Accept: "application/json",
   },
@@ -46,7 +46,6 @@ const sheets = {
 
 //Pesquisa
   buscarTitulosSemelhantes: (idUsuario, titulo) => api.get(`/buscar-titulos/${idUsuario}/${titulo}`),
-
 };
 
 export default sheets;

@@ -8,8 +8,9 @@ import {
   TextInput,
   Button,
   Alert,
+  Image,
   ScrollView,
-  Modal
+  Modal,
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
@@ -183,7 +184,8 @@ export default function Escolhanotas() {
               await deleteFunction(id); // Chama a função de deleção
               Alert.alert(
                 "Sucesso",
-                `${type.charAt(0).toUpperCase() + type.slice(1)
+                `${
+                  type.charAt(0).toUpperCase() + type.slice(1)
                 } deletada com sucesso.`
               );
 
@@ -210,41 +212,14 @@ export default function Escolhanotas() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.plusIconContainer}
-        onPress={handlePlusPress}
-      >
-        <Icon name="plus" size={30} color="#1F74A7" />
-      </TouchableOpacity>
-
-      {isLoggedIn && (
-        <TouchableOpacity style={styles.newButton} onPress={handleNewButton}>
-          <Text style={styles.buttonText}>Controle Financeiro</Text>
-        </TouchableOpacity>
-      )}
-
-      {!isLoggedIn && (
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => navigation.navigate("Login")}
-        >
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-      )}
-
-      {isLoggedIn && (
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={handleProfilePage}
-        >
-          <Image
-            source={require("../../assets/icons/perfil.png")}
-            style={styles.perfilImage}
-          />
-        </TouchableOpacity>
-      )}
-
       <Text style={styles.notesText}>Suas Notas</Text>
+
+      {/* Botão "+" centralizado na parte inferior */}
+      <View style={styles.plusButtonContainer}>
+        <TouchableOpacity style={styles.plusButton} onPress={handlePlusPress}>
+          <Icon name="plus" size={30} color="#FFF" />
+        </TouchableOpacity>
+      </View>
 
       <ScrollView>
         {/* Exibição de Finanças */}
@@ -339,7 +314,14 @@ export default function Escolhanotas() {
           )}
 
         {/* Botão para abrir o modal */}
-        <Button title="Abrir Modal de Busca" onPress={() => { setTitulos(''); setResultados([]); setModalVisible(true); }} />
+        <Button
+          title="Abrir Modal de Busca"
+          onPress={() => {
+            setTitulos("");
+            setResultados([]);
+            setModalVisible(true);
+          }}
+        />
 
         {/* Modal */}
         <Modal
@@ -358,7 +340,10 @@ export default function Escolhanotas() {
                   placeholder="Digite o título"
                   style={styles.Botão_de_pesquisa}
                 />
-                <Button title="Buscar" onPress={() => TitulosSemelhantes(titulos)} />
+                <Button
+                  title="Buscar"
+                  onPress={() => TitulosSemelhantes(titulos)}
+                />
               </View>
 
               {resultados.length > 0 ? (
@@ -370,29 +355,46 @@ export default function Escolhanotas() {
                       style={styles.resultadoItem}
                       onPress={() => {
                         // Verifica o tipo de nota e redireciona para a página de edição correspondente
-                        if (resultado.tipo === 'financa') {
-                          navigation.navigate('EditarFinanca', { id: resultado.id });
-                          setModalVisible(false)
-                        } else if (resultado.tipo === 'anotacao') {
-                          navigation.navigate('EditarAnotacao', { id: resultado.id });
-                          setModalVisible(false)
-                        } else if (resultado.tipo === 'checklist') {
-                          navigation.navigate('EditarChecklist', { id: resultado.id });
-                          setModalVisible(false)
+                        if (resultado.tipo === "financa") {
+                          navigation.navigate("EditarFinanca", {
+                            id: resultado.id,
+                          });
+                          setModalVisible(false);
+                        } else if (resultado.tipo === "anotacao") {
+                          navigation.navigate("EditarAnotacao", {
+                            id: resultado.id,
+                          });
+                          setModalVisible(false);
+                        } else if (resultado.tipo === "checklist") {
+                          navigation.navigate("EditarChecklist", {
+                            id: resultado.id,
+                          });
+                          setModalVisible(false);
                         }
                       }}
                     >
-                      <Text style={styles.resultadoText}>{resultado.titulo}</Text>
-                      <Text style={styles.resultadoText}>Tipo: {resultado.tipo}</Text>
-                      <Text style={styles.resultadoText}>Descrição: {resultado.descricao || "Sem descrição"}</Text>
+                      <Text style={styles.resultadoText}>
+                        {resultado.titulo}
+                      </Text>
+                      <Text style={styles.resultadoText}>
+                        Tipo: {resultado.tipo}
+                      </Text>
+                      <Text style={styles.resultadoText}>
+                        Descrição: {resultado.descricao || "Sem descrição"}
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
               ) : (
-                <Text style={styles.resultadoText}>Nenhum resultado encontrado</Text>
+                <Text style={styles.resultadoText}>
+                  Nenhum resultado encontrado
+                </Text>
               )}
               {/* Botão para fechar o modal */}
-              <Button title="Fechar Modal" onPress={() => setModalVisible(false)} />
+              <Button
+                title="Fechar Modal"
+                onPress={() => setModalVisible(false)}
+              />
             </ScrollView>
           </View>
         </Modal>
@@ -447,6 +449,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 0,
   },
+  sectionTitleTop: {
+    fontFamily: "SuezOne_400Regular",
+    fontSize: 25,
+    color: "#255573",
+    marginTop: 0,
+    marginBottom: 0,
+  },
   Botão_de_pesquisa: {
     marginTop: 56,
     fontSize: 18,
@@ -476,13 +485,26 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 20,
+  },
+  plusButtonContainer: {
+    alignItems: "flex-end",
+    paddingVertical: 10,
+    backgroundColor: "#E2EDF2",
+  },
+  plusButton: {
+    backgroundColor: "#1F74A7",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
