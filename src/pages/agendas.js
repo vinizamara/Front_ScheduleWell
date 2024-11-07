@@ -5,8 +5,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Text,
+  TextInput,
+  Button,
   Alert,
   ScrollView,
+  Modal
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
@@ -23,6 +26,9 @@ export default function Escolhanotas() {
   const [financas, setFinancas] = useState([]);
   const [anotacoes, setAnotacoes] = useState([]);
   const [checklists, setChecklists] = useState([]);
+  const [titulos, setTitulos] = useState("");
+  const [resultados, setResultados] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
@@ -77,6 +83,72 @@ export default function Escolhanotas() {
     }
   };
 
+  const TitulosSemelhantes = async (titulo) => {
+    try {
+      const idUsuario = await AsyncStorage.getItem("userId");
+      console.log(titulo);
+      console.log(idUsuario);
+      const response = await sheets.buscarTitulosSemelhantes(idUsuario, titulo);
+      console.log(response.data);
+      setResultados(response.data.resultados);
+    } catch (error) {
+      console.log("Erro ao buscar titulos:", error.response.data.message);
+    }
+  };
+
+  useEffect(() => {
+    console.log("Resultados atualizados:", resultados);
+  }, [resultados]);
+
+  useEffect(() => {
+    if (isFocused) {
+      checkLoginStatus();
+    }
+  }, [isFocused]);
+
+  if (loading || !fontsLoaded) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#2196F3" />
+      </View>
+    );
+  }
+
+  const handlePlusPress = () => {
+    if (!isLoggedIn) {
+      Alert.alert(
+        "Faça Login",
+        "Você precisa fazer login para criar uma nova nota. Deseja fazer login agora?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          { text: "Login", onPress: () => navigation.navigate("Login") },
+        ]
+      );
+    } else {
+      navigation.navigate("Escolhanotas");
+    }
+  };
+
+  const handleNewButton = () => {
+    navigation.navigate("Controlefinanceiro");
+  };
+
+  const handleProfilePage = () => {
+    navigation.navigate("Paginadeperfil");
+  };
+
+  const handleEditFinanca = (idFinanca) => {
+    navigation.navigate("EditarFinanca", { id: idFinanca }); // Passando o ID da finança
+  };
+
+  const handleEditAnotacao = (idAnotacao) => {
+    navigation.navigate("EditarAnotacao", { id: idAnotacao }); // Passando o ID da finança
+  };
+
+  const handleEditChecklist = (idChecklist) => {
+    navigation.navigate("EditarChecklist", { id: idChecklist }); // Passando o ID da finança
+  };
+
   const handleDeleteItem = async (id, type) => {
     let deleteFunction;
     let setStateFunction;
@@ -111,8 +183,7 @@ export default function Escolhanotas() {
               await deleteFunction(id); // Chama a função de deleção
               Alert.alert(
                 "Sucesso",
-                `${
-                  type.charAt(0).toUpperCase() + type.slice(1)
+                `${type.charAt(0).toUpperCase() + type.slice(1)
                 } deletada com sucesso.`
               );
 
@@ -137,37 +208,43 @@ export default function Escolhanotas() {
     );
   };
 
-  useEffect(() => {
-    if (isFocused) {
-      checkLoginStatus();
-    }
-  }, [isFocused]);
-
-  const handlePlusPress = () => {
-    if (!isLoggedIn) {
-      Alert.alert(
-        "Faça Login",
-        "Você precisa fazer login para criar uma nova nota. Deseja fazer login agora?",
-        [
-          { text: "Cancelar", style: "cancel" },
-          { text: "Login", onPress: () => navigation.navigate("Login") },
-        ]
-      );
-    } else {
-      navigation.navigate("Escolhanotas");
-    }
-  };
-
   return (
     <View style={styles.container}>
-      <Text style={styles.notesText}>Suas Notas</Text>
+      <TouchableOpacity
+        style={styles.plusIconContainer}
+        onPress={handlePlusPress}
+      >
+        <Icon name="plus" size={30} color="#1F74A7" />
+      </TouchableOpacity>
 
-      {/* Botão "+" centralizado na parte inferior */}
-      <View style={styles.plusButtonContainer}>
-        <TouchableOpacity style={styles.plusButton} onPress={handlePlusPress}>
-          <Icon name="plus" size={30} color="#FFF" />
+      {isLoggedIn && (
+        <TouchableOpacity style={styles.newButton} onPress={handleNewButton}>
+          <Text style={styles.buttonText}>Controle Financeiro</Text>
         </TouchableOpacity>
-      </View>
+      )}
+
+      {!isLoggedIn && (
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={() => navigation.navigate("Login")}
+        >
+          <Text style={styles.buttonText}>Login</Text>
+        </TouchableOpacity>
+      )}
+
+      {isLoggedIn && (
+        <TouchableOpacity
+          style={styles.profileButton}
+          onPress={handleProfilePage}
+        >
+          <Image
+            source={require("../../assets/icons/perfil.png")}
+            style={styles.perfilImage}
+          />
+        </TouchableOpacity>
+      )}
+
+      <Text style={styles.notesText}>Suas Notas</Text>
 
       <ScrollView>
         {/* Exibição de Finanças */}
@@ -236,11 +313,7 @@ export default function Escolhanotas() {
               <TouchableOpacity
                 key={checklist.id_checklist}
                 style={styles.financaContainer}
-                onPress={() =>
-                  navigation.navigate("EditarChecklist", {
-                    id: checklist.id_checklist,
-                  })
-                }
+                onPress={() => handleEditChecklist(checklist.id_checklist)}
               >
                 <Text style={styles.financaText}>{checklist.titulo}</Text>
                 <View style={styles.iconContainer}>
@@ -264,6 +337,65 @@ export default function Escolhanotas() {
               Você ainda não possui nenhuma anotação criada
             </Text>
           )}
+
+        {/* Botão para abrir o modal */}
+        <Button title="Abrir Modal de Busca" onPress={() => { setTitulos(''); setResultados([]); setModalVisible(true); }} />
+
+        {/* Modal */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <ScrollView style={styles.modalContent}>
+              {/* Campo de busca de títulos */}
+              <View>
+                <TextInput
+                  value={titulos}
+                  onChangeText={setTitulos}
+                  placeholder="Digite o título"
+                  style={styles.Botão_de_pesquisa}
+                />
+                <Button title="Buscar" onPress={() => TitulosSemelhantes(titulos)} />
+              </View>
+
+              {resultados.length > 0 ? (
+                <View style={styles.resultadosContainer}>
+                  <Text style={styles.resultadoText}>Resultados da busca:</Text>
+                  {resultados.map((resultado, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.resultadoItem}
+                      onPress={() => {
+                        // Verifica o tipo de nota e redireciona para a página de edição correspondente
+                        if (resultado.tipo === 'financa') {
+                          navigation.navigate('EditarFinanca', { id: resultado.id });
+                          setModalVisible(false)
+                        } else if (resultado.tipo === 'anotacao') {
+                          navigation.navigate('EditarAnotacao', { id: resultado.id });
+                          setModalVisible(false)
+                        } else if (resultado.tipo === 'checklist') {
+                          navigation.navigate('EditarChecklist', { id: resultado.id });
+                          setModalVisible(false)
+                        }
+                      }}
+                    >
+                      <Text style={styles.resultadoText}>{resultado.titulo}</Text>
+                      <Text style={styles.resultadoText}>Tipo: {resultado.tipo}</Text>
+                      <Text style={styles.resultadoText}>Descrição: {resultado.descricao || "Sem descrição"}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ) : (
+                <Text style={styles.resultadoText}>Nenhum resultado encontrado</Text>
+              )}
+              {/* Botão para fechar o modal */}
+              <Button title="Fechar Modal" onPress={() => setModalVisible(false)} />
+            </ScrollView>
+          </View>
+        </Modal>
       </ScrollView>
     </View>
   );
@@ -315,24 +447,42 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 0,
   },
-  sectionTitleTop: {
-    fontFamily: "SuezOne_400Regular",
-    fontSize: 25,
-    color: "#255573",
-    marginTop: 0,
-    marginBottom: 0,
+  Botão_de_pesquisa: {
+    marginTop: 56,
+    fontSize: 18,
+    fontWeight: "bold",
+    fontStyle: "italic",
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    paddingLeft: 10,
+    marginBottom: 10,
   },
-  plusButtonContainer: {
-    alignItems: "flex-end",
-    paddingVertical: 10,
-    backgroundColor: "#E2EDF2",
+  resultadosContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: "#f1f1f1",
+    borderRadius: 10,
   },
-  plusButton: {
-    backgroundColor: "#1F74A7",
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
+  resultadoItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  resultadoText: {
+    fontSize: 18,
+    color: "#333",
+    fontWeight: "500",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
   },
 });
