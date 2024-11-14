@@ -41,12 +41,7 @@ export default function ControleFinanceiro() {
           const id = await AsyncStorage.getItem("userId");
           const financeiroResponse = await sheets.resumoFinanceiro(id);
           const financeiroData = financeiroResponse.data;
-          const rendaTotalResponse = await sheets.obterRendaTotal(id);
-          const rendaTotalData = rendaTotalResponse.data;
-  
-          setRendaTotal(
-            rendaTotalData.renda_total ? rendaTotalData.renda_total.toString() : ""
-          );
+          
           setDespesaMensal(
             financeiroData.despesas ? financeiroData.despesas.toString() : "0"
           );
@@ -55,7 +50,19 @@ export default function ControleFinanceiro() {
           );
           setSaldo(financeiroData.saldo ? financeiroData.saldo.toString() : "0");
         } catch (error) {
-          console.log("Erro ao buscar os dados financeiros:", error.response.data.error);
+          console.log("Erro ao buscar os dados financeiros:", error.response.data.message);
+        }
+        try{
+          const id = await AsyncStorage.getItem("userId");
+          const rendaTotalResponse = await sheets.obterRendaTotal(id);
+          const rendaTotalData = rendaTotalResponse.data;
+          
+          console.log(rendaTotalData)
+          setRendaTotal(
+            rendaTotalData.renda_total ? rendaTotalData.renda_total.toString() : "0"
+          );
+        }catch(error){
+          console.log("Erro ao buscar os dados financeiros:", error.response.data.message);
         }
   
         try {

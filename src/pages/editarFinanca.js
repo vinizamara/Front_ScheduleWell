@@ -145,7 +145,7 @@ export default function EditarFinanca() {
   return (
     <ScrollView style={styles.scrollContainer}>
       <View style={styles.container}>
-        <Text style={styles.pageTitle}>Edição de Finanças</Text>
+        <Text style={styles.pageTitle}>Edição de Finança</Text>
 
         <View style={styles.containerForm}>
           <TextInput

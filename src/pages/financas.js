@@ -92,7 +92,7 @@ export default function Financas() {
   return (
     <ScrollView style={styles.scrollContainer}>
       <View style={styles.container}>
-        <Text style={styles.pageTitle}>Criação de Finanças</Text>
+        <Text style={styles.pageTitle}>Criação de Finança</Text>
 
         <View style={styles.containerForm}>
           <TextInput

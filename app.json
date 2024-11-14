@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "frontApp",
+    "name": "ScheduleWell",
     "slug": "frontApp",
     "version": "1.0.1",
     "orientation": "portrait",
@@ -19,8 +19,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/logo_scheduleWell2.png",
+        "backgroundColor": "#1f74a7"
       },
       "package": "com.vinicius_zamara.frontApp"
     },

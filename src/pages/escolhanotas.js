@@ -48,7 +48,7 @@ export default function Escolhanotas() {
           onPress={() => navigation.navigate("Financas")}
         >
           <Image source={require("../../assets/icons/porco.png")} />
-          <Text style={styles.title}>Finanças</Text>
+          <Text style={styles.title}>Finança</Text>
           <Text style={styles.subtitulo}>
             Gerencie suas finanças pessoais, acompanhando suas despesas e
             receitas de forma eficiente.
