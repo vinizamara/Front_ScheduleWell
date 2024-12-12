@@ -14,10 +14,10 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import HeaderAnimation from "../components/headerAnimation";
 import sheets from "../axios/axios"; // Importa a instância do Axios
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Cadastro() {
   const navigation = useNavigation();
-
   const [isPasswordVisible, setPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [password, setPassword] = useState("");
@@ -25,9 +25,7 @@ export default function Cadastro() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
 
-  let [fontsLoaded] = useFonts({
-    SuezOne_400Regular,
-  });
+  let [fontsLoaded] = useFonts({ SuezOne_400Regular });
 
   useEffect(() => {
     async function prepare() {
@@ -37,7 +35,7 @@ export default function Cadastro() {
       }
     }
     prepare();
-  }, []);
+  }, [fontsLoaded]);
 
   if (!fontsLoaded) {
     return (
@@ -47,139 +45,105 @@ export default function Cadastro() {
     );
   }
 
-  const togglePasswordVisibility = () => {
-    setPasswordVisible(!isPasswordVisible);
-  };
+  const handleEmailChange = (text) => setEmail(text);
+  const handleNameChange = (text) => setName(text);
 
-  const toggleConfirmPasswordVisibility = () => {
-    setConfirmPasswordVisible(!isConfirmPasswordVisible);
-  };
+  const togglePasswordVisibility = () => setPasswordVisible((prev) => !prev);
+  const toggleConfirmPasswordVisibility = () => setConfirmPasswordVisible((prev) => !prev);
 
-  const handleEmailChange = (text) => {
-    setEmail(text);
-  };
-
-  const handleNameChange = (text) => {
-    setName(text);
-  };
+  const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
   const handleRegister = async () => {
-    if (password !== confirmPassword) {
-      Alert.alert("Erro", "As senhas não coincidem!");
-      return;
-    }
-
-    if (!name || !email || !password) {
-      Alert.alert("Erro", "Todos os campos são obrigatórios!");
-      return;
-    }
-
     const newUser = {
       nome: name,
       email: email,
       senha: password,
+      confirmarSenha: confirmPassword,
     };
 
     try {
-      const response = await sheets.createUser(newUser);
+        const response = await sheets.createUser(newUser);
+        Alert.alert("Sucesso", response.data.message);
 
-      if (response.status === 201) {
-        Alert.alert("Sucesso", "Usuário cadastrado com sucesso!");
-        navigation.navigate("Agendas");
-      }
+        // Armazenar informações no AsyncStorage
+        await AsyncStorage.setItem("userLoggedIn", "true");
+        await AsyncStorage.setItem("userName", name);
+
+        navigation.navigate("Login");
     } catch (error) {
-      if (error.response) {
-        Alert.alert("Erro", error.response.data.error);
-      } else {
-        Alert.alert("Erro", "Erro ao conectar-se ao servidor.");
-      }
+      Alert.alert("Atenção", error.response.data.error);
     }
   };
 
   return (
     <View style={styles.container}>
       <HeaderAnimation
-        message={"Cadastre-se"}
-        animationType={"fadeInLeft"}
+        message="Cadastre-se"
+        animationType="fadeInLeft"
         style={styles.containerHeader}
       />
       <View style={styles.containerForm}>
-        <Text style={styles.title}>Nome</Text>
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.inputWithoutBorder}
-            placeholder="Insira seu nome"
-            value={name}
-            onChangeText={handleNameChange}
-          />
-        </View>
-
-        <Text style={styles.title}>Email</Text>
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.inputWithoutBorder}
-            placeholder="Insira seu email"
-            value={email}
-            onChangeText={handleEmailChange}
-          />
-        </View>
-
-        <Text style={styles.title}>Senha</Text>
-        <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Insira sua senha"
-            style={styles.inputWithoutBorder}
-            secureTextEntry={!isPasswordVisible}
-            value={password}
-            onChangeText={setPassword}
-          />
-          {password.length > 0 && (
-            <TouchableOpacity
-              onPress={togglePasswordVisibility}
-              style={styles.eyeIcon}
-            >
-              <Ionicons
-                name={isPasswordVisible ? "eye-off" : "eye"}
-                size={24}
-                color="#555"
-              />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        <Text style={styles.title}>Confirme sua senha</Text>
-        <View style={styles.inputContainer}>
-          <TextInput
-            placeholder="Confirme sua senha"
-            style={styles.inputWithoutBorder}
-            secureTextEntry={!isConfirmPasswordVisible}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-          />
-          {confirmPassword.length > 0 && (
-            <TouchableOpacity
-              onPress={toggleConfirmPasswordVisibility}
-              style={styles.eyeIcon}
-            >
-              <Ionicons
-                name={isConfirmPasswordVisible ? "eye-off" : "eye"}
-                size={24}
-                color="#555"
-              />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleRegister}
-        >
+        <FormField
+          label="Nome"
+          placeholder="Insira seu nome"
+          value={name}
+          onChangeText={handleNameChange}
+        />
+        <FormField
+          label="Email"
+          placeholder="Insira seu email"
+          value={email}
+          onChangeText={handleEmailChange}
+        />
+        <FormField
+          label="Senha"
+          placeholder="Insira sua senha"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={!isPasswordVisible}
+          toggleVisibility={togglePasswordVisibility}
+          isVisible={isPasswordVisible}
+        />
+        <FormField
+          label="Confirme sua senha"
+          placeholder="Confirme sua senha"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry={!isConfirmPasswordVisible}
+          toggleVisibility={toggleConfirmPasswordVisibility}
+          isVisible={isConfirmPasswordVisible}
+        />
+        <TouchableOpacity style={styles.button} onPress={handleRegister}>
           <Text style={styles.buttonText}>Cadastrar-se</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
+
+const FormField = ({ label, placeholder, value, onChangeText, secureTextEntry, toggleVisibility, isVisible }) => (
+  <>
+    <Text style={styles.title}>{label}</Text>
+    <View style={styles.inputContainer}>
+      <TextInput
+        style={styles.inputWithoutBorder}
+        placeholder={placeholder}
+        value={value}
+        onChangeText={onChangeText}
+        secureTextEntry={secureTextEntry}
+      />
+      {value.length > 0 && toggleVisibility && (
+        <TouchableOpacity onPress={toggleVisibility} style={styles.eyeIcon}>
+          <Ionicons
+            name={isVisible ? "eye-off" : "eye"}
+            size={24}
+            color="#555"
+          />
+        </TouchableOpacity>
+      )}
+    </View>
+  </>
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -194,11 +158,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: "5%",
     paddingVertical: "10%",
     marginTop: -50,
-  },
-  message: {
-    color: "#255573",
-    fontFamily: "SuezOne_400Regular",
-    fontSize: 28,
   },
   containerForm: {
     width: "80%",

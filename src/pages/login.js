@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -9,19 +9,16 @@ import {
   Alert,
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
-import * as SplashScreen from "expo-splash-screen";
 import { useNavigation } from "@react-navigation/native";
-import * as Animatable from "react-native-animatable";
 import { Ionicons } from "@expo/vector-icons";
 import HeaderAnimation from "../components/headerAnimation";
-import sheets from "../axios/axios"; // Importa a instância do Axios
+import sheets from "../axios/axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Login() {
   const navigation = useNavigation();
 
   const [isPasswordVisible, setPasswordVisible] = useState(false);
-  const [error, setError] = useState(null);
   const [user, setUser] = useState({
     email: "",
     senha: "",
@@ -30,16 +27,6 @@ export default function Login() {
   let [fontsLoaded] = useFonts({
     SuezOne_400Regular,
   });
-
-  useEffect(() => {
-    async function prepare() {
-      await SplashScreen.preventAutoHideAsync();
-      if (fontsLoaded) {
-        await SplashScreen.hideAsync();
-      }
-    }
-    prepare();
-  }, []);
 
   if (!fontsLoaded) {
     return (
@@ -54,39 +41,35 @@ export default function Login() {
   };
 
   const handleEmailChange = (text) => {
-    setUser({ ...user, email: text });
+    setUser((prevState) => ({ ...prevState, email: text }));
   };
 
   const handlePasswordChange = (text) => {
-    setUser({ ...user, senha: text });
+    setUser((prevState) => ({ ...prevState, senha: text }));
   };
 
   const handleLogin = async () => {
-    if (user.email === "" || user.senha === "") {
-      Alert.alert("Preencha os campos para entrar");
-      return;
-    }
-
     try {
       const response = await sheets.postLogin(user);
+      Alert.alert("Sucesso", response.data.message);
 
-      if (response.status === 200) {
-        Alert.alert("Sucesso", response.data.message);
+      const userName = response.data.user.nome;
+      const userEmail = response.data.user.email;
+      const userId = response.data.user.id_usuario;
 
-        const userName = response.data.user.Nome;
+      try {
         await AsyncStorage.setItem("userLoggedIn", "true");
         await AsyncStorage.setItem("userName", userName);
+        await AsyncStorage.setItem("userEmail", userEmail);
+        await AsyncStorage.setItem("userId", userId.toString());
+        console.log("Dados salvos com sucesso!");
+      } catch (e) {
+        console.error("Erro ao armazenar dados no AsyncStorage:", e);
+      }
 
-        navigation.navigate("Home");
-      }
+      navigation.navigate("Main");
     } catch (error) {
-      if (error.response) {
-        Alert.alert("Erro no login", error.response.data.error);
-        console.log(error);
-      } else {
-        Alert.alert("Erro de Conexão", "Erro ao conectar-se ao servidor.");
-        console.log(error);
-      }
+      Alert.alert("Atenção", error.response.data.error);
     }
   };
 
@@ -117,7 +100,7 @@ export default function Login() {
             value={user.senha}
             onChangeText={handlePasswordChange}
           />
-          {user.senha.length > 0 ? (
+          {user.senha.length > 0 && (
             <TouchableOpacity
               onPress={togglePasswordVisibility}
               style={styles.eyeIcon}
@@ -128,8 +111,6 @@ export default function Login() {
                 color="#555"
               />
             </TouchableOpacity>
-          ) : (
-            <View />
           )}
         </View>
 
@@ -150,8 +131,6 @@ export default function Login() {
             Não possui uma conta? Cadastre-se!
           </Text>
         </TouchableOpacity>
-
-        {error && <Text style={{ color: "red" }}>{error}</Text>}
       </View>
     </View>
   );

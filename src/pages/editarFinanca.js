@@ -7,16 +7,18 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
-  ScrollView
+  ScrollView,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import sheets from "../axios/axios"; // Importa o Axios configurado
 import Icon from "react-native-vector-icons/FontAwesome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function Financas() {
+export default function EditarFinanca() {
   const navigation = useNavigation();
+  const route = useRoute();
+  const { id } = route.params;
 
   const [financa, setFinanca] = useState({
     tituloNota: "",
@@ -34,25 +36,60 @@ export default function Financas() {
     const fetchUserId = async () => {
       try {
         const storedUserId = await AsyncStorage.getItem("userId");
-        console.log("User ID recuperado:", storedUserId); // Log do userId
-        setUserId(storedUserId ? parseInt(storedUserId) : null); // Converte para número se não for null
+        console.log("User ID recuperado:", storedUserId);
+        if (storedUserId) {
+          setUserId(parseInt(storedUserId)); // Atualiza o estado do userId
+        } else {
+          Alert.alert("Erro", "ID do usuário não encontrado.");
+        }
       } catch (error) {
-        console.error(
-          "Erro ao obter o ID do usuário:",
-          error.response.message.error
-        );
+        console.error("Erro ao obter o ID do usuário:", error);
       }
     };
 
-    fetchUserId();
+    fetchUserId(); // Chama a função para obter o ID do usuário
   }, []);
+
+  useEffect(() => {
+    if (userId) {
+      fetchFinanca(userId); // Chama a função para buscar a finança
+    }
+  }, [userId]); // Executa quando userId for alterado
+
+  const fetchFinanca = async (userId) => {
+    if (!userId) return; // Adiciona verificação aqui
+
+    try {
+      const response = await sheets.listarFinancas(userId);
+      const finance = response.data.find((item) => item.id_financa === id);
+      console.log(finance.data);
+      console.log(new Date(finance.data));
+      if (finance) {
+        setFinanca({
+          tituloNota: finance.titulo,
+          descricaoNota: finance.descricao,
+          dataNota: new Date(finance.data),
+          valorNota: finance.valor.toString(),
+          tipoTransacao: finance.tipo_transacao,
+          frequencia: finance.frequencia,
+        });
+      } else {
+        Alert.alert("Erro", "Finança não encontrada.");
+      }
+    } catch (error) {
+      Alert.alert("Erro na busca de notas", error.response.data.error);
+    }
+  };
 
   const showDatePickerHandler = () => {
     setShowDatePicker(true);
   };
 
-  //Função para atualizar o id da nota
   const onChangeDate = (event, selectedDate) => {
+    if (event.type === "dismissed") {
+      setShowDatePicker(false);
+    }
+
     const currentDate = selectedDate || financa.dataNota;
     setShowDatePicker(Platform.OS === "ios");
     setFinanca((prevState) => ({ ...prevState, dataNota: currentDate }));
@@ -64,16 +101,31 @@ export default function Financas() {
 
   const formatDate = (date) => {
     const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
+    // Aplica a correção de fuso horário apenas ao salvar a data
+    const adjustedDate = new Date(
+      d.getTime() + Math.abs(d.getTimezoneOffset() * 60000)
+    );
+    const year = adjustedDate.getFullYear();
+    const month = String(adjustedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(adjustedDate.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`; // Formato 'YYYY-MM-DD'
   };
 
-  //Função para criar a nota
+  const formatDateExibition = (date) => {
+    const d = new Date(date);
+    // Aplica a correção de fuso horário apenas ao salvar a data
+    const adjustedDate = new Date(
+      d.getTime() + Math.abs(d.getTimezoneOffset() * 60000)
+    );
+    const year = adjustedDate.getFullYear();
+    const month = String(adjustedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(adjustedDate.getDate()).padStart(2, "0");
+    return `${day}/${month}/${year}`; // Formato 'YYYY-MM-DD'
+  };
+
   const handleSave = async () => {
     try {
-      const response = await sheets.criarFinanca({
+      const response = await sheets.atualizarFinanca(id, {
         fk_id_usuario: userId,
         titulo: financa.tituloNota,
         descricao: financa.descricaoNota,
@@ -82,17 +134,18 @@ export default function Financas() {
         tipo_transacao: financa.tipoTransacao,
         frequencia: financa.frequencia,
       });
+
       Alert.alert("Sucesso", response.data.message);
       navigation.navigate("Main", { screen: "Agendas" });
     } catch (error) {
-      Alert.alert("Erro na criação de nota", error.response.data.message);
+      Alert.alert("Erro da API", error.response.data.error);
     }
   };
 
   return (
     <ScrollView style={styles.scrollContainer}>
       <View style={styles.container}>
-        <Text style={styles.pageTitle}>Criação de Finança</Text>
+        <Text style={styles.pageTitle}>Edição de Finança</Text>
 
         <View style={styles.containerForm}>
           <TextInput
@@ -114,15 +167,17 @@ export default function Financas() {
             onPress={showDatePickerHandler}
             style={styles.input}
           >
-            <Text style={styles.dateText}>
-              {financa.dataNota.toLocaleDateString()}
-            </Text>
+            <Text style={styles.dateText}>{formatDateExibition(financa.dataNota)}</Text>
           </TouchableOpacity>
           {showDatePicker && (
             <DateTimePicker
-              value={financa.dataNota}
+              value={
+                new Date(
+                  financa.dataNota.getTime() +
+                    Math.abs(financa.dataNota.getTimezoneOffset() * 60000)
+                )
+              }
               mode="date"
-              display="default"
               onChange={onChangeDate}
             />
           )}
@@ -167,9 +222,9 @@ export default function Financas() {
             <TouchableOpacity
               style={[
                 styles.frequencyButton,
-                financa.frequencia === "Diária" && styles.selectedButton,
+                financa.frequencia === "Diaria" && styles.selectedButton,
               ]}
-              onPress={() => handleInputChange("frequencia", "Diária")}
+              onPress={() => handleInputChange("frequencia", "Diaria")}
             >
               <Text style={styles.frequencyButtonText}>Diária</Text>
             </TouchableOpacity>
@@ -211,9 +266,9 @@ export default function Financas() {
             <TouchableOpacity
               style={[
                 styles.frequencyButton,
-                financa.frequencia === "Única" && styles.selectedButton,
+                financa.frequencia === "Unica" && styles.selectedButton,
               ]}
-              onPress={() => handleInputChange("frequencia", "Única")}
+              onPress={() => handleInputChange("frequencia", "Unica")}
             >
               <Text style={styles.frequencyButtonText}>Única</Text>
             </TouchableOpacity>
@@ -222,13 +277,13 @@ export default function Financas() {
 
         <View style={styles.footer}>
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.footerText}>Salvar</Text>
+            <Text style={styles.footerText}>Editar</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.cancelButton}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.footerText}>Cancelar</Text>
+            <Text style={styles.footerText}>Voltar</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -243,10 +298,6 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     alignItems: "center",
   },
-  scrollContainer: {
-    flexGrow: 1,
-    paddingBottom: 20,
-  },
   pageTitle: {
     fontSize: 26,
     fontWeight: "bold",
@@ -258,23 +309,18 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: "#C6DBE4",
-    borderColor: "#1F74A7",
+    borderColor: "#7A7A7A",
     borderWidth: 1,
     borderRadius: 8,
     height: 50,
     paddingHorizontal: 15,
-    paddingVertical: 10,
     marginBottom: 15,
     justifyContent: "center",
     fontSize: 18,
+    paddingVertical: 10,
   },
   descriptionInput: {
     height: 100,
-    borderColor: "#1F74A7",
-    borderWidth: 1,
-    borderRadius: 8,
-    backgroundColor: "#C6DBE4",
-    paddingHorizontal: 15,
     textAlignVertical: "top",
   },
   transactionTypeContainer: {
@@ -295,7 +341,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginHorizontal: 5,
     borderWidth: 1,
-    borderColor: "#1F74A7",
+    borderColor: "#7A7A7A",
   },
   despesaButton: {
     flex: 1,
@@ -305,7 +351,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginHorizontal: 5,
     borderWidth: 1,
-    borderColor: "#1F74A7",
+    borderColor: "#7A7A7A",
   },
   selectedButton: {
     backgroundColor: "#255573",
@@ -322,14 +368,14 @@ const styles = StyleSheet.create({
   },
   frequencyButton: {
     flex: 1,
-    backgroundColor: "#1F74A7", // Alterado para a cor #1F74A7
+    backgroundColor: "#2884BB",
     paddingVertical: 15,
     alignItems: "center",
     borderRadius: 8,
     marginHorizontal: 5,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: "#1F74A7",
+    borderColor: "#7A7A7A",
   },
   frequencyButtonText: {
     fontSize: 18,
@@ -342,7 +388,7 @@ const styles = StyleSheet.create({
     marginTop: "10%",
   },
   saveButton: {
-    backgroundColor: "#1F74A7", // Botão Salvar
+    backgroundColor: "#1F74A7",
     paddingVertical: 15,
     paddingHorizontal: 25,
     borderRadius: 8,
@@ -350,7 +396,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   cancelButton: {
-    backgroundColor: "#EC4E4E",
+    backgroundColor: "#FF4B4B",
     paddingVertical: 15,
     paddingHorizontal: 25,
     borderRadius: 8,

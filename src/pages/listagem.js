@@ -9,22 +9,27 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  FlatList,
 } from "react-native";
 import { useFonts, SuezOne_400Regular } from "@expo-google-fonts/suez-one";
 import * as SplashScreen from "expo-splash-screen";
-import Icon from "react-native-vector-icons/MaterialIcons";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useNavigation } from "@react-navigation/native";
-import DateTimePickerModal from 'react-native-modal-datetime-picker'; // Importa a biblioteca do DateTimePickerModal
-import sheets from "../axios/axios"; // Importa a instância do Axios
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Icon from "react-native-vector-icons/MaterialIcons"; // Importando o ícone
+
+import sheets from "../axios/axios"; // Certifique-se de que o axios está corretamente configurado.
 
 export default function Listagem() {
+  const [userId, setUserId] = useState(null);
   const [inputValues, setInputValues] = useState({
     titulo: "",
     data: "",
     descricao: "",
   });
-  const [itens, setItens] = useState([]); // Estado para armazenar os itens
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false); // Estado para mostrar/esconder o picker de data
+  const [itens, setItens] = useState([]); // Estado para armazenar os itens do checklist
+  const [itemInput, setItemInput] = useState(""); // Estado para o campo de entrada do item
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const navigation = useNavigation();
 
   let [fontsLoaded] = useFonts({
@@ -38,6 +43,18 @@ export default function Listagem() {
         await SplashScreen.hideAsync();
       }
     }
+
+    const fetchUserId = async () => {
+      try {
+        const storedUserId = await AsyncStorage.getItem("userId");
+        console.log("User ID recuperado:", storedUserId); // Log do userId
+        setUserId(storedUserId ? parseInt(storedUserId) : null); // Converte para número se não for null
+      } catch (error) {
+        console.error("Erro ao obter o ID do usuário:", error);
+      }
+    };
+
+    fetchUserId();
     prepare();
   }, [fontsLoaded]);
 
@@ -53,47 +70,8 @@ export default function Listagem() {
     setInputValues({ ...inputValues, [name]: value });
   };
 
-  const handleAddItem = () => {
-    if (!inputValues.titulo || !inputValues.data) {
-      Alert.alert("Erro", "Título e data são obrigatórios.");
-      return;
-    }
-    setItens([...itens, { ...inputValues }]);
-    setInputValues({
-      titulo: "",
-      data: "",
-      descricao: "",
-    });
-  };
-
-  const handleSave = async () => {
-    try {
-      // Primeiro, cria o checklist
-      const checklistResponse = await sheets.postChecklist({
-        fkIdUsuario: 1, // Substitua com o ID real do usuário
-        titulo: inputValues.titulo,
-        data: inputValues.data,
-        descricao: inputValues.descricao,
-      });
-
-      if (checklistResponse.status === 201) {
-        const checklistId = checklistResponse.data.result.insertId;
-
-        // Adiciona os itens ao checklist
-        for (const item of itens) {
-          await sheets.postItemChecklist({
-            fkIdChecklist: checklistId,
-            texto: item.titulo,
-            concluido: false, // ou o valor padrão que você desejar
-          });
-        }
-
-        Alert.alert("Sucesso", "Checklist e itens adicionados com sucesso!");
-        navigation.navigate("Agendas");
-      }
-    } catch (error) {
-      Alert.alert("Erro", "Erro ao adicionar o checklist e itens.");
-    }
+  const handleItemInputChange = (text) => {
+    setItemInput(text);
   };
 
   const handleCancel = () => {
@@ -109,8 +87,61 @@ export default function Listagem() {
   };
 
   const handleConfirm = (date) => {
-    setInputValues({ ...inputValues, data: date.toLocaleDateString('pt-BR') });
+    const formattedDate = new Date(date).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    setInputValues({ ...inputValues, data: formattedDate });
     hideDatePicker();
+  };
+
+  const handleAddItem = () => {
+    if (itemInput.trim() === "") {
+      Alert.alert("Erro", "O item não pode ser vazio.");
+      return;
+    }
+    setItens([...itens, { texto: itemInput, concluido: false }]);
+    setItemInput("");
+  };
+
+  const handleRemoveItem = (index) => {
+    const newItems = itens.filter((_, i) => i !== index);
+    setItens(newItems);
+  };
+
+  const handleSave = async () => {
+    try {
+      const response = await sheets.postChecklist({
+        fkIdUsuario: userId,
+        titulo: inputValues.titulo,
+        data: inputValues.data.split("/").reverse().join("-"),
+        descricao: inputValues.descricao,
+      });
+
+      if (
+        response.status === 201 &&
+        response.data.result.insertId !== undefined
+      ) {
+        const checklistId = response.data.result.insertId;
+
+        for (const item of itens) {
+          await sheets.postItemChecklist({
+            fkIdChecklist: checklistId,
+            texto: item.texto,
+            concluido: item.concluido,
+          });
+        }
+
+        Alert.alert("Sucesso", response.data.message);
+        navigation.navigate("Main", { screen: "Agendas" });
+      }
+    } catch (error) {
+        Alert.alert(
+          "Erro",
+            error.response.data.message
+        );
+    }
   };
 
   return (
@@ -130,7 +161,9 @@ export default function Listagem() {
           onChangeText={(text) => handleInputChange("titulo", text)}
         />
         <TouchableOpacity onPress={showDatePicker} style={styles.datePicker}>
-          <Text style={styles.dateText}>{inputValues.data || "Selecione a data"}</Text>
+          <Text style={styles.dateText}>
+            {inputValues.data || "Selecione a data"}
+          </Text>
         </TouchableOpacity>
         <TextInput
           style={[styles.input, styles.textarea]}
@@ -139,9 +172,42 @@ export default function Listagem() {
           onChangeText={(text) => handleInputChange("descricao", text)}
           multiline
         />
-        <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
-          <Icon name="add" size={24} color="#FFF" />
+
+        {/* Botão de adicionar item acima do campo de título da tarefa */}
+        <TouchableOpacity style={styles.addButtonAbove} onPress={handleAddItem}>
+          <Icon name="add" size={30} color="#FFF" />
         </TouchableOpacity>
+        
+          <TextInput
+            style={styles.input}
+            placeholder="Título da Tarefa"
+            value={itemInput}
+            onChangeText={handleItemInputChange}
+          />
+
+        <FlatList
+          data={itens}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item, index }) => (
+            <View style={styles.itemRow}>
+              {/* Checkbox do item */}
+              <TouchableOpacity style={styles.checkbox}>
+                {item.concluido && <View style={styles.checked} />}
+              </TouchableOpacity>
+
+              {/* Texto do item */}
+              <Text style={styles.itemText}>{item.texto}</Text>
+
+              {/* Botão para deletar o item */}
+              <TouchableOpacity 
+                onPress={() => handleRemoveItem(index)} 
+                style={styles.deleteButton} // Adicionando estilo ao botão de deletar
+              >
+                <Icon name="delete" size={24} color="#FFF" />
+              </TouchableOpacity>
+            </View>
+          )}
+        />
       </View>
 
       <View style={styles.buttons}>
@@ -153,16 +219,6 @@ export default function Listagem() {
         </TouchableOpacity>
       </View>
 
-      {/* Renderiza a lista de itens */}
-      <View style={styles.itemList}>
-        {itens.map((item, index) => (
-          <View key={index} style={styles.item}>
-            <Text style={styles.itemText}>{item.titulo}</Text>
-          </View>
-        ))}
-      </View>
-
-      {/* DateTimePickerModal */}
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
@@ -180,100 +236,142 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   header: {
-    marginTop: 30, // Aumenta a distância do topo
-    marginBottom: 30, // Aumenta o espaço abaixo do título
+    marginTop: 30,
+    marginBottom: 30,
     alignItems: "center",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#1F74A7",
+    color: "#255573",
     fontFamily: "SuezOne_400Regular",
   },
   formContainer: {
     flex: 1,
-    justifyContent: "flex-start", // Garante que os campos fiquem alinhados no topo
-    paddingBottom: 20, // Espaço para o footer
+    justifyContent: "flex-start",
+    paddingBottom: 20,
   },
   input: {
-    height: 60, // Aumenta a altura dos campos de entrada
-    backgroundColor: "#FFFFFF",
+    height: 60,
+    backgroundColor: "#C6DBE4",
     borderRadius: 8,
     paddingHorizontal: 15,
+    paddingVertical: 10,
     marginBottom: 15,
     fontSize: 16,
-    borderColor: "#1F74A7",
+    borderColor: "#1F74A7", 
     borderWidth: 1,
+  },
+  textarea: {
+    height: 100,
+    borderColor: "#1F74A7", 
+    borderWidth: 1,
+    borderRadius: 8,
+    backgroundColor: "#C6DBE4",
+    paddingHorizontal: 15,
+    textAlignVertical: "top",
   },
   datePicker: {
     height: 60,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#C6DBE4",
     borderRadius: 8,
     paddingHorizontal: 15,
     marginBottom: 15,
-    justifyContent: 'center',
-    borderColor: "#1F74A7",
+    justifyContent: "center",
+    borderColor: "#1F74A7", 
     borderWidth: 1,
   },
   dateText: {
     fontSize: 16,
-    color: "#1F74A7",
+    color: "#555",
   },
-  textarea: {
-    height: 100,
-    textAlignVertical: "top",
-  },
-  addButton: {
+  addButtonAbove: {
+    alignSelf: "flex-end",
     backgroundColor: "#1F74A7",
     width: 50,
     height: 50,
     borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
-    position: "absolute",
-    right: 20,
-    bottom: 20,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
+  },
+  itemInputContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  itemRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: "#FFFFFF",
+    marginBottom: 10,
+    borderColor: "#1F74A7", 
+    borderWidth: 1,
+  },
+  checkbox: {
+    width: 35,
+    height: 35,
+    borderRadius: 4,
+    borderColor: "#1F74A7",
+    borderWidth: 2,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  checked: {
+    width: 10,
+    height: 10,
+    borderRadius: 2,
+    backgroundColor: "#1F74A7",
+  },
+  itemText: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
+  },
+  deleteButton: {
+    backgroundColor: "#FF4B4B",
+    borderRadius: 8,
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
   },
   buttons: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
-    marginBottom: 30,
+    marginBottom: 50,
   },
   saveButton: {
     backgroundColor: "#1F74A7",
-    paddingVertical: 15, // Aumenta o padding vertical
-    paddingHorizontal: 25, // Aumenta o padding horizontal
     borderRadius: 8,
+    padding: 15,
     flex: 1,
+    alignItems: "center",
     marginRight: 10,
   },
   cancelButton: {
     backgroundColor: "#FF4B4B",
-    paddingVertical: 15, // Aumenta o padding vertical
-    paddingHorizontal: 25, // Aumenta o padding horizontal
-    borderRadius: 8,
-    flex: 1,
-  },
-  footerText: {
-    color: "#FFF",
-    fontSize: 18, // Aumenta o tamanho do texto
-    textAlign: "center",
-    fontFamily: "SuezOne_400Regular",
-  },
-  itemList: {
-    marginTop: 20,
-  },
-  item: {
-    backgroundColor: "#FFFFFF",
     borderRadius: 8,
     padding: 15,
-    marginBottom: 10,
-    borderColor: "#1F74A7",
-    borderWidth: 1,
+    flex: 1,
+    alignItems: "center",
   },
-  itemText: {
+  footerText: {
+    color: "#FFFFFF",
     fontSize: 16,
-    color: "#1F74A7",
   },
 });

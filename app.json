@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "frontApp",
+    "name": "ScheduleWell",
     "slug": "frontApp",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -19,12 +19,18 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "foregroundImage": "./assets/logo_scheduleWell2.png",
+        "backgroundColor": "#1f74a7"
+      },
+      "package": "com.vinicius_zamara.frontApp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "705a14eb-675d-4914-a599-040c4c2cca4c"
+      }
     }
   }
 }
